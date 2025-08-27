@@ -1,4 +1,4 @@
-get_zonal_stats <- function(longitude, latitude, url, buffer = 100, bands = list(1, 2, 3), approx_stats = FALSE,
+get_zonal_stats <- function(longitude, latitude, url, buffer = 1000, bands = list(1, 2, 3), approx_stats = FALSE,
                             stats = c(
                               "min", "max", "mean", "count", "sum", "std", "median", "majority", "minority", "unique", "range", "nodata", "area", "freq_hist"
                             )) {
@@ -19,7 +19,10 @@ get_zonal_stats <- function(longitude, latitude, url, buffer = 100, bands = list
 
   res_tbl <- res %>%
     httr2::resp_body_json() %>%
-    purrr::map_dfr(dplyr::as_tibble, .id = "band")
+    purrr::map_dfr(\(x) {
+      x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
+      dplyr::as_tibble(x)
+    }, .id = "band")
 
   dplyr::bind_cols(
     dplyr::tibble(longitude = longitude, latitude = latitude),
