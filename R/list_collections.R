@@ -1,3 +1,4 @@
+#' @export
 list_collections <- function(limit = NULL) {
 
   # Get collections
