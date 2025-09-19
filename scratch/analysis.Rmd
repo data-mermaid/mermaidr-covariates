@@ -1,22 +1,18 @@
 ---
 title: "Getting environmental covariates for GFCR locations"
-output:
-  github_document:
-    df_print: kable
-  html_document:
-    df_print: paged
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, cache = TRUE)
-
-# Need to run this to ensure that rstac works, because the API is missing "type" in Items:
-# remotes::install_github("sharlagelfand/rstac", ref = "invalid-item")
 ```
 
 # Load packages
 
 ```{r libraries, cache = FALSE}
+# Need to run this to ensure that rstac works, because the API is missing "type" in Items:
+# remotes::install_github("sharlagelfand/rstac", ref = "invalid-item")
+
 # remotes::install_github("data-mermaid/mermaidr")
 # remotes::install_github("data-mermaid/mermaidr-covariates")
 
@@ -75,11 +71,14 @@ max_dhw
 
 ## Expand covariates
 
+Includes the start and end date of the data used for the covariates, the band, and the value
+
 ```{r unnest-covars}
 max_dhw <- max_dhw %>%
   unnest(covariates)
 
-max_dhw
+max_dhw %>%
+    glimpse()
 ```
 
 # Visualize 
