@@ -1,0 +1,101 @@
+---
+title: "Getting environmental covariates for GFCR locations"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, cache = TRUE)
+
+# Need to run this to ensure that rstac works, because the API is missing "type" in Items:
+# remotes::install_github("sharlagelfand/rstac", ref = "invalid-item")
+```
+
+# Load packages
+
+```{r libraries, cache = FALSE}
+# remotes::install_github("data-mermaid/mermaidr")
+# remotes::install_github("data-mermaid/mermaidr-covariates")
+
+library(mermaidr)
+library(mermaidrcovariates)
+library(tidyverse)
+```
+
+# Get project data from MERMAID
+
+Aggregated data for GFCR projects
+
+```{r sample-data}
+summary_sampleevents <- mermaid_get_summary_sampleevents()
+
+gfcr_summary_sampleevents <- summary_sampleevents %>%
+  filter(str_detect(tags, "GFCR"))
+```
+
+## Summary of hard coral cover for projects
+
+```{r sample-data-summary}
+gfcr_summary_sampleevents <- gfcr_summary_sampleevents %>%
+  filter(!is.na(`benthicpit_percent_cover_benthic_category_avg_Hard coral`)) %>%
+  rename(hard_coral_cover = `benthicpit_percent_cover_benthic_category_avg_Hard coral`)
+
+gfcr_summary_sampleevents %>%
+  group_by(project, tags, country) %>%
+  summarise(
+    n_sites = length(site),
+    average_hard_coral_cover = mean(hard_coral_cover), .groups = "drop"
+  )
+```
+
+# Get covariates for these sites
+
+## List STAC collections
+
+```{r stac-collections}
+list_collections()
+```
+
+## Get maximum DHW for previous year
+
+```{r get-zonal-stats}
+max_dhw <- gfcr_summary_sampleevents %>%
+  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 100, stats = "max")
+```
+
+```{r max-dhw-cols}
+max_dhw <- max_dhw %>%
+  select(project, country, site, sample_date, hard_coral_cover, covariates)
+
+max_dhw
+```
+
+## Expand covariates
+
+```{r unnest-covars}
+max_dhw <- max_dhw %>%
+  unnest(covariates)
+
+max_dhw
+```
+
+# Visualize 
+
+```{r plot}
+ggplot(
+  max_dhw,
+  aes(
+    x = max,
+    y = hard_coral_cover
+  )
+) +
+  geom_point(color = "darkblue", alpha = 0.6) +
+  geom_smooth(method = "lm", color = "red", linetype = "dashed") +
+  labs(
+    title = paste("Coral Cover vs. Max. DHW (Previous 365 Days)"),
+    x = "Maximum DHW",
+    y = "Hard Coral Cover (%)"
+  ) +
+  theme_minimal()
+```
