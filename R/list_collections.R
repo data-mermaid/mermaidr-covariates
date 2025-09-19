@@ -1,9 +1,9 @@
 #' @export
-list_collections <- function(limit = NULL) {
+list_collections <- function() {
 
   # Get collections
   res <- rstac::stac(stac_url) |>
-    rstac::collections(limit = limit) |>
+    rstac::collections() |>
     rstac::get_request()
 
   # Just keep "collections" entry
