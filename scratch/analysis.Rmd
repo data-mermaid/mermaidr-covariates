@@ -1,6 +1,8 @@
 ---
 title: "Getting environmental covariates for GFCR locations"
 output:
+  github_document:
+    df_print: kable
   html_document:
     df_print: paged
 ---
@@ -82,7 +84,7 @@ max_dhw
 
 # Visualize 
 
-```{r plot}
+```{r plot, dpi = 300}
 ggplot(
   max_dhw,
   aes(
