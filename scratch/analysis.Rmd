@@ -1,13 +1,19 @@
 ---
 title: "Getting environmental covariates for GFCR locations"
 output: github_document
+editor_options: 
+  chunk_output_type: inline
 ---
+
+This analysis extracts covariates for GFCR project sites from MERMAID, then combines that with coral cover data to plot the relationship between the two. In this example, the environmental data is maximum degree heating weeks (DHW) for a given number of days prior to the survey.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, cache = TRUE)
 ```
 
 # Load packages
+
+Load libraries to use for analysis.
 
 ```{r libraries, cache = FALSE}
 # Need to run this to ensure that rstac works, because the API is missing "type" in Items:
@@ -23,22 +29,24 @@ library(tidyverse)
 
 # Get project data from MERMAID
 
-Aggregated data for GFCR projects
+The first step is to get coral cover data for GFCR proejcts from MERMAID. The following gets summary sample events, and then filters for projects whose tags contain "GFCR", and projects that have hard coral cover data.
 
 ```{r sample-data}
 summary_sampleevents <- mermaid_get_summary_sampleevents()
 
 gfcr_summary_sampleevents <- summary_sampleevents %>%
-  filter(str_detect(tags, "GFCR"))
+  filter(str_detect(tags, "GFCR")) %>%
+  filter(!is.na(`benthicpit_percent_cover_benthic_category_avg_Hard coral`)) %>%
+  rename(hard_coral_cover = `benthicpit_percent_cover_benthic_category_avg_Hard coral`)
+
+gfcr_summary_sampleevents
 ```
 
 ## Summary of hard coral cover for projects
 
-```{r sample-data-summary}
-gfcr_summary_sampleevents <- gfcr_summary_sampleevents %>%
-  filter(!is.na(`benthicpit_percent_cover_benthic_category_avg_Hard coral`)) %>%
-  rename(hard_coral_cover = `benthicpit_percent_cover_benthic_category_avg_Hard coral`)
+Summarise projects to show their tags, country, number of sites, and average hard coral cover.
 
+```{r sample-data-summary}
 gfcr_summary_sampleevents %>%
   group_by(project, tags, country) %>%
   summarise(
@@ -49,7 +57,11 @@ gfcr_summary_sampleevents %>%
 
 # Get covariates for these sites
 
+Next, get the relevant covariates for these sites.
+
 ## List STAC collections
+
+List available STAC collections. We have available the monthly aggregation of Degree Heating Weeks (DHW).
 
 ```{r stac-collections}
 list_collections()
@@ -57,10 +69,34 @@ list_collections()
 
 ## Get maximum DHW for previous year
 
+Focus on degree heating weeks (DHW), and get the max (of the monhtly average) for the 365 days prior to the survey data. Review the survey data:
+
+```{r review-survey-data}
+gfcr_summary_sampleevents %>%
+  distinct(project, site, latitude, longitude, sample_date)
+```
+
+The `summary_zonal_stats()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it. The buffer size is set to 1000 metres.
+
+```{r get-zonal-stats-short-eg}
+max_dhw <- gfcr_summary_sampleevents %>%
+  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 60, buffer = 1000, stats = "max")
+```
+
 ```{r get-zonal-stats}
 max_dhw <- gfcr_summary_sampleevents %>%
-  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 100, stats = "max")
+  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
 ```
+
+```{r save-zonal-stats}
+saveRDS(max_dhw, here::here("scratch", "max_dhw.rds"))
+```
+
+```{r read-zonal-stats}
+max_dhw <- readRDS(here::here("scratch", "max_dhw.rds"))
+```
+
+Looka the returned data, keeping only the project information, site, survey date, hard coral cover, and covariates.
 
 ```{r max-dhw-cols}
 max_dhw <- max_dhw %>%
@@ -71,17 +107,19 @@ max_dhw
 
 ## Expand covariates
 
-Includes the start and end date of the data used for the covariates, the band, and the value
+The covariates are currently in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
 
 ```{r unnest-covars}
 max_dhw <- max_dhw %>%
   unnest(covariates)
 
 max_dhw %>%
-    glimpse()
+  glimpse()
 ```
 
-# Visualize 
+# Visualize
+
+Finally, visualize coral cover against the maximum mean DHW for the past 365 days.
 
 ```{r plot, dpi = 300}
 ggplot(
