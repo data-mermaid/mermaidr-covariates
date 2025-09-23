@@ -29,7 +29,7 @@ library(tidyverse)
 
 # Get project data from MERMAID
 
-The first step is to get coral cover data for GFCR proejcts from MERMAID. The following gets summary sample events, and then filters for projects whose tags contain "GFCR", and projects that have hard coral cover data.
+The first step is to get coral cover data for GFCR projects from MERMAID. The following gets summary sample events, and then filters for projects whose tags contain "GFCR", and projects that have hard coral cover data.
 
 ```{r sample-data}
 summary_sampleevents <- mermaid_get_summary_sampleevents()
@@ -78,11 +78,6 @@ gfcr_summary_sampleevents %>%
 
 The `summary_zonal_stats()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it. The buffer size is set to 1000 metres.
 
-```{r get-zonal-stats-short-eg}
-max_dhw <- gfcr_summary_sampleevents %>%
-  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 60, buffer = 1000, stats = "max")
-```
-
 ```{r get-zonal-stats}
 max_dhw <- gfcr_summary_sampleevents %>%
   summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
@@ -96,7 +91,7 @@ saveRDS(max_dhw, here::here("scratch", "max_dhw.rds"))
 max_dhw <- readRDS(here::here("scratch", "max_dhw.rds"))
 ```
 
-Looka the returned data, keeping only the project information, site, survey date, hard coral cover, and covariates.
+Look at the returned data, keeping only the project information, site, survey date, hard coral cover, and covariates.
 
 ```{r max-dhw-cols}
 max_dhw <- max_dhw %>%
