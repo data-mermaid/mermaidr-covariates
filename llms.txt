@@ -9,3 +9,9 @@ Access covariates for MERMAID data.
 - [`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md)
   : Get summary of zonal statistics
 
+# Articles
+
+### All vignettes
+
+- [Getting environmental covariates for GFCR
+  locations](https://data-mermaid.github.io/mermaidr-covariates/articles/covariates.md):
