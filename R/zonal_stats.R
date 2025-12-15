@@ -1,4 +1,15 @@
+#' Get summary of zonal statistics
+#'
+#' @param df Sample events from \code{mermaidr}
+#' @param collection Covariates to get statistics for
+#' @param n_days Number of days prior to sample date to get statistics for. Defaults to 365.
+#' @param buffer Buffer around site location, in metres. Defaults to 1000.
+#' @param stats Summary statistics. One of: min, max, or mean.
+#'
 #' @export
+#'
+#' @examples
+#' # TODO
 summary_zonal_stats <- function(df, collection, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
   # Allow for the possibility that they have more than one record at each site at each date -> make distinct for them
   df <- df %>%
