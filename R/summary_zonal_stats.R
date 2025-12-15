@@ -92,6 +92,12 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
       get_zonal_stats(df[["longitude"]], df[["latitude"]], x, buffer = buffer, stats = stats)
     })
 
+  # TODO -> handle no stats returned
+
+  if (nrow(zonal_stats) == 0) {
+    browser()
+  }
+
   # Keep non-summary stat cols
   id_cols <- zonal_stats %>%
     select(-all_of(stats)) %>%
@@ -107,15 +113,25 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
 
   zonal_stats_summary <- bind_cols(id_cols, zonal_stats_summary)
 
-  # Return df along with zonal stats, in df-column called: covariates
+  # Reshape zonal stats into the following format:
+  # covariate, start_date, end_date, band, statistic, value
+  # covariate will just be collection_id
+  # band is as is, with "_band" removed
+  # Put into a df-column called covariates
   zonal_stats_df <- zonal_stats_summary %>%
-    dplyr::select(-longitude, -latitude) %>%
-    # Add date
-    dplyr::mutate(
-      covariates_start_date = start_date,
-      covariates_end_date = end_date
+    tidyr::pivot_longer(
+      cols = dplyr::all_of(stats),
+      names_to = "statistic",
+      values_to = "value"
     ) %>%
-    dplyr::relocate(covariates_start_date, covariates_end_date, .before = dplyr::everything()) %>%
+    dplyr::mutate(
+      band = stringr::str_remove(band, "band_"),
+      band = as.numeric(band),
+      covariate = collection_id,
+      start_date = start_date,
+      end_date = end_date
+    ) %>%
+    dplyr::select(covariate, start_date, end_date, band, statistic, value) %>%
     tidyr::nest(covariates = dplyr::everything())
 
   dplyr::bind_cols(df, zonal_stats_df)
