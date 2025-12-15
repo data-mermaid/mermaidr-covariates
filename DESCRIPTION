@@ -25,3 +25,8 @@ Imports:
     tidyr
 RoxygenNote: 7.3.3
 URL: https://data-mermaid.github.io/mermaidr-covariates/
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Config/Needs/website: rmarkdown
