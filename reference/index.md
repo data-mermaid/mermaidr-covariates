@@ -1,0 +1,8 @@
+# Package index
+
+## All functions
+
+- [`list_collections()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_collections.md)
+  : List available collections
+- [`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md)
+  : Get summary of zonal statistics
