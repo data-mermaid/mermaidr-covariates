@@ -2,7 +2,7 @@
 title: "Getting environmental covariates for GFCR locations"
 output: github_document
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 This analysis extracts covariates for GFCR project sites from MERMAID, then combines that with coral cover data to plot the relationship between the two. In this example, the environmental data is maximum degree heating weeks (DHW) for a given number of days prior to the survey.
@@ -105,11 +105,14 @@ max_dhw
 The covariates are currently in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
 
 ```{r unnest-covars}
+max_dhw %>%
+  select(covariates) %>%
+  unnest(covariates)
+
 max_dhw <- max_dhw %>%
   unnest(covariates)
 
-max_dhw %>%
-  glimpse()
+max_dhw
 ```
 
 # Visualize
@@ -120,7 +123,7 @@ Finally, visualize coral cover against the maximum mean DHW for the past 365 day
 ggplot(
   max_dhw,
   aes(
-    x = max,
+    x = value,
     y = hard_coral_cover
   )
 ) +

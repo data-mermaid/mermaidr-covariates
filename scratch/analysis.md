@@ -41,21 +41,21 @@ gfcr_summary_sampleevents <- summary_sampleevents %>%
 gfcr_summary_sampleevents
 ```
 
-    ## # A tibble: 29 × 377
+    ## # A tibble: 73 × 380
     ##    project_id   project tags  country site_id site  latitude longitude reef_type
     ##    <chr>        <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>    
-    ##  1 54d68642-48… SLCRI … Inte… Sri La… 4affc2… Bar …     8.41      79.7 patch    
-    ##  2 54d68642-48… SLCRI … Inte… Sri La… e61f1d… Bar …     8.37      79.7 patch    
-    ##  3 54d68642-48… SLCRI … Inte… Sri La… 168b07… Hipo…     8.27      79.7 patch    
-    ##  4 54d68642-48… SLCRI … Inte… Sri La… 51f953… Kand…     8.25      79.7 patch    
-    ##  5 54d68642-48… SLCRI … Inte… Sri La… 630643… Kuda…     8.24      79.7 patch    
-    ##  6 54d68642-48… SLCRI … Inte… Sri La… 1363cc… Kuda…     8.24      79.7 patch    
-    ##  7 54d68642-48… SLCRI … Inte… Sri La… 3d49dc… Sea …     8.17      79.7 fringing 
-    ##  8 54d68642-48… SLCRI … Inte… Sri La… 3d49dc… Sea …     8.17      79.7 fringing 
-    ##  9 54d68642-48… SLCRI … Inte… Sri La… 0c41df… St. …     8.14      79.7 patch    
-    ## 10 54d68642-48… SLCRI … Inte… Sri La… 74f31a… Thal…     8.12      79.7 patch    
-    ## # ℹ 19 more rows
-    ## # ℹ 368 more variables: reef_zone <chr>, reef_exposure <chr>,
+    ##  1 8a747031-4e… Invest… Unit… Fiji    2ecee0… GA1      -16.5      179. barrier  
+    ##  2 8a747031-4e… Invest… Unit… Fiji    4f1394… GA2      -16.5      179. barrier  
+    ##  3 8a747031-4e… Invest… Unit… Fiji    f3ae80… GA3      -16.5      179. barrier  
+    ##  4 8a747031-4e… Invest… Unit… Fiji    35cbcc… GA4      -16.6      179. barrier  
+    ##  5 8a747031-4e… Invest… Unit… Fiji    53220e… GA5      -16.6      179. barrier  
+    ##  6 8a747031-4e… Invest… Unit… Fiji    2f53e7… GA6      -16.6      179. fringing 
+    ##  7 8a747031-4e… Invest… Unit… Fiji    4e28c5… QR1      -16.1      180. barrier  
+    ##  8 8a747031-4e… Invest… Unit… Fiji    14b477… QR2      -16.1      180. barrier  
+    ##  9 8a747031-4e… Invest… Unit… Fiji    687440… QR3      -16.2      180. barrier  
+    ## 10 8a747031-4e… Invest… Unit… Fiji    fd9428… QR4      -16.2      180. barrier  
+    ## # ℹ 63 more rows
+    ## # ℹ 371 more variables: reef_zone <chr>, reef_exposure <chr>,
     ## #   management_id <chr>, management <chr>, management_est_year <int>,
     ## #   management_size <dbl>, management_parties <chr>,
     ## #   management_compliance <chr>, management_rules <chr>, sample_date <date>,
@@ -76,12 +76,15 @@ gfcr_summary_sampleevents %>%
   )
 ```
 
-    ## # A tibble: 3 × 5
-    ##   project                      tags       country n_sites average_hard_coral_c…¹
-    ##   <chr>                        <chr>      <chr>     <int>                  <dbl>
-    ## 1 SLCRI Bar Reef Seascape      Internati… Sri La…      11                   9.68
-    ## 2 SLCRI Kayankerni Seascape    Global Fu… Sri La…      11                  44.4 
-    ## 3 SLCRI Pigeon Island Seascape Global Fu… Sri La…       7                  55.9 
+    ## # A tibble: 6 × 5
+    ##   project                           tags  country n_sites average_hard_coral_c…¹
+    ##   <chr>                             <chr> <chr>     <int>                  <dbl>
+    ## 1 Investing in Coral Reefs and the… Unit… Fiji         27                  38.0 
+    ## 2 Maldives RREEF (GFCR)             Glob… Maldiv…      11                  43.4 
+    ## 3 SLCRI Bar Reef Seascape           Inte… Sri La…      11                   9.68
+    ## 4 SLCRI Kayankerni Seascape         Glob… Sri La…      11                  44.4 
+    ## 5 SLCRI Pigeon Island Seascape      Glob… Sri La…       7                  55.9 
+    ## 6 Terumbu Karang Sehat Indonesia P… Cons… Indone…       6                  53.7 
     ## # ℹ abbreviated name: ¹​average_hard_coral_cover
 
 # Get covariates for these sites
@@ -117,20 +120,20 @@ gfcr_summary_sampleevents %>%
   distinct(project, site, latitude, longitude, sample_date)
 ```
 
-    ## # A tibble: 29 × 5
-    ##    project                 site                  latitude longitude sample_date
-    ##    <chr>                   <chr>                    <dbl>     <dbl> <date>     
-    ##  1 SLCRI Bar Reef Seascape Bar Reef Deep             8.41      79.7 2025-03-16 
-    ##  2 SLCRI Bar Reef Seascape Bar Reef Shallow          8.37      79.7 2025-03-16 
-    ##  3 SLCRI Bar Reef Seascape Hipolis Reef Deep         8.27      79.7 2025-03-20 
-    ##  4 SLCRI Bar Reef Seascape KandaKuliya Reef Deep     8.25      79.7 2025-03-19 
-    ##  5 SLCRI Bar Reef Seascape Kudawa reef Deep          8.24      79.7 2025-03-17 
-    ##  6 SLCRI Bar Reef Seascape Kudawa Reef Shallow       8.24      79.7 2025-03-17 
-    ##  7 SLCRI Bar Reef Seascape Sea Guard Reef Deep       8.17      79.7 2024-03-19 
-    ##  8 SLCRI Bar Reef Seascape Sea Guard Reef Deep       8.17      79.7 2025-03-19 
-    ##  9 SLCRI Bar Reef Seascape St. Annes Reef Deep       8.14      79.7 2025-03-20 
-    ## 10 SLCRI Bar Reef Seascape Thalawila Reef Deep       8.12      79.7 2025-03-15 
-    ## # ℹ 19 more rows
+    ## # A tibble: 73 × 5
+    ##    project                                  site  latitude longitude sample_date
+    ##    <chr>                                    <chr>    <dbl>     <dbl> <date>     
+    ##  1 Investing in Coral Reefs and the Blue E… GA1      -16.5      179. 2025-10-08 
+    ##  2 Investing in Coral Reefs and the Blue E… GA2      -16.5      179. 2025-10-08 
+    ##  3 Investing in Coral Reefs and the Blue E… GA3      -16.5      179. 2025-10-09 
+    ##  4 Investing in Coral Reefs and the Blue E… GA4      -16.6      179. 2025-10-09 
+    ##  5 Investing in Coral Reefs and the Blue E… GA5      -16.6      179. 2025-10-08 
+    ##  6 Investing in Coral Reefs and the Blue E… GA6      -16.6      179. 2025-10-08 
+    ##  7 Investing in Coral Reefs and the Blue E… QR1      -16.1      180. 2025-09-24 
+    ##  8 Investing in Coral Reefs and the Blue E… QR2      -16.1      180. 2025-09-24 
+    ##  9 Investing in Coral Reefs and the Blue E… QR3      -16.2      180. 2025-09-24 
+    ## 10 Investing in Coral Reefs and the Blue E… QR4      -16.2      180. 2025-09-25 
+    ## # ℹ 63 more rows
 
 The `summary_zonal_stats()` function takes the site latitude and
 longitude, as well as the survey date, to find the data at that site for
@@ -160,20 +163,20 @@ max_dhw <- max_dhw %>%
 max_dhw
 ```
 
-    ## # A tibble: 29 × 6
+    ## # A tibble: 73 × 6
     ##    project                 country site  sample_date hard_coral_cover covariates
     ##    <chr>                   <chr>   <chr> <date>                 <dbl> <list>    
-    ##  1 SLCRI Bar Reef Seascape Sri La… Bar … 2025-03-16              12.5 <tibble>  
-    ##  2 SLCRI Bar Reef Seascape Sri La… Bar … 2025-03-16               0   <tibble>  
-    ##  3 SLCRI Bar Reef Seascape Sri La… Hipo… 2025-03-20               2.5 <tibble>  
-    ##  4 SLCRI Bar Reef Seascape Sri La… Kand… 2025-03-19              24   <tibble>  
-    ##  5 SLCRI Bar Reef Seascape Sri La… Kuda… 2025-03-17               4   <tibble>  
-    ##  6 SLCRI Bar Reef Seascape Sri La… Kuda… 2025-03-17               0   <tibble>  
-    ##  7 SLCRI Bar Reef Seascape Sri La… Sea … 2024-03-19              10   <tibble>  
-    ##  8 SLCRI Bar Reef Seascape Sri La… Sea … 2025-03-19              16   <tibble>  
-    ##  9 SLCRI Bar Reef Seascape Sri La… St. … 2025-03-20              13.5 <tibble>  
-    ## 10 SLCRI Bar Reef Seascape Sri La… Thal… 2025-03-15              11.5 <tibble>  
-    ## # ℹ 19 more rows
+    ##  1 Investing in Coral Ree… Fiji    GA1   2025-10-08              62.3 <tibble>  
+    ##  2 Investing in Coral Ree… Fiji    GA2   2025-10-08              31.2 <tibble>  
+    ##  3 Investing in Coral Ree… Fiji    GA3   2025-10-09              24.6 <tibble>  
+    ##  4 Investing in Coral Ree… Fiji    GA4   2025-10-09              42.6 <tibble>  
+    ##  5 Investing in Coral Ree… Fiji    GA5   2025-10-08              11.5 <tibble>  
+    ##  6 Investing in Coral Ree… Fiji    GA6   2025-10-08              57.4 <tibble>  
+    ##  7 Investing in Coral Ree… Fiji    QR1   2025-09-24              27.9 <tibble>  
+    ##  8 Investing in Coral Ree… Fiji    QR2   2025-09-24              96.7 <tibble>  
+    ##  9 Investing in Coral Ree… Fiji    QR3   2025-09-24              77.0 <tibble>  
+    ## 10 Investing in Coral Ree… Fiji    QR4   2025-09-25              13.1 <tibble>  
+    ## # ℹ 63 more rows
 
 ## Expand covariates
 
@@ -182,24 +185,48 @@ they are, you can see they contain start and end date of the data used
 for the covariates, the band, and the summarised value.
 
 ``` r
+max_dhw %>%
+  select(covariates) %>%
+  unnest(covariates)
+```
+
+    ## # A tibble: 73 × 6
+    ##    covariate            start_date end_date    band statistic value
+    ##    <chr>                <date>     <date>     <dbl> <chr>     <dbl>
+    ##  1 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.86
+    ##  2 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.80
+    ##  3 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.80
+    ##  4 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        5.82
+    ##  5 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        6.81
+    ##  6 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        6.81
+    ##  7 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.96
+    ##  8 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.96
+    ##  9 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.47
+    ## 10 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.48
+    ## # ℹ 63 more rows
+
+``` r
 max_dhw <- max_dhw %>%
   unnest(covariates)
 
-max_dhw %>%
-  glimpse()
+max_dhw
 ```
 
-    ## Rows: 29
-    ## Columns: 9
-    ## $ project               <chr> "SLCRI Bar Reef Seascape", "SLCRI Bar Reef Seasc…
-    ## $ country               <chr> "Sri Lanka", "Sri Lanka", "Sri Lanka", "Sri Lank…
-    ## $ site                  <chr> "Bar Reef Deep", "Bar Reef Shallow", "Hipolis Re…
-    ## $ sample_date           <date> 2025-03-16, 2025-03-16, 2025-03-20, 2025-03-19,…
-    ## $ hard_coral_cover      <dbl> 12.50, 0.00, 2.50, 24.00, 4.00, 0.00, 10.00, 16.…
-    ## $ covariates_start_date <date> 2024-04-01, 2024-04-01, 2024-04-01, 2024-04-01,…
-    ## $ covariates_end_date   <date> 2025-03-01, 2025-03-01, 2025-03-01, 2025-03-01,…
-    ## $ band                  <chr> "band_1", "band_1", "band_1", "band_1", "band_1"…
-    ## $ max                   <dbl> 8.02, 8.01, 8.05, 8.00, 7.71, 7.71, 0.65, 7.80, …
+    ## # A tibble: 73 × 11
+    ##    project       country site  sample_date hard_coral_cover covariate start_date
+    ##    <chr>         <chr>   <chr> <date>                 <dbl> <chr>     <date>    
+    ##  1 Investing in… Fiji    GA1   2025-10-08              62.3 noaa-mon… 2024-11-01
+    ##  2 Investing in… Fiji    GA2   2025-10-08              31.2 noaa-mon… 2024-11-01
+    ##  3 Investing in… Fiji    GA3   2025-10-09              24.6 noaa-mon… 2024-11-01
+    ##  4 Investing in… Fiji    GA4   2025-10-09              42.6 noaa-mon… 2024-11-01
+    ##  5 Investing in… Fiji    GA5   2025-10-08              11.5 noaa-mon… 2024-11-01
+    ##  6 Investing in… Fiji    GA6   2025-10-08              57.4 noaa-mon… 2024-11-01
+    ##  7 Investing in… Fiji    QR1   2025-09-24              27.9 noaa-mon… 2024-10-01
+    ##  8 Investing in… Fiji    QR2   2025-09-24              96.7 noaa-mon… 2024-10-01
+    ##  9 Investing in… Fiji    QR3   2025-09-24              77.0 noaa-mon… 2024-10-01
+    ## 10 Investing in… Fiji    QR4   2025-09-25              13.1 noaa-mon… 2024-10-01
+    ## # ℹ 63 more rows
+    ## # ℹ 4 more variables: end_date <date>, band <dbl>, statistic <chr>, value <dbl>
 
 # Visualize
 
@@ -210,7 +237,7 @@ Finally, visualize coral cover against the maximum mean DHW for the past
 ggplot(
   max_dhw,
   aes(
-    x = max,
+    x = value,
     y = hard_coral_cover
   )
 ) +
