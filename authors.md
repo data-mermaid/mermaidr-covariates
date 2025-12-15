@@ -2,18 +2,20 @@
 
 ## Authors
 
-- **Jane Doe**. Author, maintainer.
+- **Sharla Gelfand**. Author, maintainer.
+
+- **Wildlife Conservation Society**. Copyright holder, funder.
 
 ## Citation
 
-Doe J (2025). *mermaidrcovariates: What the Package Does (Title Case)*.
-R package version 0.1.0,
+Gelfand S (2025). *mermaidrcovariates: Access covariates for MERMAID
+data*. R package version 0.0.01,
 <https://data-mermaid.github.io/mermaidr-covariates/>.
 
     @Manual{,
-      title = {mermaidrcovariates: What the Package Does (Title Case)},
-      author = {Jane Doe},
+      title = {mermaidrcovariates: Access covariates for MERMAID data},
+      author = {Sharla Gelfand},
       year = {2025},
-      note = {R package version 0.1.0},
+      note = {R package version 0.0.01},
       url = {https://data-mermaid.github.io/mermaidr-covariates/},
     }
