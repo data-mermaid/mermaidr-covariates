@@ -1,4 +1,9 @@
+#' List available collections
+#'
 #' @export
+#'
+#' @examples
+#' list_collections()
 list_collections <- function() {
 
   # Get collections
