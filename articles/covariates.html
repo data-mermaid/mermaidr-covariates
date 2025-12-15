@@ -197,22 +197,22 @@ size is set to 1000 metres.</p>
 site, survey date, hard coral cover, and covariates.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">max_dhw</span> <span class="op">&lt;-</span> <span class="va">max_dhw</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">project</span>, <span class="va">country</span>, <span class="va">site</span>, <span class="va">sample_date</span>, <span class="va">hard_coral_cover</span>, <span class="va">covariates</span><span class="op">)</span></span>
+<span>  <span class="fu">select</span><span class="op">(</span><span class="va">site</span>, <span class="va">sample_date</span>, <span class="va">hard_coral_cover</span>, <span class="va">covariates</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">max_dhw</span></span></code></pre></div>
-<pre><code><span><span class="co">## # A tibble: 73 × 6</span></span>
-<span><span class="co">##    project                    country site  sample_date hard_coral_cover covariates</span></span>
-<span><span class="co">##    &lt;chr&gt;                      &lt;chr&gt;   &lt;chr&gt; &lt;date&gt;                 &lt;dbl&gt; &lt;list&gt;    </span></span>
-<span><span class="co">##  1 Investing in Coral Reefs … Fiji    GA1   2025-10-08              62.3 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  2 Investing in Coral Reefs … Fiji    GA2   2025-10-08              31.2 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  3 Investing in Coral Reefs … Fiji    GA3   2025-10-09              24.6 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  4 Investing in Coral Reefs … Fiji    GA4   2025-10-09              42.6 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  5 Investing in Coral Reefs … Fiji    GA5   2025-10-08              11.5 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  6 Investing in Coral Reefs … Fiji    GA6   2025-10-08              57.4 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  7 Investing in Coral Reefs … Fiji    QR1   2025-09-24              27.9 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  8 Investing in Coral Reefs … Fiji    QR2   2025-09-24              96.7 &lt;tibble&gt;  </span></span>
-<span><span class="co">##  9 Investing in Coral Reefs … Fiji    QR3   2025-09-24              77.0 &lt;tibble&gt;  </span></span>
-<span><span class="co">## 10 Investing in Coral Reefs … Fiji    QR4   2025-09-25              13.1 &lt;tibble&gt;  </span></span>
+<pre><code><span><span class="co">## # A tibble: 73 × 4</span></span>
+<span><span class="co">##    site  sample_date hard_coral_cover covariates      </span></span>
+<span><span class="co">##    &lt;chr&gt; &lt;date&gt;                 &lt;dbl&gt; &lt;list&gt;          </span></span>
+<span><span class="co">##  1 GA1   2025-10-08              62.3 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  2 GA2   2025-10-08              31.2 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  3 GA3   2025-10-09              24.6 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  4 GA4   2025-10-09              42.6 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  5 GA5   2025-10-08              11.5 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  6 GA6   2025-10-08              57.4 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  7 QR1   2025-09-24              27.9 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  8 QR2   2025-09-24              96.7 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">##  9 QR3   2025-09-24              77.0 &lt;tibble [1 × 6]&gt;</span></span>
+<span><span class="co">## 10 QR4   2025-09-25              13.1 &lt;tibble [1 × 6]&gt;</span></span>
 <span><span class="co">## # ℹ 63 more rows</span></span></code></pre>
 </div>
 <div class="section level3">
@@ -222,43 +222,36 @@ site, survey date, hard coral cover, and covariates.</p>
 Once they are, you can see they contain start and end date of the data
 used for the covariates, the band, and the summarised value.</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">max_dhw</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">select</span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu">unnest</span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span></span></code></pre></div>
-<pre><code><span><span class="co">## # A tibble: 73 × 6</span></span>
-<span><span class="co">##    covariate            start_date end_date    band statistic value</span></span>
-<span><span class="co">##    &lt;chr&gt;                &lt;date&gt;     &lt;date&gt;     &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;</span></span>
-<span><span class="co">##  1 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.86</span></span>
-<span><span class="co">##  2 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.80</span></span>
-<span><span class="co">##  3 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.80</span></span>
-<span><span class="co">##  4 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        5.82</span></span>
-<span><span class="co">##  5 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        6.81</span></span>
-<span><span class="co">##  6 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        6.81</span></span>
-<span><span class="co">##  7 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.96</span></span>
-<span><span class="co">##  8 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.96</span></span>
-<span><span class="co">##  9 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.47</span></span>
-<span><span class="co">## 10 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.48</span></span>
-<span><span class="co">## # ℹ 63 more rows</span></span></code></pre>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">max_dhw</span> <span class="op">&lt;-</span> <span class="va">max_dhw</span> <span class="op"><a href="../reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">unnest</span><span class="op">(</span><span class="va">covariates</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">max_dhw</span></span></code></pre></div>
-<pre><code><span><span class="co">## # A tibble: 73 × 11</span></span>
-<span><span class="co">##    project          country site  sample_date hard_coral_cover covariate start_date</span></span>
-<span><span class="co">##    &lt;chr&gt;            &lt;chr&gt;   &lt;chr&gt; &lt;date&gt;                 &lt;dbl&gt; &lt;chr&gt;     &lt;date&gt;    </span></span>
-<span><span class="co">##  1 Investing in Co… Fiji    GA1   2025-10-08              62.3 noaa-mon… 2024-11-01</span></span>
-<span><span class="co">##  2 Investing in Co… Fiji    GA2   2025-10-08              31.2 noaa-mon… 2024-11-01</span></span>
-<span><span class="co">##  3 Investing in Co… Fiji    GA3   2025-10-09              24.6 noaa-mon… 2024-11-01</span></span>
-<span><span class="co">##  4 Investing in Co… Fiji    GA4   2025-10-09              42.6 noaa-mon… 2024-11-01</span></span>
-<span><span class="co">##  5 Investing in Co… Fiji    GA5   2025-10-08              11.5 noaa-mon… 2024-11-01</span></span>
-<span><span class="co">##  6 Investing in Co… Fiji    GA6   2025-10-08              57.4 noaa-mon… 2024-11-01</span></span>
-<span><span class="co">##  7 Investing in Co… Fiji    QR1   2025-09-24              27.9 noaa-mon… 2024-10-01</span></span>
-<span><span class="co">##  8 Investing in Co… Fiji    QR2   2025-09-24              96.7 noaa-mon… 2024-10-01</span></span>
-<span><span class="co">##  9 Investing in Co… Fiji    QR3   2025-09-24              77.0 noaa-mon… 2024-10-01</span></span>
-<span><span class="co">## 10 Investing in Co… Fiji    QR4   2025-09-25              13.1 noaa-mon… 2024-10-01</span></span>
-<span><span class="co">## # ℹ 63 more rows</span></span>
-<span><span class="co">## # ℹ 4 more variables: end_date &lt;date&gt;, band &lt;dbl&gt;, statistic &lt;chr&gt;, value &lt;dbl&gt;</span></span></code></pre>
+<pre><code><span><span class="co">## # A tibble: 73 × 9</span></span>
+<span><span class="co">##    site  sample_date hard_coral_cover covariate            start_date end_date  </span></span>
+<span><span class="co">##    &lt;chr&gt; &lt;date&gt;                 &lt;dbl&gt; &lt;chr&gt;                &lt;date&gt;     &lt;date&gt;    </span></span>
+<span><span class="co">##  1 GA1   2025-10-08              62.3 noaa-monthly-max-dhw 2024-11-01 2025-04-01</span></span>
+<span><span class="co">##  2 GA2   2025-10-08              31.2 noaa-monthly-max-dhw 2024-11-01 2025-04-01</span></span>
+<span><span class="co">##  3 GA3   2025-10-09              24.6 noaa-monthly-max-dhw 2024-11-01 2025-04-01</span></span>
+<span><span class="co">##  4 GA4   2025-10-09              42.6 noaa-monthly-max-dhw 2024-11-01 2025-04-01</span></span>
+<span><span class="co">##  5 GA5   2025-10-08              11.5 noaa-monthly-max-dhw 2024-11-01 2025-04-01</span></span>
+<span><span class="co">##  6 GA6   2025-10-08              57.4 noaa-monthly-max-dhw 2024-11-01 2025-04-01</span></span>
+<span><span class="co">##  7 QR1   2025-09-24              27.9 noaa-monthly-max-dhw 2024-10-01 2025-04-01</span></span>
+<span><span class="co">##  8 QR2   2025-09-24              96.7 noaa-monthly-max-dhw 2024-10-01 2025-04-01</span></span>
+<span><span class="co">##  9 QR3   2025-09-24              77.0 noaa-monthly-max-dhw 2024-10-01 2025-04-01</span></span>
+<span><span class="co">## 10 QR4   2025-09-25              13.1 noaa-monthly-max-dhw 2024-10-01 2025-04-01</span></span>
+<span><span class="co">##     band statistic value</span></span>
+<span><span class="co">##    &lt;dbl&gt; &lt;chr&gt;     &lt;dbl&gt;</span></span>
+<span><span class="co">##  1     1 max        4.86</span></span>
+<span><span class="co">##  2     1 max        4.80</span></span>
+<span><span class="co">##  3     1 max        4.80</span></span>
+<span><span class="co">##  4     1 max        5.82</span></span>
+<span><span class="co">##  5     1 max        6.81</span></span>
+<span><span class="co">##  6     1 max        6.81</span></span>
+<span><span class="co">##  7     1 max        2.96</span></span>
+<span><span class="co">##  8     1 max        2.96</span></span>
+<span><span class="co">##  9     1 max        2.47</span></span>
+<span><span class="co">## 10     1 max        2.48</span></span>
+<span><span class="co">## # ℹ 63 more rows</span></span></code></pre>
 </div>
 </div>
 <div class="section level2">
@@ -266,7 +259,7 @@ used for the covariates, the band, and the summarised value.</p>
 </h2>
 <p>Finally, visualize coral cover against the maximum mean DHW for the
 past 365 days.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">ggplot</span><span class="op">(</span></span>
 <span>  <span class="va">max_dhw</span>,</span>
 <span>  <span class="fu">aes</span><span class="op">(</span></span>
