@@ -25,3 +25,4 @@ Imports:
     stringr,
     tidyr
 RoxygenNote: 7.3.3
+URL: https://data-mermaid.github.io/mermaidr-covariates/
