@@ -1,5 +1,21 @@
-start_end_to_interval <- function(start_date, end_date) {
-  glue::glue("{start_date}T00:00:00Z/{end_date}T00:00:00Z")
+#' @export
+summary_zonal_stats <- function(df, collection, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
+  # Allow for the possibility that they have more than one record at each site at each date -> make distinct for them
+  df <- df %>%
+    dplyr::mutate(...id = glue::glue("{site}_{sample_date}"))
+
+  df_distinct <- df %>%
+    dplyr::distinct(site, latitude, longitude, sample_date, ...id)
+
+  zonal_stats <- df_distinct %>%
+    split(.$...id) %>%
+    purrr::map_dfr(summary_zonal_stats_single, collection, n_days = n_days, buffer = buffer, stats = stats, .progress = TRUE)
+
+  # Re-attach to existing df, even if it was not distinct
+  df %>%
+    dplyr::left_join(zonal_stats %>%
+      dplyr::select(...id, covariates), by = "...id") %>%
+    dplyr::select(-...id)
 }
 
 summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
@@ -8,7 +24,7 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
   # Get the specific stat, AND use that summary of it
   # e.g. if min, get mins, then summarise using min
   # if mean, get means, then summarise using mean
-  # this does not work the same way for mediacn....
+  # this does not work the same way for median....
   # what if e.g. they want the "average lowest value"?
   # they might be different
 
@@ -137,22 +153,35 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
   dplyr::bind_cols(df, zonal_stats_df)
 }
 
-#' @export
-summary_zonal_stats <- function(df, collection, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
-  # Allow for the possibility that they have more than one record at each site at each date -> make distinct for them
-  df <- df %>%
-    dplyr::mutate(...id = glue::glue("{site}_{sample_date}"))
 
-  df_distinct <- df %>%
-    dplyr::distinct(site, latitude, longitude, sample_date, ...id)
+get_zonal_stats <- function(longitude, latitude, url, buffer = 1000, bands = list(1, 2, 3), approx_stats = FALSE,
+                            stats = c(
+                              "min", "max", "mean", "count", "sum", "std", "median", "majority", "minority", "unique", "range", "nodata", "area", "freq_hist"
+                            )) {
+  res <- httr2::request(zonal_stats_url) %>%
+    httr2::req_body_json(list(
+      aoi = list(
+        type = "Point", coordinates = c(longitude, latitude),
+        buffer_size = buffer
+      ),
+      image = list(
+        url = url,
+        # bands = list(1), # TODO, not working -> only works with band: 1
+        approx_stats = approx_stats
+      ),
+      stats = as.list(stats)
+    )) %>%
+    httr2::req_perform()
 
-  zonal_stats <- df_distinct %>%
-    split(.$...id) %>%
-    purrr::map_dfr(summary_zonal_stats_single, collection, n_days = n_days, buffer = buffer, stats = stats, .progress = TRUE)
+  res_tbl <- res %>%
+    httr2::resp_body_json() %>%
+    purrr::map_dfr(\(x) {
+      x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
+      dplyr::as_tibble(x)
+    }, .id = "band")
 
-  # Re-attach to existing df, even if it was not distinct
-  df %>%
-    dplyr::left_join(zonal_stats %>%
-      dplyr::select(...id, covariates), by = "...id") %>%
-    dplyr::select(-...id)
+  dplyr::bind_cols(
+    dplyr::tibble(longitude = longitude, latitude = latitude),
+    res_tbl
+  )
 }
