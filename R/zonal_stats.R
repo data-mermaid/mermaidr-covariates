@@ -32,7 +32,7 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
 
   # Get sample_date
   sample_date <- df %>%
-    pull(sample_date)
+    dplyr::pull(sample_date)
 
   # Add 1 day -> end will be midnight on this day
   input_sample_date_end <- sample_date + lubridate::days(1)
@@ -116,16 +116,16 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
 
   # Keep non-summary stat cols
   id_cols <- zonal_stats %>%
-    select(-all_of(stats)) %>%
-    distinct()
+    dplyr::select(-dplyr::all_of(stats)) %>%
+    dplyr::distinct()
 
   # Apply summary function to each of the cols
   zonal_stats_summary <- stats %>%
     purrr::map(\(x) {
       zonal_stats %>%
-        dplyr::summarise(dplyr::across(all_of(x), ~ do.call(x, as.list(.x))))
+        dplyr::summarise(dplyr::across(dplyr::all_of(x), ~ do.call(x, as.list(.x))))
     }) %>%
-    bind_cols()
+    dplyr::bind_cols()
 
   zonal_stats_summary <- bind_cols(id_cols, zonal_stats_summary)
 
