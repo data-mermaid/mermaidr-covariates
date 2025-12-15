@@ -92,7 +92,7 @@ Look at the returned data, keeping only the project information, site, survey da
 
 ```{r max-dhw-cols}
 max_dhw <- max_dhw %>%
-  select(project, country, site, sample_date, hard_coral_cover, covariates)
+  select(site, sample_date, hard_coral_cover, covariates)
 
 max_dhw
 ```
@@ -101,11 +101,11 @@ max_dhw
 
 The covariates are currently in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
 
-```{r unnest-covars}
-max_dhw %>%
-  select(covariates) %>%
-  unnest(covariates)
+```{r output-width, echo = FALSE}
+options(dplyr.width = Inf)
+```
 
+```{r unnest-covars}
 max_dhw <- max_dhw %>%
   unnest(covariates)
 

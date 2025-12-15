@@ -148,30 +148,34 @@ max_dhw <- gfcr_summary_sampleevents %>%
   summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
 ```
 
+
+
+
+
 Look at the returned data, keeping only the project information, site, survey date, hard coral cover, and covariates.
 
 
 ``` r
 max_dhw <- max_dhw %>%
-  select(project, country, site, sample_date, hard_coral_cover, covariates)
+  select(site, sample_date, hard_coral_cover, covariates)
 
 max_dhw
 ```
 
 ```
-## # A tibble: 73 × 6
-##    project                    country site  sample_date hard_coral_cover covariates
-##    <chr>                      <chr>   <chr> <date>                 <dbl> <list>    
-##  1 Investing in Coral Reefs … Fiji    GA1   2025-10-08              62.3 <tibble>  
-##  2 Investing in Coral Reefs … Fiji    GA2   2025-10-08              31.2 <tibble>  
-##  3 Investing in Coral Reefs … Fiji    GA3   2025-10-09              24.6 <tibble>  
-##  4 Investing in Coral Reefs … Fiji    GA4   2025-10-09              42.6 <tibble>  
-##  5 Investing in Coral Reefs … Fiji    GA5   2025-10-08              11.5 <tibble>  
-##  6 Investing in Coral Reefs … Fiji    GA6   2025-10-08              57.4 <tibble>  
-##  7 Investing in Coral Reefs … Fiji    QR1   2025-09-24              27.9 <tibble>  
-##  8 Investing in Coral Reefs … Fiji    QR2   2025-09-24              96.7 <tibble>  
-##  9 Investing in Coral Reefs … Fiji    QR3   2025-09-24              77.0 <tibble>  
-## 10 Investing in Coral Reefs … Fiji    QR4   2025-09-25              13.1 <tibble>  
+## # A tibble: 73 × 4
+##    site  sample_date hard_coral_cover covariates      
+##    <chr> <date>                 <dbl> <list>          
+##  1 GA1   2025-10-08              62.3 <tibble [1 × 6]>
+##  2 GA2   2025-10-08              31.2 <tibble [1 × 6]>
+##  3 GA3   2025-10-09              24.6 <tibble [1 × 6]>
+##  4 GA4   2025-10-09              42.6 <tibble [1 × 6]>
+##  5 GA5   2025-10-08              11.5 <tibble [1 × 6]>
+##  6 GA6   2025-10-08              57.4 <tibble [1 × 6]>
+##  7 QR1   2025-09-24              27.9 <tibble [1 × 6]>
+##  8 QR2   2025-09-24              96.7 <tibble [1 × 6]>
+##  9 QR3   2025-09-24              77.0 <tibble [1 × 6]>
+## 10 QR4   2025-09-25              13.1 <tibble [1 × 6]>
 ## # ℹ 63 more rows
 ```
 
@@ -180,28 +184,7 @@ max_dhw
 The covariates are currently in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
 
 
-``` r
-max_dhw %>%
-  select(covariates) %>%
-  unnest(covariates)
-```
 
-```
-## # A tibble: 73 × 6
-##    covariate            start_date end_date    band statistic value
-##    <chr>                <date>     <date>     <dbl> <chr>     <dbl>
-##  1 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.86
-##  2 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.80
-##  3 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        4.80
-##  4 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        5.82
-##  5 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        6.81
-##  6 noaa-monthly-max-dhw 2024-11-01 2025-04-01     1 max        6.81
-##  7 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.96
-##  8 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.96
-##  9 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.47
-## 10 noaa-monthly-max-dhw 2024-10-01 2025-04-01     1 max        2.48
-## # ℹ 63 more rows
-```
 
 ``` r
 max_dhw <- max_dhw %>%
@@ -211,21 +194,32 @@ max_dhw
 ```
 
 ```
-## # A tibble: 73 × 11
-##    project          country site  sample_date hard_coral_cover covariate start_date
-##    <chr>            <chr>   <chr> <date>                 <dbl> <chr>     <date>    
-##  1 Investing in Co… Fiji    GA1   2025-10-08              62.3 noaa-mon… 2024-11-01
-##  2 Investing in Co… Fiji    GA2   2025-10-08              31.2 noaa-mon… 2024-11-01
-##  3 Investing in Co… Fiji    GA3   2025-10-09              24.6 noaa-mon… 2024-11-01
-##  4 Investing in Co… Fiji    GA4   2025-10-09              42.6 noaa-mon… 2024-11-01
-##  5 Investing in Co… Fiji    GA5   2025-10-08              11.5 noaa-mon… 2024-11-01
-##  6 Investing in Co… Fiji    GA6   2025-10-08              57.4 noaa-mon… 2024-11-01
-##  7 Investing in Co… Fiji    QR1   2025-09-24              27.9 noaa-mon… 2024-10-01
-##  8 Investing in Co… Fiji    QR2   2025-09-24              96.7 noaa-mon… 2024-10-01
-##  9 Investing in Co… Fiji    QR3   2025-09-24              77.0 noaa-mon… 2024-10-01
-## 10 Investing in Co… Fiji    QR4   2025-09-25              13.1 noaa-mon… 2024-10-01
+## # A tibble: 73 × 9
+##    site  sample_date hard_coral_cover covariate            start_date end_date  
+##    <chr> <date>                 <dbl> <chr>                <date>     <date>    
+##  1 GA1   2025-10-08              62.3 noaa-monthly-max-dhw 2024-11-01 2025-04-01
+##  2 GA2   2025-10-08              31.2 noaa-monthly-max-dhw 2024-11-01 2025-04-01
+##  3 GA3   2025-10-09              24.6 noaa-monthly-max-dhw 2024-11-01 2025-04-01
+##  4 GA4   2025-10-09              42.6 noaa-monthly-max-dhw 2024-11-01 2025-04-01
+##  5 GA5   2025-10-08              11.5 noaa-monthly-max-dhw 2024-11-01 2025-04-01
+##  6 GA6   2025-10-08              57.4 noaa-monthly-max-dhw 2024-11-01 2025-04-01
+##  7 QR1   2025-09-24              27.9 noaa-monthly-max-dhw 2024-10-01 2025-04-01
+##  8 QR2   2025-09-24              96.7 noaa-monthly-max-dhw 2024-10-01 2025-04-01
+##  9 QR3   2025-09-24              77.0 noaa-monthly-max-dhw 2024-10-01 2025-04-01
+## 10 QR4   2025-09-25              13.1 noaa-monthly-max-dhw 2024-10-01 2025-04-01
+##     band statistic value
+##    <dbl> <chr>     <dbl>
+##  1     1 max        4.86
+##  2     1 max        4.80
+##  3     1 max        4.80
+##  4     1 max        5.82
+##  5     1 max        6.81
+##  6     1 max        6.81
+##  7     1 max        2.96
+##  8     1 max        2.96
+##  9     1 max        2.47
+## 10     1 max        2.48
 ## # ℹ 63 more rows
-## # ℹ 4 more variables: end_date <date>, band <dbl>, statistic <chr>, value <dbl>
 ```
 
 # Visualize
