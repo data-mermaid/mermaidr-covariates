@@ -115,7 +115,7 @@ list_collections()
 
 ## Get maximum DHW for previous year
 
-Focus on degree heating weeks (DHW), and get the max (of the monhtly average) for the 365 days prior to the survey data. Review the survey data:
+Focus on degree heating weeks (DHW), and get the max (of the monthly average) for the 365 days prior to the survey data. Review the survey data:
 
 
 ``` r
@@ -182,8 +182,6 @@ max_dhw
 ## Expand covariates
 
 The covariates are currently in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
-
-
 
 
 ``` r
