@@ -110,7 +110,7 @@ list_collections()
 
 ### Get maximum DHW for previous year
 
-Focus on degree heating weeks (DHW), and get the max (of the monhtly
+Focus on degree heating weeks (DHW), and get the max (of the monthly
 average) for the 365 days prior to the survey data. Review the survey
 data:
 

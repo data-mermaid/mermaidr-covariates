@@ -1,1 +1,124 @@
-Access covariates for MERMAID data.
+# mermaidrcovariates
+
+The goal of `mermaidrcovariates` is to easily access covariates data and
+add it to MERMAID data.
+
+For more information and detailed instructions on usage, please visit
+the [package
+website](https://data-mermaid.github.io/mermaidr-covariates/).
+
+For more details on using `mermaidr` in general, please see the
+[`mermaidr` package website](https://data-mermaid.github.io/mermaidr/).
+
+## Installation
+
+You can install `mermaidrcovariates` from GitHub with:
+
+``` r
+# install.packages("remotes")
+remotes::install_github("data-mermaid/mermaidr-covariates")
+```
+
+## Usage
+
+Through `mermaidrcovariates`, you can easily add covariates to the
+aggregated data from your coral reef surveys, which is already entered
+in MERMAID. To do this, first load the `mermaidrcovariates` and
+`mermaid` packages, and access the sample events for a given project.
+For this example, we will work with hard coral cover data, available
+from the Benthic PIT method.
+
+``` r
+library(mermaidrcovariates)
+library(mermaidr)
+
+se <- mermaid_search_my_projects("Great Sea Reef 2019") %>%
+  mermaid_get_project_data("benthicpit", data = "sampleevents")
+```
+
+To get covariates, we need each sample event’s date as well as its
+latitude and longitude. We will keep these columns along with the site
+name and average hard coral cover, using the `tidyverse` package for
+data manipulation.
+
+``` r
+library(tidyverse)
+
+se <- se %>%
+  select(site, sample_date, latitude, longitude, hard_coral_cover = percent_cover_benthic_category_avg_hard_coral)
+```
+
+To get the covariates for these sites, we need to know what data is
+available. We find this by using the
+[`list_collections()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_collections.md)
+function:
+
+``` r
+list_collections()
+#> $`noaa-monthly-max-dhw`
+#> ###Collection
+#> - id: noaa-monthly-max-dhw
+#> - title: NOAA Degree Heating Week (DHW) - Monthly Aggregation
+#> - description: 
+#> The NOAA Coral Reef Watch (CRW) daily global 5km satellite coral bleaching Degree Heating Week (DHW) product shows accumulated heat stress, which can lead to coral bleaching and death. The scale ranges from 0 to 20 °C-weeks. The DHW product accumulates the instantaneous bleaching heat stress, measured by CRW's Coral Bleaching HotSpot, during the most recent 12-week period. It is directly related to the timing and intensity of coral bleaching.
+#> - field(s): 
+#> type, id, stac_version, description, links, stac_extensions, title, extent, license, keywords, providers, summaries
+```
+
+The monthly aggregation of Degree Heating Weeks (DHW) is available. We
+can access this data by using its id, `noaa-monthly-max-dhw`, in the
+function
+[`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md).
+The
+[`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md)
+function takes the site latitude and longitude, as well as the survey
+date, to find the data at that site for `n` days prior, then aggregates
+it.
+
+We access the maximum DHW (of the monthly average) for the 365 days
+prior to the survey data, using a buffer size of 1000 metres:
+
+``` r
+max_dhw <- se %>%
+  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+```
+
+The covariates are returned in a format that need to be expanded. Once
+they are, you can see they contain start and end date of the data used
+for the covariates, the band, and the summarised value.
+
+``` r
+max_dhw %>%
+  unnest(covariates)
+#> # A tibble: 72 × 11
+#>    site  sample_date latitude longitude hard_coral_cover covariate           
+#>    <chr> <date>         <dbl>     <dbl>            <dbl> <chr>               
+#>  1 BA09  2019-09-26     -17.4      178.             12.3 noaa-monthly-max-dhw
+#>  2 BA16  2019-09-27     -17.2      178.             10.7 noaa-monthly-max-dhw
+#>  3 GS03  2019-10-08     -16.4      178.             52   noaa-monthly-max-dhw
+#>  4 BA15  2019-09-27     -17.2      178.             25   noaa-monthly-max-dhw
+#>  5 YA02  2019-09-30     -17.0      177.             26.3 noaa-monthly-max-dhw
+#>  6 LW04  2019-09-25     -17.6      177.             11.7 noaa-monthly-max-dhw
+#>  7 IP3.5 2019-10-04     -16.4      179.             52.3 noaa-monthly-max-dhw
+#>  8 BA11  2019-09-27     -17.3      178.             23   noaa-monthly-max-dhw
+#>  9 GS05  2019-10-08     -16.4      178.             40.3 noaa-monthly-max-dhw
+#> 10 YQ02  2019-10-03     -16.6      179.             59   noaa-monthly-max-dhw
+#>    start_date end_date    band statistic value
+#>    <date>     <date>     <dbl> <chr>     <dbl>
+#>  1 2018-10-01 2019-09-01     1 max        8.36
+#>  2 2018-10-01 2019-09-01     1 max        8.24
+#>  3 2018-11-01 2019-10-01     1 max        5.96
+#>  4 2018-10-01 2019-09-01     1 max        8.24
+#>  5 2018-10-01 2019-09-01     1 max        8.79
+#>  6 2018-10-01 2019-09-01     1 max       11.3 
+#>  7 2018-11-01 2019-10-01     1 max        4.25
+#>  8 2018-10-01 2019-09-01     1 max        8.57
+#>  9 2018-11-01 2019-10-01     1 max        6.30
+#> 10 2018-11-01 2019-10-01     1 max        8.25
+#> # ℹ 62 more rows
+```
+
+This data can be analysed along with the hard coral cover, shown in
+further detail in the example analysis, [Getting environmental
+covariates for GFCR
+locations](https://data-mermaid.github.io/mermaidr-covariates/articles/covariates.html).
