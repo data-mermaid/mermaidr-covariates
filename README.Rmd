@@ -1,0 +1,93 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%",
+  message = FALSE
+)
+```
+
+# mermaidrcovariates
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of `mermaidrcovariates` is to easily access covariates data and add it to MERMAID data.
+
+For more information and detailed instructions on usage, please visit the [package website](https://data-mermaid.github.io/mermaidr-covariates/).
+
+For more details on using `mermaidr` in general, please see the [`mermaidr` package website](https://data-mermaid.github.io/mermaidr/).
+
+## Installation
+
+You can install `mermaidrcovariates` from GitHub with:
+
+```{r eval = FALSE}
+# install.packages("remotes")
+remotes::install_github("data-mermaid/mermaidr-covariates")
+```
+
+## Usage
+
+Through `mermaidrcovariates`, you can easily add covariates to the aggregated data from your coral reef surveys, which is already entered in MERMAID. To do this, first load the `mermaidrcovariates` and `mermaid` packages, and access the sample events for a given project. For this example, we will work with hard coral cover data, available from the Benthic PIT method. 
+
+```{r get-sample-events}
+library(mermaidrcovariates)
+library(mermaidr)
+
+se <- mermaid_search_my_projects("Great Sea Reef 2019") %>%
+  mermaid_get_project_data("benthicpit", data = "sampleevents")
+```
+
+To get covariates, we need each sample event's date as well as its latitude and longitude. We will keep these columns along with the site name and average hard coral cover, using the `tidyverse` package for data manipulation.
+
+```{r se-cols}
+library(tidyverse)
+
+se <- se %>%
+  select(site, sample_date, latitude, longitude, hard_coral_cover = percent_cover_benthic_category_avg_hard_coral)
+```
+
+To find which covariates are available, we use the `list_covariates()` function:
+
+```{r list-covariates}
+list_covariates()
+```
+
+The monthly aggregation of Degree Heating Weeks (DHW) is available. We can access this data by using its id, `noaa-monthly-max-dhw`, in the function `get_zonal_statistics()`. The `get_zonal_statistics()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it.
+
+We access the maximum DHW (of the monthly average) for the 365 days prior to the survey data, using a buffer size of 1000 metres:
+
+```{r max-dhw-internal, echo = FALSE}
+if (file.exists("inst/extdata/readme_max_dhw.rds")) {
+  max_dhw <- readRDS("inst/extdata/readme_max_dhw.rds")
+} else {
+  max_dhw <- se %>%
+    get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+}
+```
+
+```{r max-dhw, eval = FALSE}
+max_dhw <- se %>%
+  get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+```
+
+The covariates are returned in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
+
+```{r output-width, echo = FALSE}
+options(dplyr.width = Inf)
+```
+
+```{r expand-covariates}
+max_dhw %>%
+  unnest(covariates)
+```
+
+This data can be analysed along with the hard coral cover, shown in further detail in the example analysis, [Getting environmental covariates for GFCR locations](https://data-mermaid.github.io/mermaidr-covariates/articles/covariates.html).

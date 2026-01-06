@@ -56,12 +56,12 @@ gfcr_summary_sampleevents %>%
 
 Next, get the relevant covariates for these sites.
 
-## List STAC collections
+## List covariates
 
-List available STAC collections. We have available the monthly aggregation of Degree Heating Weeks (DHW).
+List available covariates. We have available the monthly aggregation of Degree Heating Weeks (DHW).
 
-```{r stac-collections}
-list_collections()
+```{r list-covariates}
+list_covariates()
 ```
 
 ## Get maximum DHW for previous year
@@ -73,11 +73,11 @@ gfcr_summary_sampleevents %>%
   distinct(project, site, latitude, longitude, sample_date)
 ```
 
-The `summary_zonal_stats()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it. The buffer size is set to 1000 metres.
+The `get_zonal_statistics()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it. The buffer size is set to 1000 metres.
 
 ```{r get-zonal-stats}
 max_dhw <- gfcr_summary_sampleevents %>%
-  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+  get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
 ```
 
 ```{r save-zonal-stats, echo = FALSE}

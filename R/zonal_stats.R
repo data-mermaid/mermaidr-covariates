@@ -1,16 +1,13 @@
 #' Get summary of zonal statistics
 #'
 #' @param df Sample events from \code{mermaidr}
-#' @param collection Covariates to get statistics for
+#' @param covariates Covariate IDs to get statistics for
 #' @param n_days Number of days prior to sample date to get statistics for. Defaults to 365.
 #' @param buffer Buffer around site location, in metres. Defaults to 1000.
 #' @param stats Summary statistics. One of: min, max, or mean.
 #'
 #' @export
-#'
-#' @examples
-#' # TODO
-summary_zonal_stats <- function(df, collection, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
+get_zonal_statistics <- function(df, covariates, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
   # Allow for the possibility that they have more than one record at each site at each date -> make distinct for them
   df <- df %>%
     dplyr::mutate(...id = glue::glue("{site}_{sample_date}"))
@@ -20,7 +17,7 @@ summary_zonal_stats <- function(df, collection, n_days = 365, buffer = 1000, sta
 
   zonal_stats <- df_distinct %>%
     split(.$...id) %>%
-    purrr::map_dfr(summary_zonal_stats_single, collection, n_days = n_days, buffer = buffer, stats = stats, .progress = TRUE)
+    purrr::map_dfr(summary_zonal_stats_single, covariates, n_days = n_days, buffer = buffer, stats = stats, .progress = TRUE)
 
   # Re-attach to existing df, even if it was not distinct
   df %>%
@@ -29,7 +26,7 @@ summary_zonal_stats <- function(df, collection, n_days = 365, buffer = 1000, sta
     dplyr::select(-...id)
 }
 
-summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
+summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
   # Get zonal stats for X days before
 
   # Get the specific stat, AND use that summary of it
@@ -57,7 +54,7 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
   # # Search for items between those dates
   # relevant_items <- rstac::stac(stac_url) |>
   #   rstac::stac_search(
-  #     collections = collection_id,
+  #     collections = covariates,
   #     datetime = input_interval,
   #     limit = 999999
   #   ) |>
@@ -69,7 +66,7 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
   after_start_input_interval <- after_date_to_datetime(input_sample_date_start)
   after_start_items <- rstac::stac(stac_url) |>
     rstac::stac_search(
-      collections = collection_id,
+      collections = covariates,
       datetime = after_start_input_interval,
       limit = 999999
     ) |>
@@ -142,7 +139,7 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
 
   # Reshape zonal stats into the following format:
   # covariate, start_date, end_date, band, statistic, value
-  # covariate will just be collection_id
+  # covariate will just be covariates
   # band is as is, with "_band" removed
   # Put into a df-column called covariates
   zonal_stats_df <- zonal_stats_summary %>%
@@ -154,7 +151,7 @@ summary_zonal_stats_single <- function(df, collection_id, n_days = 365, buffer =
     dplyr::mutate(
       band = stringr::str_remove(band, "band_"),
       band = as.numeric(band),
-      covariate = collection_id,
+      covariate = covariates,
       start_date = start_date,
       end_date = end_date
     ) %>%

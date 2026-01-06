@@ -1,10 +1,10 @@
-#' List available collections
+#' List available covariates
 #'
 #' @export
 #'
 #' @examples
-#' list_collections()
-list_collections <- function() {
+#' list_covariates()
+list_covariates <- function() {
 
   # Get collections
   res <- rstac::stac(stac_url) |>
