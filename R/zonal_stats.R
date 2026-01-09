@@ -13,11 +13,23 @@ get_zonal_statistics <- function(df, covariates, n_days = 365, buffer = 1000, st
     dplyr::mutate(...id = glue::glue("{site}_{sample_date}"))
 
   df_distinct <- df %>%
-    dplyr::distinct(site, latitude, longitude, sample_date, ...id)
+    dplyr::distinct(site, latitude, longitude, sample_date, ...id) %>%
+    split(.$...id)
 
-  zonal_stats <- df_distinct %>%
-    split(.$...id) %>%
-    purrr::map_dfr(summary_zonal_stats_single, covariates, n_days = n_days, buffer = buffer, stats = stats, .progress = TRUE)
+  zonal_stats <- withCallingHandlers(
+    purrr::map_dfr(
+      df_distinct,
+      \(x) summary_zonal_stats_single(x, covariates,
+        n_days = n_days,
+        buffer = buffer, stats = stats
+      ),
+      .progress = TRUE
+    ),
+    purrr_error_indexed = function(err) {
+      rlang::cnd_signal(err$parent)
+    }
+  )
+
 
   # Re-attach to existing df, even if it was not distinct
   df %>%
@@ -111,10 +123,17 @@ summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 10
 
   # Get zonal stats for each URL
 
-  zonal_stats <- zonal_stats_urls %>%
-    purrr::map_dfr(\(x) {
-      get_zonal_stats(df[["longitude"]], df[["latitude"]], x, buffer = buffer, stats = stats)
-    })
+  zonal_stats <- withCallingHandlers(
+    purrr::map_dfr(
+      zonal_stats_urls,
+      \(x) {
+        get_zonal_stats(df[["longitude"]], df[["latitude"]], x, buffer = buffer, stats = stats)
+      }
+    ),
+    purrr_error_indexed = function(err) {
+      rlang::cnd_signal(err$parent)
+    }
+  )
 
   # TODO -> handle no stats returned
 
@@ -162,11 +181,15 @@ summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 10
 }
 
 
-get_zonal_stats <- function(longitude, latitude, url, buffer = 1000, bands = list(1, 2, 3), approx_stats = FALSE,
+get_zonal_stats <- function(longitude, latitude, url, buffer = 1000,
+                            bands = list(1), approx_stats = FALSE,
                             stats = c(
-                              "min", "max", "mean", "count", "sum", "std", "median", "majority", "minority", "unique", "range", "nodata", "area", "freq_hist"
+                              "min", "max", "mean", "count", "sum", "std",
+                              "median", "majority", "minority", "unique",
+                              "range", "nodata", "area", "freq_hist"
                             )) {
   res <- httr2::request(zonal_stats_url) %>%
+    httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = list(
         type = "Point", coordinates = c(longitude, latitude),
@@ -174,12 +197,21 @@ get_zonal_stats <- function(longitude, latitude, url, buffer = 1000, bands = lis
       ),
       image = list(
         url = url,
-        # bands = list(1), # TODO, not working -> only works with band: 1
+        bands = bands,
         approx_stats = approx_stats
       ),
       stats = as.list(stats)
     )) %>%
+    httr2::req_error(is_error = \(res) FALSE) %>%
     httr2::req_perform()
+
+  if (httr2::resp_status(res) != 200) {
+    stop(call. = FALSE, paste0(
+      "Error getting zonal statistics: ",
+      httr2::resp_status(res), " ",
+      httr2::resp_status_desc(res)
+    ))
+  }
 
   res_tbl <- res %>%
     httr2::resp_body_json() %>%

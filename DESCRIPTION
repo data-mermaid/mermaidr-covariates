@@ -27,6 +27,8 @@ RoxygenNote: 7.3.3
 URL: https://data-mermaid.github.io/mermaidr-covariates/
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/Needs/website: rmarkdown
+Config/testthat/edition: 3
