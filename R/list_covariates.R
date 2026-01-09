@@ -5,7 +5,6 @@
 #' @examples
 #' list_covariates()
 list_covariates <- function() {
-
   # Get collections
   res <- rstac::stac(stac_url) |>
     rstac::collections() |>
@@ -15,7 +14,9 @@ list_covariates <- function() {
   res <- res[["collections"]]
 
   # Name with ID
-  names(res) <- sapply(res, \(x) {x[["id"]]})
+  names(res) <- sapply(res, \(x) {
+    x[["id"]]
+  })
 
   # Give it "collections" class
   # TODO
