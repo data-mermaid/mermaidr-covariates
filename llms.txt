@@ -48,13 +48,12 @@ se <- se %>%
   select(site, sample_date, latitude, longitude, hard_coral_cover = percent_cover_benthic_category_avg_hard_coral)
 ```
 
-To get the covariates for these sites, we need to know what data is
-available. We find this by using the
-[`list_collections()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_collections.md)
+To find which covariates are available, we use the
+[`list_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_covariates.md)
 function:
 
 ``` r
-list_collections()
+list_covariates()
 #> $`noaa-monthly-max-dhw`
 #> ###Collection
 #> - id: noaa-monthly-max-dhw
@@ -68,9 +67,9 @@ list_collections()
 The monthly aggregation of Degree Heating Weeks (DHW) is available. We
 can access this data by using its id, `noaa-monthly-max-dhw`, in the
 function
-[`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md).
+[`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md).
 The
-[`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md)
+[`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
 function takes the site latitude and longitude, as well as the survey
 date, to find the data at that site for `n` days prior, then aggregates
 it.
@@ -80,7 +79,7 @@ prior to the survey data, using a buffer size of 1000 metres:
 
 ``` r
 max_dhw <- se %>%
-  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+  get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
 ```
 
 The covariates are returned in a format that need to be expanded. Once
@@ -127,10 +126,10 @@ locations](https://data-mermaid.github.io/mermaidr-covariates/articles/covariate
 
 ## All functions
 
-- [`list_collections()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_collections.md)
-  : List available collections
-- [`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md)
+- [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
   : Get summary of zonal statistics
+- [`list_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_covariates.md)
+  : List available covariates
 
 # Articles
 

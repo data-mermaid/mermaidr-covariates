@@ -90,13 +90,13 @@ gfcr_summary_sampleevents %>%
 
 Next, get the relevant covariates for these sites.
 
-### List STAC collections
+### List covariates
 
-List available STAC collections. We have available the monthly
-aggregation of Degree Heating Weeks (DHW).
+List available covariates. We have available the monthly aggregation of
+Degree Heating Weeks (DHW).
 
 ``` r
-list_collections()
+list_covariates()
 ```
 
     ## $`noaa-monthly-max-dhw`
@@ -135,14 +135,14 @@ gfcr_summary_sampleevents %>%
     ## # ℹ 63 more rows
 
 The
-[`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md)
+[`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
 function takes the site latitude and longitude, as well as the survey
 date, to find the data at that site for `n` days prior, then aggregates
 it. The buffer size is set to 1000 metres.
 
 ``` r
 max_dhw <- gfcr_summary_sampleevents %>%
-  summary_zonal_stats("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+  get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
 ```
 
 Look at the returned data, keeping only the project information, site,

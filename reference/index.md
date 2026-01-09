@@ -2,7 +2,7 @@
 
 ## All functions
 
-- [`list_collections()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_collections.md)
-  : List available collections
-- [`summary_zonal_stats()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summary_zonal_stats.md)
+- [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
   : Get summary of zonal statistics
+- [`list_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_covariates.md)
+  : List available covariates
