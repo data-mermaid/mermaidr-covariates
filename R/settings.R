@@ -1,2 +1,2 @@
-stac_url <- "https://xv9pvd1by2.execute-api.us-east-1.amazonaws.com/dev/"
+stac_url <- "https://mermaid.prescient.earth/stac"
 zonal_stats_url <- "https://api.zonalstats.datamermaid.org/api/v1/zonal-stats"
