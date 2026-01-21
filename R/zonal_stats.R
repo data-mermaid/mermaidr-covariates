@@ -1,13 +1,13 @@
 #' Get summary of zonal statistics
 #'
 #' @param df Sample events from \code{mermaidr}
-#' @param covariates Covariate IDs to get statistics for
+#' @param covariate_id Covariate ID to get statistics for
 #' @param n_days Number of days prior to sample date to get statistics for. Defaults to 365.
 #' @param buffer Buffer around site location, in metres. Defaults to 1000.
 #' @param stats Summary statistics. One of: min, max, or mean.
 #'
 #' @export
-get_zonal_statistics <- function(df, covariates, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
+get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
   # Allow for the possibility that they have more than one record at each site at each date -> make distinct for them
   df <- df %>%
     dplyr::mutate(...id = glue::glue("{site}_{sample_date}"))
@@ -19,9 +19,12 @@ get_zonal_statistics <- function(df, covariates, n_days = 365, buffer = 1000, st
   zonal_stats <- withCallingHandlers(
     purrr::map_dfr(
       df_distinct,
-      \(x) summary_zonal_stats_single(x, covariates,
+      \(x)
+      summary_zonal_stats_single(x,
+        covariate_id,
         n_days = n_days,
-        buffer = buffer, stats = stats
+        buffer = buffer,
+        stats = stats
       ),
       .progress = TRUE
     ),
@@ -30,7 +33,6 @@ get_zonal_statistics <- function(df, covariates, n_days = 365, buffer = 1000, st
     }
   )
 
-
   # Re-attach to existing df, even if it was not distinct
   df %>%
     dplyr::left_join(zonal_stats %>%
@@ -38,7 +40,7 @@ get_zonal_statistics <- function(df, covariates, n_days = 365, buffer = 1000, st
     dplyr::select(-...id)
 }
 
-summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
+summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
   # Get zonal stats for X days before
 
   # Get the specific stat, AND use that summary of it
@@ -50,6 +52,14 @@ summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 10
 
   # but for now, just do same stat + summary stat
 
+
+  # Get covariate name, since ID is not informative
+  covariate_info <- rstac::stac(stac_url) %>%
+    rstac::collections(covariate_id) %>%
+    rstac::get_request()
+
+  covariate_name <- covariate_info[["title"]]
+
   # Get sample_date
   sample_date <- df %>%
     dplyr::pull(sample_date)
@@ -60,41 +70,24 @@ summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 10
   # Subtract `n_days` days
   input_sample_date_start <- sample_date - lubridate::days(n_days)
 
-  # # Construct interval
-  # input_interval <- start_end_to_interval(input_sample_date_start, input_sample_date_end)
-  #
-  # # Search for items between those dates
-  # relevant_items <- rstac::stac(stac_url) |>
-  #   rstac::stac_search(
-  #     collections = covariates,
-  #     datetime = input_interval,
-  #     limit = 999999
-  #   ) |>
-  #   rstac::get_request()
+  # Construct interval
+  input_interval <- start_end_to_interval(input_sample_date_start, input_sample_date_end)
 
-  # There is currently a bug in the API that does not allow intervals from {start}/{end}
-
-  # So have to get all items after start, then filter items that are before end
-  after_start_input_interval <- after_date_to_datetime(input_sample_date_start)
-  after_start_items <- rstac::stac(stac_url) |>
+  # Search for items between those dates
+  relevant_items <- rstac::stac(stac_url) |>
     rstac::stac_search(
-      collections = covariates,
-      datetime = after_start_input_interval,
+      collections = covariate_id,
+      datetime = input_interval,
       limit = 999999
     ) |>
     rstac::get_request()
 
-  # Keep only items on or before sample date
-
-  relevant_items <- after_start_items[["features"]] %>%
-    purrr::keep(\(x) {
-      item_date <- lubridate::ymd_hms(x[["properties"]][["datetime"]])
-
-      item_date <= sample_date
-    })
+  if (relevant_items[["numberReturned"]] == 0) {
+    return(empty_covariates(df, covariate_name))
+  }
 
   # Only include items that have the assets "data"
-  relevant_items <- relevant_items %>%
+  relevant_items <- relevant_items[["features"]] %>%
     purrr::keep(\(x) {
       # No assets
       if (!"assets" %in% names(x)) {
@@ -104,6 +97,10 @@ summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 10
       # Check for "data" asset
       "data" %in% names(x[["assets"]])
     })
+
+  if (length(relevant_items) == 0) {
+    return(empty_covariates(df, covariate_name))
+  }
 
   # Get the dates of items, to have start/end date
   item_dates <- relevant_items %>%
@@ -154,11 +151,11 @@ summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 10
     }) %>%
     dplyr::bind_cols()
 
-  zonal_stats_summary <- bind_cols(id_cols, zonal_stats_summary)
+  zonal_stats_summary <- dplyr::bind_cols(id_cols, zonal_stats_summary)
 
   # Reshape zonal stats into the following format:
   # covariate, start_date, end_date, band, statistic, value
-  # covariate will just be covariates
+  # covariate will just be covariate
   # band is as is, with "_band" removed
   # Put into a df-column called covariates
   zonal_stats_df <- zonal_stats_summary %>%
@@ -170,11 +167,11 @@ summary_zonal_stats_single <- function(df, covariates, n_days = 365, buffer = 10
     dplyr::mutate(
       band = stringr::str_remove(band, "band_"),
       band = as.numeric(band),
-      covariate = covariates,
+      covariate = covariate_name,
       start_date = start_date,
       end_date = end_date
     ) %>%
-    dplyr::select(covariate, start_date, end_date, band, statistic, value) %>%
+    dplyr::select(covariate, covariate_name, start_date, end_date, band, statistic, value) %>%
     tidyr::nest(covariates = dplyr::everything())
 
   dplyr::bind_cols(df, zonal_stats_df)
@@ -224,4 +221,20 @@ get_zonal_stats <- function(longitude, latitude, url, buffer = 1000,
     dplyr::tibble(longitude = longitude, latitude = latitude),
     res_tbl
   )
+}
+
+empty_covariates <- function(df, covariate_name) {
+  covariates <- dplyr::tibble(
+    covariate = covariate_name,
+    start_date = NA,
+    end_date = NA,
+    band = NA_integer_,
+    statistic = NA_character_,
+    value = NA_real_
+  ) %>%
+    dplyr::mutate(dplyr::across(c(start_date, end_date), as.Date)) %>%
+    tidyr::nest(covariates = dplyr::everything())
+
+  df %>%
+    dplyr::bind_cols(covariates)
 }
