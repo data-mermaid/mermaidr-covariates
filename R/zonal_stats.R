@@ -52,7 +52,6 @@ summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 
 
   # but for now, just do same stat + summary stat
 
-
   # Get covariate name, since ID is not informative
   covariate_info <- rstac::stac(stac_url) %>%
     rstac::collections(covariate_id) %>%
@@ -171,7 +170,7 @@ summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 
       start_date = start_date,
       end_date = end_date
     ) %>%
-    dplyr::select(covariate, covariate_name, start_date, end_date, band, statistic, value) %>%
+    dplyr::select(covariate, start_date, end_date, band, statistic, value) %>%
     tidyr::nest(covariates = dplyr::everything())
 
   dplyr::bind_cols(df, zonal_stats_df)
