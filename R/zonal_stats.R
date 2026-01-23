@@ -146,7 +146,20 @@ summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 
   zonal_stats_summary <- stats %>%
     purrr::map(\(x) {
       zonal_stats %>%
-        dplyr::summarise(dplyr::across(dplyr::all_of(x), ~ do.call(x, as.list(.x))))
+        dplyr::summarise(dplyr::across(
+            dplyr::all_of(x),
+            ~ {
+                if (x == "mean") {
+                    if (all(is.na(.x))) {
+                        NA
+                    } else {
+                        mean(.x, trim = 0, na.rm = TRUE)
+                    }
+                } else {
+                    do.call(x, as.list(.x, na.rm = TRUE))
+                }
+            }
+        ))
     }) %>%
     dplyr::bind_cols()
 
