@@ -5,3 +5,7 @@
 .httr-oauth
 docs
 inst/doc
+scratch
+assets
+cache
+.DS_Store
