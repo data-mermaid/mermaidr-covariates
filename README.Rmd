@@ -12,6 +12,8 @@ knitr::opts_chunk$set(
   out.width = "100%",
   message = FALSE
 )
+
+options(width = 80)
 ```
 
 # mermaidrcovariates
@@ -55,28 +57,30 @@ se <- se %>%
   select(site, sample_date, latitude, longitude, hard_coral_cover = percent_cover_benthic_category_avg_hard_coral)
 ```
 
-To find which covariates are available, we use the `list_covariates()` function:
+You can use the [Prescient browser](https://mermaid.prescient.earth/) to find which covariates are available. To see this programatically, we use the `list_covariates()` function:
 
 ```{r list-covariates}
 list_covariates()
 ```
 
-The monthly aggregation of Degree Heating Weeks (DHW) is available. We can access this data by using its id, `noaa-monthly-max-dhw`, in the function `get_zonal_statistics()`. The `get_zonal_statistics()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it.
+For this example, we will look at mean Daily Sea Surface Temperature (SST). We can access this data by using its id --- `50b810fb-5f17-4cdb-b34b-c377837e2a29` --- in the function `get_zonal_statistics()`. The `get_zonal_statistics()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it.
 
-We access the maximum DHW (of the monthly average) for the 365 days prior to the survey data, using a buffer size of 1000 metres:
+We access the maximum SST (of the daily average) for the 60 days prior to the survey data, using a buffer size of 1000 metres:
 
-```{r max-dhw-internal, echo = FALSE}
-if (file.exists("inst/extdata/readme_max_dhw.rds")) {
-  max_dhw <- readRDS("inst/extdata/readme_max_dhw.rds")
+```{r max-sst-internal, echo = FALSE}
+if (file.exists("inst/extdata/readme_max_sst.rds")) {
+  max_sst <- readRDS("inst/extdata/readme_max_sst.rds")
 } else {
-  max_dhw <- se %>%
-    get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+  max_sst <- se %>%
+    get_zonal_statistics("50b810fb-5f17-4cdb-b34b-c377837e2a29", n_days = 60, buffer = 1000, stats = "max")
+  
+  saveRDS(max_sst, "inst/extdata/readme_max_sst_new.rds")
 }
 ```
 
-```{r max-dhw, eval = FALSE}
-max_dhw <- se %>%
-  get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+```{r max-sst, eval = FALSE}
+max_sst <- se %>%
+  get_zonal_statistics("50b810fb-5f17-4cdb-b34b-c377837e2a29", n_days = 10, buffer = 1000, stats = "max")
 ```
 
 The covariates are returned in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
@@ -86,8 +90,6 @@ options(dplyr.width = Inf)
 ```
 
 ```{r expand-covariates}
-max_dhw %>%
+max_sst %>%
   unnest(covariates)
 ```
-
-This data can be analysed along with the hard coral cover, shown in further detail in the example analysis, [Getting environmental covariates for GFCR locations](https://data-mermaid.github.io/mermaidr-covariates/articles/covariates.html).
