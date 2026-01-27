@@ -8,3 +8,4 @@
 ^LICENSE\.md$
 ^vignettes/articles$
 ^README\.Rmd$
+^scratch$
