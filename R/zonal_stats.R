@@ -8,49 +8,109 @@
 #'
 #' @export
 get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
-  # Allow for the possibility that they have more than one record at each site at each date -> make distinct for them
+  covariate_name <- rstac::stac(stac_url) %>%
+    rstac::collections(covariate_id) %>%
+    rstac::get_request() %>%
+    purrr::pluck("title")
+
+  # Allow for the possibility that they have more than one record at each site at each date
+  # Make distinct for them, but also handle the possibility of different latitude/longitude
+  # So best to just distinguish entirely, using row number
   df <- df %>%
-    dplyr::mutate(...id = glue::glue("{site}_{sample_date}"))
+    dplyr::distinct(site, latitude, longitude, sample_date) %>%
+    dplyr::mutate(...id = glue::glue("{site}_{sample_date}")) %>%
+    dplyr::group_by(...id) %>%
+    dplyr::mutate(row = dplyr::row_number()) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(...id = glue::glue("{...id}_{row}")) %>%
+    dplyr::select(-row)
 
   df_distinct <- df %>%
-    dplyr::distinct(site, latitude, longitude, sample_date, ...id) %>%
     split(.$...id)
 
-  zonal_stats <- withCallingHandlers(
-    purrr::map_dfr(
+  # Now get zonal stats for each SE
+  zonal_stats <-
+    purrr::map(
       df_distinct,
-      \(x)
-      summary_zonal_stats_single(x,
+      \(se, setup)
+      get_zonal_stats_single(se,
         covariate_id,
-        n_days = n_days,
+        n_days,
         buffer = buffer,
         stats = stats
       ),
       .progress = TRUE
-    ),
-    purrr_error_indexed = function(err) {
-      rlang::cnd_signal(err$parent)
-    }
-  )
+    ) %>%
+    purrr::list_rbind(names_to = "...id")
+
+  # TODO -> separately handle case where an SE doesn't return anything
+  # I don't think the API will return 0 rows here, but just an NA
+  # The 0 rows is more likely to come from above, when fetching the items
+  if (nrow(zonal_stats) == 0) {
+    browser()
+  }
+
+  # Set up to group by non-stat columns
+  id_cols <- zonal_stats %>%
+    dplyr::select(-dplyr::all_of(stats)) %>%
+    names()
+
+  # Apply summary function to each of the cols
+  zonal_stats_summary <- stats %>%
+    purrr::map(\(x) {
+      zonal_stats %>%
+        dplyr::group_by(dplyr::across(dplyr::all_of(id_cols))) %>%
+        dplyr::summarise(
+          dplyr::across(
+            dplyr::all_of(x),
+            ~ {
+              if (x == "mean") {
+                if (all(is.na(.x))) {
+                  NA
+                } else {
+                  mean(.x, trim = 0, na.rm = TRUE)
+                }
+              } else {
+                do.call(x, as.list(.x, na.rm = TRUE))
+              }
+            }
+          ),
+          .groups = "drop"
+        )
+    }) %>%
+    dplyr::bind_cols()
+
+  # Reshape zonal stats into the following format:
+  # covariate, start_date, end_date, band, statistic, value
+  # covariate will just be covariate name
+  # band is as is, with "_band" removed
+  # Put into a df-column called covariates
+  zonal_stats_df <- zonal_stats_summary %>%
+    tidyr::pivot_longer(
+      cols = dplyr::all_of(stats),
+      names_to = "statistic",
+      values_to = "value"
+    ) %>%
+    dplyr::right_join(df, by = "...id") %>%
+    dplyr::mutate(
+      band = stringr::str_remove(band, "band_"),
+      band = as.numeric(band),
+      covariate = covariate_name,
+      start_date = start_date,
+      end_date = end_date
+    ) %>%
+    dplyr::select(...id, covariate, start_date, end_date, band, statistic, value) %>%
+    tidyr::nest(covariates = -...id)
 
   # Re-attach to existing df, even if it was not distinct
   df %>%
-    dplyr::left_join(zonal_stats %>%
-      dplyr::select(...id, covariates), by = "...id") %>%
+    dplyr::left_join(zonal_stats_df, by = "...id") %>%
     dplyr::select(-...id)
 }
 
-summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
-  # Get zonal stats for X days before
-
-  # Get the specific stat, AND use that summary of it
-  # e.g. if min, get mins, then summarise using min
-  # if mean, get means, then summarise using mean
-  # this does not work the same way for median....
-  # what if e.g. they want the "average lowest value"?
-  # they might be different
-
-  # but for now, just do same stat + summary stat
+get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
+  # , buffer = 1000
+  # , stats = c("min", "max", "mean")) {
 
   # Get covariate name, since ID is not informative
   covariate_info <- rstac::stac(stac_url) %>%
@@ -82,7 +142,11 @@ summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 
     rstac::get_request()
 
   if (relevant_items[["numberReturned"]] == 0) {
-    return(empty_covariates(df, covariate_name))
+    return(list(
+      start_date = NULL,
+      end_date = NULL,
+      urls = NULL
+    ))
   }
 
   # Only include items that have the assets "data"
@@ -98,7 +162,11 @@ summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 
     })
 
   if (length(relevant_items) == 0) {
-    return(empty_covariates(df, covariate_name))
+    return(list(
+      start_date = NULL,
+      end_date = NULL,
+      urls = NULL
+    ))
   }
 
   # Get the dates of items, to have start/end date
@@ -117,124 +185,92 @@ summary_zonal_stats_single <- function(df, covariate_id, n_days = 365, buffer = 
       x[["assets"]][["data"]][["href"]]
     })
 
-  # Get zonal stats for each URL
-
-  zonal_stats <- withCallingHandlers(
-    purrr::map_dfr(
-      zonal_stats_urls,
-      \(x) {
-        get_zonal_stats(df[["longitude"]], df[["latitude"]], x, buffer = buffer, stats = stats)
-      }
-    ),
-    purrr_error_indexed = function(err) {
-      rlang::cnd_signal(err$parent)
-    }
+  return(
+    dplyr::tibble(
+      start_date = start_date,
+      end_date = end_date,
+      urls = list(zonal_stats_urls)
+    )
   )
+}
+
+get_zonal_stats_single <- function(se, covariate_id, n_days = 30, buffer = 1000,
+                                   bands = list(1), approx_stats = FALSE,
+                                   stats = c(
+                                     "min", "max", "mean", "count", "sum", "std",
+                                     "median", "majority", "minority", "unique",
+                                     "range", "nodata", "area", "freq_hist"
+                                   )) {
+  # Set up zonal_stats requests by getting relevant STAC items for each sample event
+  setup <- get_items_for_zonal_stats(se,
+    covariate_id,
+    n_days = n_days
+  )
+  # TODO -> handle the case where an SE does not have any items, do not include it in the following call
+
+  # Get zonal stats for each URL
 
   # TODO -> handle no stats returned
 
-  if (nrow(zonal_stats) == 0) {
-    browser()
-  }
+  # Set up requests to parallelize
 
-  # Keep non-summary stat cols
-  id_cols <- zonal_stats %>%
-    dplyr::select(-dplyr::all_of(stats)) %>%
-    dplyr::distinct()
-
-  # Apply summary function to each of the cols
-  zonal_stats_summary <- stats %>%
-    purrr::map(\(x) {
-      zonal_stats %>%
-        dplyr::summarise(dplyr::across(
-            dplyr::all_of(x),
-            ~ {
-                if (x == "mean") {
-                    if (all(is.na(.x))) {
-                        NA
-                    } else {
-                        mean(.x, trim = 0, na.rm = TRUE)
-                    }
-                } else {
-                    do.call(x, as.list(.x, na.rm = TRUE))
-                }
-            }
-        ))
-    }) %>%
-    dplyr::bind_cols()
-
-  zonal_stats_summary <- dplyr::bind_cols(id_cols, zonal_stats_summary)
-
-  # Reshape zonal stats into the following format:
-  # covariate, start_date, end_date, band, statistic, value
-  # covariate will just be covariate
-  # band is as is, with "_band" removed
-  # Put into a df-column called covariates
-  zonal_stats_df <- zonal_stats_summary %>%
-    tidyr::pivot_longer(
-      cols = dplyr::all_of(stats),
-      names_to = "statistic",
-      values_to = "value"
-    ) %>%
-    dplyr::mutate(
-      band = stringr::str_remove(band, "band_"),
-      band = as.numeric(band),
-      covariate = covariate_name,
-      start_date = start_date,
-      end_date = end_date
-    ) %>%
-    dplyr::select(covariate, start_date, end_date, band, statistic, value) %>%
-    tidyr::nest(covariates = dplyr::everything())
-
-  dplyr::bind_cols(df, zonal_stats_df)
-}
-
-
-get_zonal_stats <- function(longitude, latitude, url, buffer = 1000,
-                            bands = list(1), approx_stats = FALSE,
-                            stats = c(
-                              "min", "max", "mean", "count", "sum", "std",
-                              "median", "majority", "minority", "unique",
-                              "range", "nodata", "area", "freq_hist"
-                            )) {
-  res <- httr2::request(zonal_stats_url) %>%
+  request_base <- httr2::request(zonal_stats_url) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = list(
-        type = "Point", coordinates = c(longitude, latitude),
+        type = "Point",
+        coordinates = c(se[["longitude"]], se[["latitude"]]),
         buffer_size = buffer
       ),
-      image = list(
-        url = url,
-        bands = bands,
-        approx_stats = approx_stats
-      ),
+      image = NULL,
       stats = as.list(stats)
     )) %>%
-    httr2::req_error(is_error = \(res) FALSE) %>%
-    httr2::req_perform()
+    httr2::req_error(is_error = \(res) FALSE)
 
-  if (httr2::resp_status(res) != 200) {
-    stop(call. = FALSE, paste0(
-      "Error getting zonal statistics: ",
-      httr2::resp_status(res), " ",
-      httr2::resp_status_desc(res)
-    ))
-  }
-
-  res_tbl <- res %>%
-    httr2::resp_body_json() %>%
-    purrr::map_dfr(\(x) {
-      x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
-      dplyr::as_tibble(x)
-    }, .id = "band")
-
-  dplyr::bind_cols(
-    dplyr::tibble(longitude = longitude, latitude = latitude),
-    res_tbl
+  requests <- purrr::map(
+    setup[["urls"]][[1]],
+    \(x) {
+      request_base %>%
+        httr2::req_body_json_modify(
+          image =
+            list(
+              url = x,
+              bands = bands,
+              approx_stats = approx_stats
+            )
+        )
+    }
   )
+
+  res <- httr2::req_perform_parallel(requests, progress = FALSE)
+
+  # TODO -> handle this later on
+  # if (httr2::resp_status(res) != 200) {
+  #   stop(call. = FALSE, paste0(
+  #     "Error getting zonal statistics: ",
+  #     httr2::resp_status(res), " ",
+  #     httr2::resp_status_desc(res)
+  #   ))
+  # }
+
+  # Format the results of each call
+
+  purrr::map(
+    res,
+    \(res) {
+      res %>%
+        httr2::resp_body_json() %>%
+        purrr::map_dfr(\(x) {
+          x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
+          dplyr::as_tibble(x)
+        }, .id = "band")
+    }
+  ) %>%
+    purrr::list_rbind() %>%
+      dplyr::bind_cols(setup)
 }
 
+# TODO -> replace this
 empty_covariates <- function(df, covariate_name) {
   covariates <- dplyr::tibble(
     covariate = covariate_name,
