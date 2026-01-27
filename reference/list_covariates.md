@@ -55,4 +55,12 @@ list_covariates()
 #> - field(s): 
 #> id, type, links, title, extent, license, keywords, providers, description, sci:citation, stac_version, stac_extensions
 #> 
+#> $`ea07abba-06cf-41a8-92a3-b20eaf801ea9`
+#> ###Collection
+#> - id: ea07abba-06cf-41a8-92a3-b20eaf801ea9
+#> - title: Land Use and Land Cover (LULC) Collection
+#> - description: Land Use and Land Cover dataset collection
+#> - field(s): 
+#> id, type, links, title, extent, license, keywords, providers, summaries, description, stac_version
+#> 
 ```
