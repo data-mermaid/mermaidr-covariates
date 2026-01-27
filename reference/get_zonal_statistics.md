@@ -7,7 +7,7 @@ Get summary of zonal statistics
 ``` r
 get_zonal_statistics(
   df,
-  collection,
+  covariate_id,
   n_days = 365,
   buffer = 1000,
   stats = c("min", "max", "mean")
@@ -20,9 +20,9 @@ get_zonal_statistics(
 
   Sample events from `mermaidr`
 
-- collection:
+- covariate_id:
 
-  Covariates to get statistics for
+  Covariate ID to get statistics for
 
 - n_days:
 
