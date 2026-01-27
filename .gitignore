@@ -9,3 +9,4 @@ scratch
 assets
 cache
 .DS_Store
+inst/extdata/
