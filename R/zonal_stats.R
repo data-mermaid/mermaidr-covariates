@@ -7,52 +7,22 @@
 #' @param stats Summary statistics. One of: min, max, or mean.
 #'
 #' @export
-get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
-  covariate_name <- rstac::stac(stac_url) %>%
-    rstac::collections(covariate_id) %>%
-    rstac::get_request() %>%
-    purrr::pluck("title")
+get_zonal_statistics <- function(se, covariate_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
+  covariate_name <- get_covariate_name_from_id(covariate_id)
 
-  # Allow for the possibility that they have more than one record at each site at each date
-  # Make distinct for them, but also handle the possibility of different latitude/longitude
-  # So best to just distinguish entirely, using row number
-  df <- df %>%
-    dplyr::distinct(site, latitude, longitude, sample_date) %>%
-    dplyr::mutate(...id = glue::glue("{site}_{sample_date}")) %>%
-    dplyr::group_by(...id) %>%
-    dplyr::mutate(row = dplyr::row_number()) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(...id = glue::glue("{...id}_{row}")) %>%
-    dplyr::select(-row)
+  # Add an ID for iterating over (with site/date/lat/long distinct)
+  se <- se %>%
+    add_id_for_iteration()
 
-  df_distinct <- df %>%
+  se_list <- se %>%
     split(.$...id)
 
-  # Now get zonal stats for each SE
-  zonal_stats <-
-    purrr::map(
-      df_distinct,
-      \(se, setup)
-      get_zonal_stats_single(se,
-        covariate_id,
-        n_days,
-        buffer = buffer,
-        stats = stats
-      ),
-      .progress = TRUE
-    ) %>%
-    purrr::list_rbind(names_to = "...id")
-
-  # TODO -> separately handle case where an SE doesn't return anything
-  # I don't think the API will return 0 rows here, but just an NA
-  # The 0 rows is more likely to come from above, when fetching the items
-  if (nrow(zonal_stats) == 0) {
-    browser()
-  }
+  # Get zonal stats for all SEs
+  zonal_stats <- get_zonal_stats(se_list, covariate_id, n_days, buffer, stats)
 
   # Set up to group by non-stat columns
   id_cols <- zonal_stats %>%
-    dplyr::select(-dplyr::all_of(stats)) %>%
+    dplyr::select(-dplyr::any_of(stats)) %>%
     names()
 
   # Apply summary function to each of the cols
@@ -62,7 +32,7 @@ get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, 
         dplyr::group_by(dplyr::across(dplyr::all_of(id_cols))) %>%
         dplyr::summarise(
           dplyr::across(
-            dplyr::all_of(x),
+            dplyr::any_of(x),
             ~ {
               if (x == "mean") {
                 if (all(is.na(.x))) {
@@ -85,16 +55,30 @@ get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, 
   # covariate will just be covariate name
   # band is as is, with "_band" removed
   # Put into a df-column called covariates
+
+  if (!any(stats %in% names(zonal_stats_summary))) {
+    zonal_stats_summary <- zonal_stats_summary %>%
+      dplyr::bind_cols(dplyr::tibble(
+        statistic = NA_character_,
+        value = NA_real_,
+        band = NA_character_
+      ))
+  } else {
+    zonal_stats_summary <- zonal_stats_summary %>%
+      tidyr::pivot_longer(
+        cols = dplyr::any_of(stats),
+        names_to = "statistic",
+        values_to = "value"
+      ) %>%
+      dplyr::mutate(
+        band = stringr::str_remove(band, "band_"),
+        band = as.numeric(band)
+      )
+  }
+
   zonal_stats_df <- zonal_stats_summary %>%
-    tidyr::pivot_longer(
-      cols = dplyr::all_of(stats),
-      names_to = "statistic",
-      values_to = "value"
-    ) %>%
-    dplyr::right_join(df, by = "...id") %>%
+    dplyr::right_join(se, by = "...id") %>%
     dplyr::mutate(
-      band = stringr::str_remove(band, "band_"),
-      band = as.numeric(band),
       covariate = covariate_name,
       start_date = start_date,
       end_date = end_date
@@ -103,22 +87,12 @@ get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, 
     tidyr::nest(covariates = -...id)
 
   # Re-attach to existing df, even if it was not distinct
-  df %>%
+  se %>%
     dplyr::left_join(zonal_stats_df, by = "...id") %>%
     dplyr::select(-...id)
 }
 
 get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
-  # , buffer = 1000
-  # , stats = c("min", "max", "mean")) {
-
-  # Get covariate name, since ID is not informative
-  covariate_info <- rstac::stac(stac_url) %>%
-    rstac::collections(covariate_id) %>%
-    rstac::get_request()
-
-  covariate_name <- covariate_info[["title"]]
-
   # Get sample_date
   sample_date <- df %>%
     dplyr::pull(sample_date)
@@ -142,11 +116,13 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
     rstac::get_request()
 
   if (relevant_items[["numberReturned"]] == 0) {
-    return(list(
-      start_date = NULL,
-      end_date = NULL,
-      urls = NULL
-    ))
+    return(
+      dplyr::tibble(
+        start_date = NA,
+        end_date = NA,
+        urls = NA
+      )
+    )
   }
 
   # Only include items that have the assets "data"
@@ -162,11 +138,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
     })
 
   if (length(relevant_items) == 0) {
-    return(list(
-      start_date = NULL,
-      end_date = NULL,
-      urls = NULL
-    ))
+    return(NULL)
   }
 
   # Get the dates of items, to have start/end date
@@ -194,6 +166,23 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   )
 }
 
+
+get_zonal_stats <- function(se_list, covariate_id, n_days, buffer, stats) {
+  se_list %>%
+    purrr::map(
+      \(se)
+      get_zonal_stats_single(se,
+        covariate_id,
+        n_days,
+        buffer = buffer,
+        stats = stats
+      ),
+      .progress = TRUE
+    ) %>%
+    purrr::compact() %>% # Remove those without any items/results
+    purrr::list_rbind(names_to = "...id")
+}
+
 get_zonal_stats_single <- function(se, covariate_id, n_days = 30, buffer = 1000,
                                    bands = list(1), approx_stats = FALSE,
                                    stats = c(
@@ -202,11 +191,17 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, buffer = 1000,
                                      "range", "nodata", "area", "freq_hist"
                                    )) {
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
-  setup <- get_items_for_zonal_stats(se,
+  stac_items <- get_items_for_zonal_stats(se,
     covariate_id,
     n_days = n_days
   )
-  # TODO -> handle the case where an SE does not have any items, do not include it in the following call
+  # Returns a list with elements start_date, end_date, urls
+  # and NULL if there are no items
+
+  # Handle case where SE does not have any items
+  if (is.na(stac_items[["urls"]])) {
+    return(stac_items)
+  }
 
   # Get zonal stats for each URL
 
@@ -228,7 +223,7 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, buffer = 1000,
     httr2::req_error(is_error = \(res) FALSE)
 
   requests <- purrr::map(
-    setup[["urls"]][[1]],
+    stac_items[["urls"]][[1]],
     \(x) {
       request_base %>%
         httr2::req_body_json_modify(
@@ -254,21 +249,22 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, buffer = 1000,
   # }
 
   # Format the results of each call
-
-  purrr::map(
-    res,
-    \(res) {
-      res %>%
-        httr2::resp_body_json() %>%
-        purrr::map_dfr(\(x) {
-          x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
-          dplyr::as_tibble(x)
-        }, .id = "band")
-    }
-  ) %>%
+  res %>%
+    purrr::keep(\(x) x$status_code == 200) %>%
+    purrr::map(
+      \(res) {
+        res %>%
+          httr2::resp_body_json() %>%
+          purrr::map_dfr(\(x) {
+            x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
+            dplyr::as_tibble(x)
+          }, .id = "band")
+      }
+    ) %>%
     purrr::list_rbind() %>%
-      dplyr::bind_cols(setup)
+    dplyr::bind_cols(stac_items)
 }
+
 
 # TODO -> replace this
 empty_covariates <- function(df, covariate_name) {

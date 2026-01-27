@@ -73,7 +73,7 @@ if (file.exists("inst/extdata/readme_max_sst.rds")) {
 } else {
   max_sst <- se %>%
     get_zonal_statistics("50b810fb-5f17-4cdb-b34b-c377837e2a29", n_days = 60, buffer = 1000, stats = "max")
-  
+
   saveRDS(max_sst, "inst/extdata/readme_max_sst_new.rds")
 }
 ```
