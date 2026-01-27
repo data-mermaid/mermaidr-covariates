@@ -168,10 +168,12 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 
 
 get_zonal_stats <- function(se_list, covariate_id, n_days, buffer, stats) {
+  safely_get_zonal_stats_single <- purrr::safely(get_zonal_stats_single, otherwise = NULL)
+
   se_list %>%
     purrr::map(
       \(se)
-      get_zonal_stats_single(se,
+      safely_get_zonal_stats_single(se,
         covariate_id,
         n_days,
         buffer = buffer,
@@ -179,6 +181,7 @@ get_zonal_stats <- function(se_list, covariate_id, n_days, buffer, stats) {
       ),
       .progress = TRUE
     ) %>%
+    purrr::map("result") %>%
     purrr::compact() %>% # Remove those without any items/results
     purrr::list_rbind(names_to = "...id")
 }
