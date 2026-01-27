@@ -28,40 +28,19 @@ get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, 
   df_distinct <- df %>%
     split(.$...id)
 
-  # Set up zonal_stats requests by getting relevant STAC items for each sample event
-  zonal_stats_setup <- withCallingHandlers(
+  # Now get zonal stats for each SE
+  zonal_stats <-
     purrr::map(
       df_distinct,
-      \(x)
-      get_items_for_zonal_stats(x,
-        covariate_id,
-        n_days = n_days
-      )
-    ),
-    purrr_error_indexed = function(err) {
-      rlang::cnd_signal(err$parent)
-    }
-  )
-
-  zonal_stats_setup_df <- zonal_stats_setup %>%
-    purrr::list_rbind(names_to = "...id")
-
-  # TODO -> handle the case where an SE does not have any items, do not include it in the following call
-
-  # Now get zonal stats for each SE
-  # TODO -> add back purrr error indexed?
-  zonal_stats <- withCallingHandlers(
-    purrr::map2(
-      df_distinct,
-      zonal_stats_setup,
       \(se, setup)
-      get_zonal_stats_single(se, setup,
+      get_zonal_stats_single(se,
+        covariate_id,
+        n_days,
         buffer = buffer,
         stats = stats
       ),
       .progress = TRUE
-    )
-  ) %>%
+    ) %>%
     purrr::list_rbind(names_to = "...id")
 
   # TODO -> separately handle case where an SE doesn't return anything
@@ -113,7 +92,6 @@ get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, 
       values_to = "value"
     ) %>%
     dplyr::right_join(df, by = "...id") %>%
-    dplyr::left_join(zonal_stats_setup_df, by = "...id") %>%
     dplyr::mutate(
       band = stringr::str_remove(band, "band_"),
       band = as.numeric(band),
@@ -216,13 +194,20 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   )
 }
 
-get_zonal_stats_single <- function(se, setup, buffer = 1000,
+get_zonal_stats_single <- function(se, covariate_id, n_days = 30, buffer = 1000,
                                    bands = list(1), approx_stats = FALSE,
                                    stats = c(
                                      "min", "max", "mean", "count", "sum", "std",
                                      "median", "majority", "minority", "unique",
                                      "range", "nodata", "area", "freq_hist"
                                    )) {
+  # Set up zonal_stats requests by getting relevant STAC items for each sample event
+  setup <- get_items_for_zonal_stats(se,
+    covariate_id,
+    n_days = n_days
+  )
+  # TODO -> handle the case where an SE does not have any items, do not include it in the following call
+
   # Get zonal stats for each URL
 
   # TODO -> handle no stats returned
@@ -281,7 +266,8 @@ get_zonal_stats_single <- function(se, setup, buffer = 1000,
         }, .id = "band")
     }
   ) %>%
-    purrr::list_rbind()
+    purrr::list_rbind() %>%
+      dplyr::bind_cols(setup)
 }
 
 # TODO -> replace this
