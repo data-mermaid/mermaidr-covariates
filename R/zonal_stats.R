@@ -13,12 +13,19 @@ get_zonal_statistics <- function(df, covariate_id, n_days = 365, buffer = 1000, 
     rstac::get_request() %>%
     purrr::pluck("title")
 
-  # Allow for the possibility that they have more than one record at each site at each date -> make distinct for them
+  # Allow for the possibility that they have more than one record at each site at each date
+  # Make distinct for them, but also handle the possibility of different latitude/longitude
+  # So best to just distinguish entirely, using row number
   df <- df %>%
-    dplyr::mutate(...id = glue::glue("{site}_{sample_date}"))
+    dplyr::distinct(site, latitude, longitude, sample_date) %>%
+    dplyr::mutate(...id = glue::glue("{site}_{sample_date}")) %>%
+    dplyr::group_by(...id) %>%
+    dplyr::mutate(row = dplyr::row_number()) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(...id = glue::glue("{...id}_{row}")) %>%
+    dplyr::select(-row)
 
   df_distinct <- df %>%
-    dplyr::distinct(site, latitude, longitude, sample_date, ...id) %>%
     split(.$...id)
 
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
