@@ -1,14 +1,21 @@
 #' Get summary of zonal statistics
 #'
 #' @param se Sample events from \code{mermaidr}
-#' @param covariate_id Covariate ID to get statistics for
+#' @param covariate Covariate to get statistics for. Both covariate title or ID are permitted.
 #' @param n_days Number of days prior to sample date to get statistics for. Defaults to 365.
 #' @param buffer Buffer around site location, in metres. Defaults to 1000.
 #' @param stats Summary statistics. One of: min, max, or mean.
 #'
 #' @export
-get_zonal_statistics <- function(se, covariate_id, n_days = 365, buffer = 1000, stats = c("min", "max", "mean")) {
-  covariate_name <- get_covariate_name_from_id(covariate_id)
+get_zonal_statistics <- function(se, covariate, n_days = 365,
+                                 buffer = 1000, stats = c("min", "max", "mean")) {
+  covariate_id <- get_covariate_id(covariate)
+
+  if (covariate_id == covariate) {
+    covariate_name <- get_covariate_name_from_id(covariate_id)
+  } else {
+    covariate_name <- covariate
+  }
 
   # Add an ID for iterating over (with site/date/lat/long distinct)
   se <- se %>%

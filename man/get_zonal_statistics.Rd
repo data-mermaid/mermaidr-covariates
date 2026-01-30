@@ -6,7 +6,7 @@
 \usage{
 get_zonal_statistics(
   se,
-  covariate_id,
+  covariate,
   n_days = 365,
   buffer = 1000,
   stats = c("min", "max", "mean")
@@ -15,7 +15,7 @@ get_zonal_statistics(
 \arguments{
 \item{se}{Sample events from \code{mermaidr}}
 
-\item{covariate_id}{Covariate ID to get statistics for}
+\item{covariate}{Covariate to get statistics for. Both covariate title or ID are permitted.}
 
 \item{n_days}{Number of days prior to sample date to get statistics for. Defaults to 365.}
 
