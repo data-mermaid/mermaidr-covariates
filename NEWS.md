@@ -4,6 +4,8 @@
 it is a list (with `as_data_frame = FALSE`) is improved.
 * `get_zonal_statistics()` takes the covariate name *or* ID (previously just ID). 
 The argument name is `covariate` instead of `covariate_id`. 
+* `get_zonal_statistics()` returns `n_dates` in `covariates` column, gets stats 
+for `n_days - 1` prior to sample date and sample date.
 
 # mermaidrcovariates 0.0.1
 

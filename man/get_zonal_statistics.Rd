@@ -17,7 +17,9 @@ get_zonal_statistics(
 
 \item{covariate}{Covariate to get statistics for. Both covariate title or ID are permitted.}
 
-\item{n_days}{Number of days prior to sample date to get statistics for. Defaults to 365.}
+\item{n_days}{Number of days to get statistics for. Includes the sample date
+itself, and days prior to it -- e.g., 365 days would include the sample date
+and the 364 days prior. Defaults to 365.}
 
 \item{buffer}{Buffer around site location, in metres. Defaults to 1000.}
 

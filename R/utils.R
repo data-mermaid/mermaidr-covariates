@@ -7,7 +7,7 @@ after_date_to_datetime <- function(date) {
 }
 
 start_end_to_interval <- function(start_date, end_date) {
-  glue::glue("{start_date}T00:00:00Z/{end_date}T00:00:00Z")
+  glue::glue("{start_date}T00:00:00Z/{end_date}T23:59:59Z")
 }
 
 get_covariate_name_from_id <- function(id) {
