@@ -1,6 +1,6 @@
 #' Get summary of zonal statistics
 #'
-#' @param df Sample events from \code{mermaidr}
+#' @param se Sample events from \code{mermaidr}
 #' @param covariate_id Covariate ID to get statistics for
 #' @param n_days Number of days prior to sample date to get statistics for. Defaults to 365.
 #' @param buffer Buffer around site location, in metres. Defaults to 1000.

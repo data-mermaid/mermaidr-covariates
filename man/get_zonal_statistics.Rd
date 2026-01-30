@@ -5,7 +5,7 @@
 \title{Get summary of zonal statistics}
 \usage{
 get_zonal_statistics(
-  df,
+  se,
   covariate_id,
   n_days = 365,
   buffer = 1000,
@@ -13,7 +13,7 @@ get_zonal_statistics(
 )
 }
 \arguments{
-\item{df}{Sample events from \code{mermaidr}}
+\item{se}{Sample events from \code{mermaidr}}
 
 \item{covariate_id}{Covariate ID to get statistics for}
 

@@ -77,7 +77,6 @@ list_covariates <- function(as_data_frame = TRUE) {
 print.covariate <- function(x) {
   cat("# Covariate:", x$title, fill = TRUE)
 
-
   dates <- ifelse(is.na(x$end_date),
     paste0(x$start_date, " — "),
     paste0(x$start_date, " — ", x$end_date)
