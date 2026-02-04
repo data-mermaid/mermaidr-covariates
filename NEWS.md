@@ -6,6 +6,12 @@ it is a list (with `as_data_frame = FALSE`) is improved.
 The argument name is `covariate` instead of `covariate_id`. 
 * `get_zonal_statistics()` returns `n_dates` in `covariates` column, gets stats 
 for `n_days - 1` prior to sample date and sample date.
+* `get_zonal_statistics()` now returns zonal statistics for *each* of the `n_days`, 
+while `get_summary_zonal_statistics()` summarises the zonal statistics over time.
+* `get_summary_zonal_statistics()` requires both `spatial_stats` -- how to 
+summarise spatially -- and `temporal_stats` -- how to summarise over time. 
+* `get_zonal_statistics()` requires only `spatial_stats`.
+* The argument `buffer` has been renamed to `radius`.
 
 # mermaidrcovariates 0.0.1
 

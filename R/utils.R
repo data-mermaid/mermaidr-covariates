@@ -23,6 +23,7 @@ add_id_for_iteration <- function(df) {
   # So best to just distinguish entirely, using row number
   df %>%
     dplyr::distinct(site, latitude, longitude, sample_date) %>%
+    dplyr::arrange(site, sample_date, latitude, longitude) %>%
     dplyr::mutate(...id = glue::glue("{site}_{sample_date}")) %>%
     dplyr::group_by(...id) %>%
     dplyr::mutate(row = dplyr::row_number()) %>%

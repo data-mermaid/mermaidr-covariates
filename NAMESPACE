@@ -2,6 +2,7 @@
 
 S3method(print,covariate)
 export("%>%")
+export(get_summary_zonal_statistics)
 export(get_zonal_statistics)
 export(list_covariates)
 importFrom(magrittr,"%>%")

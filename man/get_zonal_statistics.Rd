@@ -2,14 +2,14 @@
 % Please edit documentation in R/zonal_stats.R
 \name{get_zonal_statistics}
 \alias{get_zonal_statistics}
-\title{Get summary of zonal statistics}
+\title{Get zonal statistics}
 \usage{
 get_zonal_statistics(
   se,
   covariate,
   n_days = 365,
-  buffer = 1000,
-  stats = c("min", "max", "mean")
+  radius = 1000,
+  spatial_stats = c("min", "max", "mean")
 )
 }
 \arguments{
@@ -21,10 +21,13 @@ get_zonal_statistics(
 itself, and days prior to it -- e.g., 365 days would include the sample date
 and the 364 days prior. Defaults to 365.}
 
-\item{buffer}{Buffer around site location, in metres. Defaults to 1000.}
+\item{radius}{Radius around site location, in metres. Defaults to 1000.}
 
-\item{stats}{Summary statistics. One of: min, max, or mean.}
+\item{spatial_stats}{Spatial statistics -- used to summarise all data around
+the site location, according to the \code{radius} set.}
 }
 \description{
-Get summary of zonal statistics
+Get zonal statistics. For *each* of the `n_days` prior to the sample event date,
+returns summarised values of covariate data for `radius` metres around each site
+location, using `spatial_stats` to determine how to spatially summarise the data.
 }
