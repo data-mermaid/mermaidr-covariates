@@ -37,7 +37,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     split(.$...id)
 
   # Get zonal stats for all SEs
-  zonal_stats <- get_zonal_stats(se_list, covariate_id, n_days, radius, spatial_stats)
+  zonal_stats <- get_zonal_stats(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats)
 
   # Attach to sample events and remove ID
   se %>%
@@ -121,7 +121,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 }
 
 
-get_zonal_stats <- function(se_list, covariate_id, n_days, radius, spatial_stats) {
+get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats) {
   se_list %>%
     purrr::map(
       \(se)
@@ -136,7 +136,21 @@ get_zonal_stats <- function(se_list, covariate_id, n_days, radius, spatial_stats
     purrr::map("result") %>%
     purrr::compact() %>% # Remove those without any items/results
     purrr::list_rbind(names_to = "...id") %>%
-    dplyr::mutate(n_dates = dplyr::n()) %>%
+    # Add n_dates, add covariate, remove "band_" character
+    dplyr::mutate(
+      covariate = covariate_name,
+      n_dates = dplyr::n(),
+      band = stringr::str_remove(band, "band_"),
+      band = as.numeric(band)
+    ) %>%
+    # reorganize to have a column `spatial_stat` and `value`, instead of a column for each stat
+    tidyr::pivot_longer(
+      cols = dplyr::all_of(spatial_stats),
+      names_to = "spatial_stat",
+      values_to = "value"
+    ) %>%
+    # reorganize covariates columns
+    dplyr::select(...id, covariate, start_date, end_date, n_dates, date, band, spatial_stat, value) %>%
     tidyr::nest(covariates = -...id, .by = "...id") # Nest covariates
 }
 
@@ -218,42 +232,19 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
           purrr::map_dfr(\(x) {
             x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
             dplyr::as_tibble(x)
-          }, .id = "band") %>%
-          # This should happen further out
-          dplyr::mutate(
-            date = date,
-            band = stringr::str_remove(band, "band_"),
-            band = as.numeric(band)
-          )
+          }, .id = "band")
       }
     ) %>%
-    purrr::list_rbind() %>%
-    dplyr::bind_cols(stac_items %>% dplyr::distinct(start_date, end_date)) %>%
-    # This should happen further out
-    tidyr::pivot_longer(
-      cols =
-        dplyr::any_of(spatial_stats),
-      names_to = "spatial_stat",
-      values_to = "value"
-    )
-  # TODO -> reorder cols too, ALSO further out
+    purrr::list_rbind(names_to = "date") %>%
+    dplyr::bind_cols(stac_items %>% dplyr::distinct(start_date, end_date)) # %>%
+  #   # This should happen further out
+  #   tidyr::pivot_longer(
+  #     cols =
+  #       dplyr::any_of(spatial_stats),
+  #     names_to = "spatial_stat",
+  #     values_to = "value"
+  #   )
+  # # TODO -> reorder cols too, ALSO further out
 }
 
 safely_get_zonal_stats_single <- purrr::safely(get_zonal_stats_single, otherwise = NULL)
-
-# TODO -> replace this
-empty_covariates <- function(df, covariate_name) {
-  covariates <- dplyr::tibble(
-    covariate = covariate_name,
-    start_date = NA,
-    end_date = NA,
-    band = NA_integer_,
-    statistic = NA_character_,
-    value = NA_real_
-  ) %>%
-    dplyr::mutate(dplyr::across(c(start_date, end_date), as.Date)) %>%
-    tidyr::nest(covariates = dplyr::everything())
-
-  df %>%
-    dplyr::bind_cols(covariates)
-}

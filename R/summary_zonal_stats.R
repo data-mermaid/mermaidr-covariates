@@ -34,14 +34,12 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
   # Get (non-summary) zonal statistics
   zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats)
 
-  # Add id back on, just keep this and covariates -> do not need lat/long/date, join back on later
-  zonal_stats_id <- zonal_stats %>%
-    add_id_for_iteration()
-
-  # Unnest covariates, remove date
   zonal_stats <- zonal_stats %>%
-    left_join(zonal_stats_id, by = c("site", "sample_date", "latitude", "longitude")) %>%
+    add_id_for_iteration() %>% # Add id back on
+    left_join(zonal_stats, by = c("site", "sample_date", "latitude", "longitude")) %>%
+    # just keep ID and covariates -> do not need lat/long/date, join back on later
     dplyr::select(...id, covariates) %>%
+    # Unnest covariates, remove date
     tidyr::unnest(covariates) %>%
     dplyr::select(-date)
 
