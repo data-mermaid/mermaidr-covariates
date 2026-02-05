@@ -122,7 +122,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 
 
 get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats) {
-  se_list %>%
+   se_list %>%
     purrr::map(
       \(se)
       safely_get_zonal_stats_single(se,
@@ -136,6 +136,7 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
     purrr::map("result") %>%
     purrr::compact() %>% # Remove those without any items/results
     purrr::list_rbind(names_to = "...id") %>%
+      # TODO -> handle no data returned, e.g. with covariate "Daily Sea Surface Temperature (SST)"
     # Add n_dates, add covariate, remove "band_" character
     dplyr::mutate(
       covariate = covariate_name,

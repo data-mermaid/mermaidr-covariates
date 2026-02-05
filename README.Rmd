@@ -63,24 +63,24 @@ You can use the [Prescient browser](https://mermaid.prescient.earth/) to find wh
 list_covariates()
 ```
 
-For this example, we will look at mean Daily Sea Surface Temperature (SST). We can access this data by using its id --- `50b810fb-5f17-4cdb-b34b-c377837e2a29` --- in the function `get_zonal_statistics()`. The `get_zonal_statistics()` function takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it.
+For this example, we will look at maximum "Daily Sea Surface Temperature" (SST). We can access this data by using the function `get_summary_zonal_statistics()`, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it.
 
-We access the maximum SST (of the daily average) for the 60 days prior to the survey data, using a buffer size of 1000 metres:
+We access the maximum SST (of the daily average) for the 10 days prior to (and including) the survey date, using a radius of 1000 metres around the survey site. The argument `spatial_stats` describes that we want to get the **mean** of the data in that 1000 metres, while `temporal_stats` describes that we want the **max** over the 10 days.
 
 ```{r max-sst-internal, echo = FALSE}
 if (file.exists("inst/extdata/readme_max_sst.rds")) {
   max_sst <- readRDS("inst/extdata/readme_max_sst.rds")
 } else {
   max_sst <- se %>%
-    get_zonal_statistics("50b810fb-5f17-4cdb-b34b-c377837e2a29", n_days = 60, buffer = 1000, stats = "max")
+    get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 1000, spatial_stats = "mean", temporal_stats = "max")
 
-  saveRDS(max_sst, "inst/extdata/readme_max_sst_new.rds")
+  saveRDS(max_sst, "inst/extdata/readme_max_sst.rds")
 }
 ```
 
 ```{r max-sst, eval = FALSE}
 max_sst <- se %>%
-  get_zonal_statistics("50b810fb-5f17-4cdb-b34b-c377837e2a29", n_days = 10, buffer = 1000, stats = "max")
+    get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 1000, spatial_stats = "mean", temporal_stats = "max")
 ```
 
 The covariates are returned in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
