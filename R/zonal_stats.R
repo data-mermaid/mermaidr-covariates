@@ -122,10 +122,10 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 
 
 get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats) {
-   se_list %>%
+  zonal_stats <- se_list %>%
     purrr::map(
       \(se)
-      safely_get_zonal_stats_single(se,
+      get_zonal_stats_single(se,
         covariate_id,
         n_days,
         radius = radius,
@@ -133,10 +133,25 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
       ),
       .progress = TRUE
     ) %>%
-    purrr::map("result") %>%
-    purrr::compact() %>% # Remove those without any items/results
-    purrr::list_rbind(names_to = "...id") %>%
-      # TODO -> handle no data returned, e.g. with covariate "Daily Sea Surface Temperature (SST)"
+    purrr::map(\(x) {
+      if (nrow(x) == 0) {
+        dplyr::tibble(
+          start_date = NA,
+          end_date = NA,
+          date = NA,
+          band = NA,
+          spatial_stat = spatial_stats,
+          value = NA
+        ) %>%
+          tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
+      } else {
+        x
+      }
+    }) %>%
+    purrr::list_rbind(names_to = "...id")
+
+  zonal_stats %>%
+    # TODO -> handle no data returned, e.g. with covariate "Daily Sea Surface Temperature (SST)"
     # Add n_dates, add covariate, remove "band_" character
     dplyr::mutate(
       covariate = covariate_name,
@@ -167,6 +182,7 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
     covariate_id,
     n_days = n_days
   )
+
   # Returns a list with elements start_date, end_date, urls
   # and NULL if there are no items
 
@@ -182,16 +198,20 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
 
   # Set up requests to parallelize
 
-  request_base <- httr2::request(zonal_stats_url) %>%
+  request_base <- httr2::request(zonal_stats_raster_url) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = list(
         type = "Point",
         coordinates = c(se[["longitude"]], se[["latitude"]]),
-        buffer_size = radius
+        radius = radius
       ),
-      image = NULL,
-      stats = as.list(spatial_stats)
+      url = NULL,
+      stats = as.list("mean")
+      # asset = "data",
+      # stats = as.list(spatial_stats),
+      # bands = bands
+      # approx_stats = approx_stats
     )) %>%
     httr2::req_error(is_error = \(res) FALSE)
 
@@ -200,12 +220,7 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
     \(x) {
       request_base %>%
         httr2::req_body_json_modify(
-          image =
-            list(
-              url = x,
-              bands = bands,
-              approx_stats = approx_stats
-            )
+          url = x
         )
     }
   )
@@ -237,15 +252,5 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
       }
     ) %>%
     purrr::list_rbind(names_to = "date") %>%
-    dplyr::bind_cols(stac_items %>% dplyr::distinct(start_date, end_date)) # %>%
-  #   # This should happen further out
-  #   tidyr::pivot_longer(
-  #     cols =
-  #       dplyr::any_of(spatial_stats),
-  #     names_to = "spatial_stat",
-  #     values_to = "value"
-  #   )
-  # # TODO -> reorder cols too, ALSO further out
+    dplyr::bind_cols(stac_items %>% dplyr::distinct(start_date, end_date))
 }
-
-safely_get_zonal_stats_single <- purrr::safely(get_zonal_stats_single, otherwise = NULL)
