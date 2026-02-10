@@ -78,17 +78,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
     )
   }
 
-  # Only include items that have the assets "data"
-  relevant_items <- relevant_items[["features"]] %>%
-    purrr::keep(\(x) {
-      # No assets
-      if (!"assets" %in% names(x)) {
-        return(FALSE)
-      }
-
-      # Check for "data" asset
-      "data" %in% names(x[["assets"]])
-    })
+  relevant_items <- relevant_items[["features"]]
 
   if (length(relevant_items) == 0) {
     return(NULL)
@@ -207,11 +197,9 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
         radius = radius
       ),
       url = NULL,
-      stats = as.list("mean")
-      # asset = "data",
-      # stats = as.list(spatial_stats),
-      # bands = bands
-      # approx_stats = approx_stats
+      stats = as.list(spatial_stats),
+      bands = bands,
+      approx_stats = approx_stats
     )) %>%
     httr2::req_error(is_error = \(res) FALSE)
 
