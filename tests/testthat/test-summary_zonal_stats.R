@@ -1,4 +1,8 @@
 test_that("get_summary_zonal_statistics returns spatial_stats and temporal_stats columns", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",

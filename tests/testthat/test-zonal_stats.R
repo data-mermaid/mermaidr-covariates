@@ -1,4 +1,8 @@
 test_that("get_zonal_statistics allows using covariate name or ID", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -26,6 +30,10 @@ test_that("get_zonal_statistics allows using covariate name or ID", {
 })
 
 test_that("NA returned for value ONLY when there is data on date, but not within radius", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   # No data within 1000m of this site, known
   se <- mermaidr::mermaid_get_project_data(
     "75ef7a5a-c770-4ca6-b9f8-830cab74e425",
@@ -57,6 +65,10 @@ test_that("NA returned for value ONLY when there is data on date, but not within
 })
 
 test_that("NA returned for all columns when there is no data within date range", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
