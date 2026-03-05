@@ -10,7 +10,9 @@ for `n_days - 1` prior to sample date and sample date.
 while `get_summary_zonal_statistics()` summarises the zonal statistics over time.
 * `get_summary_zonal_statistics()` requires both `spatial_stats` -- how to 
 summarise spatially -- and `temporal_stats` -- how to summarise over time. 
-* `get_zonal_statistics()` requires only `spatial_stats`.
+It returns both of these columns under `covariates`, along with `value`.
+* `get_zonal_statistics()` requires only `spatial_stats`. It returns this column 
+under `covariates`, along with `value`.
 * The argument `buffer` has been renamed to `radius`.
 
 # mermaidrcovariates 0.0.1
