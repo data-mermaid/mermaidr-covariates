@@ -19,6 +19,10 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          radius = 1000,
                                          spatial_stats = c("min", "max", "mean"),
                                          temporal_stats = c("min", "max", "mean")) {
+  if (nrow(se) == 0) {
+    stop("No sample events to get zonal statistics for.", .call = FALSE)
+  }
+
   covariate_id <- get_covariate_id(covariate)
 
   if (covariate_id == covariate) {

@@ -17,6 +17,10 @@
 get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  radius = 1000,
                                  spatial_stats = c("min", "max", "mean")) {
+  if (nrow(se) == 0) {
+    stop("No sample events to get zonal statistics for.", .call = FALSE)
+  }
+
   covariate_id <- get_covariate_id(covariate)
 
   if (covariate_id == covariate) {
@@ -53,7 +57,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   input_sample_date_end <- sample_date
 
   # Subtract `n_days - 1` days - so it will be `ndays - 1` days before, and the sample date
-  input_sample_date_start <- sample_date - lubridate::days(n_days - 1)
+  input_sample_date_start <- as.Date(sample_date) - lubridate::days(n_days - 1)
 
   # Construct interval
   input_interval <- start_end_to_interval(input_sample_date_start, input_sample_date_end)
@@ -168,7 +172,8 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
                                      "range", "nodata", "area", "freq_hist"
                                    )) {
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
-  stac_items <- get_items_for_zonal_stats(se,
+  stac_items <- get_items_for_zonal_stats(
+    se,
     covariate_id,
     n_days = n_days
   )
@@ -179,7 +184,7 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
   # Handle case where SE does not have any items
 
   if (all(is.na(stac_items[["url"]]))) {
-    return(stac_items)
+    return(dplyr::tibble())
   }
 
   # Get zonal stats for each URL
