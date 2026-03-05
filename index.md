@@ -33,7 +33,7 @@ library(mermaidrcovariates)
 library(mermaidr)
 
 se <- mermaid_search_my_projects("Great Sea Reef 2019") %>%
-  mermaid_get_project_data("benthicpit", data = "sampleevents")
+  mermaid_get_project_data("benthicpit", data = "sampleevents", limit = 10)
 ```
 
 To get covariates, we need each sample event’s date as well as its
@@ -56,74 +56,38 @@ function:
 
 ``` r
 list_covariates()
-#> $`3e410700-2e6a-4b44-a2d3-1d829d19acb0`
-#> ###Collection
-#> - id: 3e410700-2e6a-4b44-a2d3-1d829d19acb0
-#> - title: MEOW Boundaries
-#> - description: 
-#> This dataset combines two separately published datasets: the "Marine Ecoregions Of the World" (MEOW; 2007) and the "Pelagic Provinces Of the World" (PPOW; 2012). These datasets were developed by Mark Spalding and colleagues in The Nature Conservancy. Alongside the individual authors, partners for the MEOW layer included WWF, Ramsar, WCS, and UNEP-WCMC. The ecoregions and pelagic provinces are broadly aligned with each other and are non-overlapping.
-#> 
-#> The MEOW dataset shows a biogeographic classification of the world's coastal and continental shelf waters, following a nested hierarchy of realms, provinces and ecoregions. It describes 232 ecoregions, which lie within 62 provinces and 12 large realms. The regions aim to capture generic patterns of biodiversity across habitats and taxa, with regions extending from the coast (intertidal zone) to the 200 m depth contour (extended beyond these waters out by a 5 km buffer).
-#> 
-#> The PPOW dataset shows a biogeographic classification of the surface pelagic (i.e. epipelagic) waters of the world's oceans. It describes 37 pelagic provinces of the world, nested into four broad realms. A system of seven biomes are also identified ecologically, and these are spatially disjoint but united by common abiotic conditions, thereby creating physiognomically similar communities.
-#> - field(s): 
-#> id, type, links, title, extent, license, keywords, providers, description, sci:citation, stac_version, stac_extensions
-#> 
-#> $`640da5d3-530f-4b92-bbb8-07e70e386f8b`
-#> ###Collection
-#> - id: 640da5d3-530f-4b92-bbb8-07e70e386f8b
-#> - title: ACA Benthic Habitat
-#> - description: 
-#> Allen Coral Atlas benthic habitat classification map providing detailed geomorphic and benthic cover classifications for shallow coral reef ecosystems worldwide. The dataset is derived from satellite imagery and machine learning classification methods.
-#> - field(s): 
-#> id, type, links, title, extent, license, keywords, providers, description, stac_version, stac_extensions
-#> 
-#> $`50b810fb-5f17-4cdb-b34b-c377837e2a29`
-#> ###Collection
-#> - id: 50b810fb-5f17-4cdb-b34b-c377837e2a29
-#> - title: Daily Sea Surface Temperature
-#> - description: Sea surface temperature each day.
-#> - field(s): 
-#> id, type, links, title, extent, license, keywords, providers, summaries, description, stac_version
-#> 
-#> $`10da4b11-c79f-4ce7-b359-0d4710a1f0fd`
-#> ###Collection
-#> - id: 10da4b11-c79f-4ce7-b359-0d4710a1f0fd
-#> - title: Human Pressures and Climate Vulnerability
-#> - description: 
-#> This dataset combines climate vulnerability scores and human pressure indicators for coral reefs worldwide. It integrates data from Beyer et al. (2018) on climate vulnerability and Andrello et al. (2022) on local human pressures.
-#> 
-#> Climate vulnerability scores include overall vulnerability, current niche, current year, projected future climate, thermal history, and temperature range metrics. Human pressure indicators include sedimentation, nutrients (nitrogen), coastal population within 5 km, market gravity (fishing pressure), number of ports, reef value, and cumulative human pressure index.
-#> 
-#> The dataset provides both normalized indicator values and raw values for key pressure metrics, along with regional classifications and BCU (Bioclimatic Unit) designations.
-#> - field(s): 
-#> id, type, links, title, extent, license, keywords, providers, description, sci:citation, stac_version, stac_extensions
-#> 
-#> $`ea07abba-06cf-41a8-92a3-b20eaf801ea9`
-#> ###Collection
-#> - id: ea07abba-06cf-41a8-92a3-b20eaf801ea9
-#> - title: Land Use and Land Cover (LULC) Collection
-#> - description: Land Use and Land Cover dataset collection
-#> - field(s): 
-#> id, type, links, title, extent, license, keywords, providers, summaries, description, stac_version
+#> # A tibble: 10 × 10
+#>    id         title description start_date end_date   license keywords providers
+#>    <chr>      <chr> <chr>       <date>     <date>     <chr>   <chr>    <list>   
+#>  1 10da4b11-… Huma… "This data… 2021-12-28 NA         propri… climate… <tibble> 
+#>  2 3e410700-… MEOW… "This data… 2012-01-01 2012-12-31 propri… <NA>     <tibble> 
+#>  3 50b810fb-… Dail… "Sea surfa… 1985-01-01 2026-01-13 CC0-1.0 climate… <tibble> 
+#>  4 640da5d3-… ACA … "Allen Cor… 2018-01-01 2022-12-31 CC-BY-… allen c… <tibble> 
+#>  5 aca_extent ACA … "ACA Reef … 2026-01-01 NA         CC0-1.0 aca, re… <tibble> 
+#>  6 countries  Coun… "Country B… 2026-01-01 NA         CC0-1.0 adminis… <tibble> 
+#>  7 daily_sst  Dail… "A collect… 1985-01-01 1985-01-03 CC0-1.0 climate… <tibble> 
+#>  8 disp_poin… Disp… "Dispersal… 2026-01-01 NA         CC0-1.0 dispers… <tibble> 
+#>  9 lulc       Land… "Land Use … 2000-01-01 2020-01-01 CC0-1.0 land co… <tibble> 
+#> 10 sediment_… Glob… "Global Se… 2000-01-01 2000-01-01 propri… sedimen… <tibble> 
+#> # ℹ 2 more variables: `sci:citation` <chr>, bbox <list>
 ```
 
-For this example, we will look at mean Daily Sea Surface Temperature
-(SST). We can access this data by using its id —
-`50b810fb-5f17-4cdb-b34b-c377837e2a29` — in the function
-[`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md).
-The
-[`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
-function takes the site latitude and longitude, as well as the survey
-date, to find the data at that site for `n` days prior, then aggregates
-it.
+For this example, we will look at maximum “Daily Sea Surface
+Temperature” (SST). We can access this data by using the function
+[`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md),
+which takes the site latitude and longitude, as well as the survey date,
+to find the data at that site for `n_days` days prior, within the given
+`radius`, and *spatially* aggregates it according to the specified
+`spatial_stat`. Then, the function *temporally* aggregates it according
+to the specified `temporal_stat`.
 
-We access the maximum SST (of the daily average) for the 60 days prior
-to the survey data, using a buffer size of 1000 metres:
+For example, to get the **maximum** SST over the 20 days prior to (and
+including) the sample event, using the *mean* SST within 100m of the
+sites:
 
 ``` r
 max_sst <- se %>%
-  get_zonal_statistics("50b810fb-5f17-4cdb-b34b-c377837e2a29", n_days = 10, buffer = 1000, stats = "max")
+  get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean", temporal_stats = "max")
 ```
 
 The covariates are returned in a format that need to be expanded. Once
@@ -133,42 +97,74 @@ for the covariates, the band, and the summarised value.
 ``` r
 max_sst %>%
   unnest(covariates)
-#> # A tibble: 72 × 11
-#>    site  sample_date latitude longitude hard_coral_cover
-#>    <chr> <date>         <dbl>     <dbl>            <dbl>
-#>  1 BA09  2019-09-26     -17.4      178.             12.3
-#>  2 BA16  2019-09-27     -17.2      178.             10.7
-#>  3 GS03  2019-10-08     -16.4      178.             52  
-#>  4 BA15  2019-09-27     -17.2      178.             25  
-#>  5 YA02  2019-09-30     -17.0      177.             26.3
-#>  6 LW04  2019-09-25     -17.6      177.             11.7
-#>  7 IP3.5 2019-10-04     -16.4      179.             52.3
-#>  8 BA11  2019-09-27     -17.3      178.             23  
-#>  9 GS05  2019-10-08     -16.4      178.             40.3
-#> 10 YQ02  2019-10-03     -16.6      179.             59  
-#>    covariate                            start_date end_date    band statistic
-#>    <chr>                                <date>     <date>     <dbl> <chr>    
-#>  1 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-07-28 2019-09-27     1 max      
-#>  2 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-07-29 2019-09-28     1 max      
-#>  3 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-08-09 2019-10-09     1 max      
-#>  4 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-07-29 2019-09-28     1 max      
-#>  5 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-08-01 2019-10-01     1 max      
-#>  6 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-07-27 2019-09-26     1 max      
-#>  7 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-08-05 2019-10-05     1 max      
-#>  8 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-07-29 2019-09-28     1 max      
-#>  9 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-08-09 2019-10-09     1 max      
-#> 10 50b810fb-5f17-4cdb-b34b-c377837e2a29 2019-08-04 2019-10-04     1 max      
-#>    value
-#>    <dbl>
-#>  1  27.1
-#>  2  27.0
-#>  3  27.5
-#>  4  27.0
-#>  5  27.1
-#>  6  27.2
-#>  7  27.7
-#>  8  27.0
-#>  9  27.5
-#> 10  27.4
-#> # ℹ 62 more rows
+#> # A tibble: 10 × 12
+#>    site  latitude longitude sample_date covariate                     start_date
+#>    <chr>    <dbl>     <dbl> <date>      <chr>                         <date>    
+#>  1 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  2 BA11     -17.3      178. 2019-09-27  Daily Sea Surface Temperature 2019-09-18
+#>  3 BA15     -17.2      178. 2019-09-27  Daily Sea Surface Temperature 2019-09-18
+#>  4 BA16     -17.2      178. 2019-09-27  Daily Sea Surface Temperature 2019-09-18
+#>  5 GS03     -16.4      178. 2019-10-08  Daily Sea Surface Temperature 2019-09-29
+#>  6 GS05     -16.4      178. 2019-10-08  Daily Sea Surface Temperature 2019-09-29
+#>  7 IP3.5    -16.4      179. 2019-10-04  Daily Sea Surface Temperature 2019-09-25
+#>  8 LW04     -17.6      177. 2019-09-25  Daily Sea Surface Temperature 2019-09-16
+#>  9 YA02     -17.0      177. 2019-09-30  Daily Sea Surface Temperature 2019-09-21
+#> 10 YQ02     -16.6      179. 2019-10-03  Daily Sea Surface Temperature 2019-09-24
+#>    end_date   n_dates  band temporal_stat spatial_stat value
+#>    <date>       <int> <dbl> <chr>         <chr>        <dbl>
+#>  1 2019-09-26      23     1 max           mean          26.9
+#>  2 2019-09-27      23     1 max           mean          26.9
+#>  3 2019-09-27      23     1 max           mean          26.8
+#>  4 2019-09-27      23     1 max           mean          26.8
+#>  5 2019-10-08      23     1 max           mean          27.4
+#>  6 2019-10-08      23     1 max           mean          27.4
+#>  7 2019-10-04      23     1 max           mean          27.5
+#>  8 2019-09-25      23     1 max           mean          27.0
+#>  9 2019-09-30      23     1 max           mean          27.0
+#> 10 2019-10-03      23     1 max           mean          27.3
 ```
+
+If we don’t want the data aggregated over time – for example, if we just
+want the value of a covariate the day of the sample event, or if we want
+to have the individual dates attached to the covariate data – we use the
+non-summary version of the function,
+[`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md).
+In this case, we omit `temporal_stats` and just get the mean SST within
+100m of the sites, for all 20 days:
+
+``` r
+sst_by_day <- se %>%
+  get_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean")
+
+sst_by_day %>%
+  unnest(covariates)
+#> # A tibble: 100 × 12
+#>    site  latitude longitude sample_date covariate                     start_date
+#>    <chr>    <dbl>     <dbl> <date>      <chr>                         <date>    
+#>  1 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  2 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  3 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  4 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  5 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  6 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  7 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  8 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>  9 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#> 10 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
+#>    end_date   n_dates date        band spatial_stat value
+#>    <date>       <int> <chr>      <dbl> <chr>        <dbl>
+#>  1 2019-09-26      23 2019-09-26     1 mean          26.1
+#>  2 2019-09-26      23 2019-09-25     1 mean          26.3
+#>  3 2019-09-26      23 2019-09-24     1 mean          26.3
+#>  4 2019-09-26      23 2019-09-23     1 mean          26.4
+#>  5 2019-09-26      23 2019-09-22     1 mean          26.6
+#>  6 2019-09-26      23 2019-09-21     1 mean          26.9
+#>  7 2019-09-26      23 2019-09-20     1 mean          26.7
+#>  8 2019-09-26      23 2019-09-19     1 mean          26.6
+#>  9 2019-09-26      23 2019-09-18     1 mean          26.5
+#> 10 2019-09-26      23 2019-09-17     1 mean          26.5
+#> # ℹ 90 more rows
+```
+
+Here, instead of having the data aggregated over time, there is one row
+for each date, along with the value on that date.

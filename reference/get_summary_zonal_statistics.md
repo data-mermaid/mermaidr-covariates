@@ -1,19 +1,20 @@
-# Get zonal statistics
+# Get summary zonal statistics
 
-Get zonal statistics. For \*each\* of the \`n_days\` prior to the sample
-event date, returns summarised values of covariate data for \`radius\`
-metres around each site location, using \`spatial_stats\` to determine
-how to spatially summarise the data.
+Get zonal statistics. Unlike `get_zonal_statistics`, this summarises the
+data for \*all \`n_days\`\* prior to the sample event date, using
+\`spatial_stats\` to determine how to spatially summarise the data, and
+\`temporal_stats\` to summarise the resulting data over time.
 
 ## Usage
 
 ``` r
-get_zonal_statistics(
+get_summary_zonal_statistics(
   se,
   covariate,
   n_days = 365,
   radius = 1000,
-  spatial_stats = c("min", "max", "mean")
+  spatial_stats = c("min", "max", "mean"),
+  temporal_stats = c("min", "max", "mean")
 )
 ```
 
@@ -42,3 +43,7 @@ get_zonal_statistics(
 
   Spatial statistics – used to summarise all data around the site
   location, according to the `radius` set.
+
+- temporal_stats:
+
+  Temporal statistics – used to summarise the data over time.
