@@ -126,8 +126,6 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
   # Otherwise, if it is e.g. monthly, then we might want to increase the chunk size
   # Because then we would not actually be getting 50 items, but say 1-2 if it is monthly
 
-  # browser()
-
   covariate_interval <- determine_covariate_interval(covariate_id)
 
   if (!covariate_interval %in% c("annual/once", "daily")) {
