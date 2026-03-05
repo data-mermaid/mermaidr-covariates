@@ -45,7 +45,7 @@ library(mermaidrcovariates)
 library(mermaidr)
 
 se <- mermaid_search_my_projects("Great Sea Reef 2019") %>%
-  mermaid_get_project_data("benthicpit", data = "sampleevents")
+  mermaid_get_project_data("benthicpit", data = "sampleevents", limit = 10)
 ```
 
 To get covariates, we need each sample event's date as well as its latitude and longitude. We will keep these columns along with the site name and average hard coral cover, using the `tidyverse` package for data manipulation.
@@ -63,24 +63,13 @@ You can use the [Prescient browser](https://mermaid.prescient.earth/) to find wh
 list_covariates()
 ```
 
-For this example, we will look at maximum "Daily Sea Surface Temperature" (SST). We can access this data by using the function `get_summary_zonal_statistics()`, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n` days prior, then aggregates it.
+For this example, we will look at maximum "Daily Sea Surface Temperature" (SST). We can access this data by using the function `get_summary_zonal_statistics()`, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n_days` days prior, within the given `radius`, and *spatially* aggregates it according to the specified `spatial_stat`. Then, the function *temporally* aggregates it according to the specified `temporal_stat`.
 
-We access the maximum SST (of the daily average) for the 10 days prior to (and including) the survey date, using a radius of 1000 metres around the survey site. The argument `spatial_stats` describes that we want to get the **mean** of the data in that 1000 metres, while `temporal_stats` describes that we want the **max** over the 10 days.
+For example, to get the **maximum** SST over the 20 days prior to (and including) the sample event, using the *mean* SST within 100m of the sites:
 
-```{r max-sst-internal, echo = FALSE}
-if (file.exists("inst/extdata/readme_max_sst.rds")) {
-  max_sst <- readRDS("inst/extdata/readme_max_sst.rds")
-} else {
-  max_sst <- se %>%
-    get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 1000, spatial_stats = "mean", temporal_stats = "max")
-
-  saveRDS(max_sst, "inst/extdata/readme_max_sst.rds")
-}
-```
-
-```{r max-sst, eval = FALSE}
+```{r get-summary-zonal-stats}
 max_sst <- se %>%
-    get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 1000, spatial_stats = "mean", temporal_stats = "max")
+  get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean", temporal_stats = "max")
 ```
 
 The covariates are returned in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
@@ -89,7 +78,19 @@ The covariates are returned in a format that need to be expanded. Once they are,
 options(dplyr.width = Inf)
 ```
 
-```{r expand-covariates}
+```{r summary-zonal-stats-unnest}
 max_sst %>%
   unnest(covariates)
 ```
+
+If we don't want the data aggregated over time -- for example, if we just want the value of a covariate the day of the sample event, or if we want to have the individual dates attached to the covariate data -- we use the non-summary version of the function, `get_zonal_statistics()`. In this case, we omit `temporal_stats` and just get the mean SST within 100m of the sites, for all 20 days:
+
+```{r get-zonal-stats}
+sst_by_day <- se %>%
+  get_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean")
+
+sst_by_day %>%
+    unnest(covariates)
+```
+
+Here, instead of having the data aggregated over time, there is one row for each date, along with the value on that date.
