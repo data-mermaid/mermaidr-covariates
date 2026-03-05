@@ -17,12 +17,12 @@ test_that("lookup_covariate_id_by_name returns the ID when it is a valid name,
 test_that("get_covariate_id returns the ID when passed an ID, the ID when
           passed a valid name, and errors when passed an invalid ID/name", {
   expect_identical(
-      get_covariate_id("ea07abba-06cf-41a8-92a3-b20eaf801ea9"),
+    get_covariate_id("ea07abba-06cf-41a8-92a3-b20eaf801ea9"),
     "ea07abba-06cf-41a8-92a3-b20eaf801ea9"
   )
 
   expect_identical(
-      get_covariate_id("Land Use and Land Cover (LULC) Collection"),
+    get_covariate_id("Land Use and Land Cover (LULC) Collection"),
     "ea07abba-06cf-41a8-92a3-b20eaf801ea9"
   )
 
