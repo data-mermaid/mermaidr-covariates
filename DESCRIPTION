@@ -1,7 +1,7 @@
 Package: mermaidrcovariates
 Type: Package
 Title: Access covariates for MERMAID data
-Version: 0.0.01
+Version: 0.1.0
 Authors@R:
     c(person(given = "Sharla",
            family = "Gelfand",
@@ -23,10 +23,12 @@ Imports:
     rstac,
     stringr,
     tidyr
+Remotes: data-mermaid/mermaidr
 RoxygenNote: 7.3.3
 URL: https://data-mermaid.github.io/mermaidr-covariates/
 Suggests: 
     knitr,
+    mermaidr,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr

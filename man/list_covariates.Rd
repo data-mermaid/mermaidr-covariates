@@ -4,11 +4,14 @@
 \alias{list_covariates}
 \title{List available covariates}
 \usage{
-list_covariates()
+list_covariates(as_data_frame = TRUE)
+}
+\arguments{
+\item{as_data_frame}{Whether to return the covariates as a data frame. Defaults to \code{TRUE}.}
 }
 \description{
 List available covariates
 }
 \examples{
-list_covariates()
+# list_covariates()
 }
