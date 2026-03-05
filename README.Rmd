@@ -90,7 +90,7 @@ sst_by_day <- se %>%
   get_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean")
 
 sst_by_day %>%
-    unnest(covariates)
+  unnest(covariates)
 ```
 
 Here, instead of having the data aggregated over time, there is one row for each date, along with the value on that date.

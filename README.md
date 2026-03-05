@@ -141,7 +141,7 @@ sst_by_day <- se %>%
   get_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean")
 
 sst_by_day %>%
-    unnest(covariates)
+  unnest(covariates)
 #> # A tibble: 100 × 12
 #>    site  latitude longitude sample_date covariate                     start_date
 #>    <chr>    <dbl>     <dbl> <date>      <chr>                         <date>    

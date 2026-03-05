@@ -23,10 +23,12 @@ Imports:
     rstac,
     stringr,
     tidyr
+Remotes: data-mermaid/mermaidr
 RoxygenNote: 7.3.3
 URL: https://data-mermaid.github.io/mermaidr-covariates/
 Suggests: 
     knitr,
+    mermaidr,
     rmarkdown,
     testthat (>= 3.0.0)
 VignetteBuilder: knitr

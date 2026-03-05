@@ -19,7 +19,7 @@ test_that("get_summary_zonal_statistics returns spatial_stats and temporal_stats
     temporal_stats = c("min", "max")
   )
 
-  covariates <- covariates[]
+  covariates <- covariates[["covariates"]][[1]]
 
   expect_named(
     covariates,

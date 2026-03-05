@@ -3,7 +3,7 @@ test_that("check_covariate_id returns TRUE when x is an ID, and FALSE when it is
   skip_on_ci()
   skip_on_cran()
 
-  expect_true(check_covariate_id("ea07abba-06cf-41a8-92a3-b20eaf801ea9"))
+  expect_true(check_covariate_id("50b810fb-5f17-4cdb-b34b-c377837e2a29"))
 
   expect_false(check_covariate_id("test"))
 })
@@ -15,8 +15,8 @@ test_that("lookup_covariate_id_by_name returns the ID when it is a valid name,
   skip_on_cran()
 
   expect_identical(
-    lookup_covariate_id_by_name("Land Use and Land Cover (LULC) Collection"),
-    "ea07abba-06cf-41a8-92a3-b20eaf801ea9"
+    lookup_covariate_id_by_name("Daily Sea Surface Temperature"),
+    "50b810fb-5f17-4cdb-b34b-c377837e2a29"
   )
 
   expect_true(is.na(lookup_covariate_id_by_name("test")))
@@ -29,13 +29,13 @@ test_that("get_covariate_id returns the ID when passed an ID, the ID when
   skip_on_cran()
 
   expect_identical(
-    get_covariate_id("ea07abba-06cf-41a8-92a3-b20eaf801ea9"),
-    "ea07abba-06cf-41a8-92a3-b20eaf801ea9"
+    get_covariate_id("50b810fb-5f17-4cdb-b34b-c377837e2a29"),
+    "50b810fb-5f17-4cdb-b34b-c377837e2a29"
   )
 
   expect_identical(
-    get_covariate_id("Land Use and Land Cover (LULC) Collection"),
-    "ea07abba-06cf-41a8-92a3-b20eaf801ea9"
+    get_covariate_id("Daily Sea Surface Temperature"),
+    "50b810fb-5f17-4cdb-b34b-c377837e2a29"
   )
 
   expect_error(get_covariate_id("test"))

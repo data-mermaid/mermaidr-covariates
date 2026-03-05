@@ -13,5 +13,5 @@ list_covariates(as_data_frame = TRUE)
 List available covariates
 }
 \examples{
-list_covariates()
+# list_covariates()
 }
