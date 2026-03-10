@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mermaidrcovariates</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -94,7 +94,7 @@
 <span><span class="co">#&gt;  9 lulc       Land… "Land Use … 2000-01-01 2020-01-01 CC0-1.0 land co… &lt;tibble&gt; </span></span>
 <span><span class="co">#&gt; 10 sediment_… Glob… "Global Se… 2000-01-01 2000-01-01 propri… sedimen… &lt;tibble&gt; </span></span>
 <span><span class="co">#&gt; # ℹ 2 more variables: `sci:citation` &lt;chr&gt;, bbox &lt;list&gt;</span></span></code></pre></div>
-<p>For this example, we will look at maximum “Daily Sea Surface Temperature” (SST). We can access this data by using the function <code><a href="reference/get_summary_zonal_statistics.html">get_summary_zonal_statistics()</a></code>, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for <code>n_days</code> days prior, within the given <code>radius</code>, and <em>spatially</em> aggregates it according to the specified <code>spatial_stat</code>. Then, the function <em>temporally</em> aggregates it according to the specified <code>temporal_stat</code>.</p>
+<p>For this example, we will look at maximum “Daily Sea Surface Temperature” (SST). We can access this data by using the function <code><a href="reference/get_summary_zonal_statistics.html">get_summary_zonal_statistics()</a></code>, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for <code>n_days</code> days prior, within the given <code>radius</code>, and <em>spatially</em> aggregates it according to the specified <code>spatial_stats</code>. Then, the function <em>temporally</em> aggregates it according to the specified <code>temporal_stats</code>.</p>
 <p>For example, to get the <strong>maximum</strong> SST over the 20 days prior to (and including) the sample event, using the <em>mean</em> SST within 100m of the sites:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">max_sst</span> <span class="op">&lt;-</span> <span class="va">se</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>

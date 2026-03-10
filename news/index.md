@@ -1,5 +1,10 @@
 # Changelog
 
+## mermaidrcovariates 0.1.1
+
+- Fix bug with calculating `n_dates` returned from
+  [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md).
+
 ## mermaidrcovariates 0.1.0
 
 - [`list_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_covariates.md)

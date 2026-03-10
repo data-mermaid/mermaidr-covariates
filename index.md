@@ -78,8 +78,8 @@ Temperature” (SST). We can access this data by using the function
 which takes the site latitude and longitude, as well as the survey date,
 to find the data at that site for `n_days` days prior, within the given
 `radius`, and *spatially* aggregates it according to the specified
-`spatial_stat`. Then, the function *temporally* aggregates it according
-to the specified `temporal_stat`.
+`spatial_stats`. Then, the function *temporally* aggregates it according
+to the specified `temporal_stats`.
 
 For example, to get the **maximum** SST over the 20 days prior to (and
 including) the sample event, using the *mean* SST within 100m of the
