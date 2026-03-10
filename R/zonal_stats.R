@@ -34,7 +34,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
     # Add an ID for iterating over (with site/date/lat/long distinct)
     se <- se %>%
-      add_id_for_iteration()
+      add_id_for_iteration(strip_cols = FALSE)
   }
 
   se_list <- se %>%

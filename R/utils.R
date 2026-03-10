@@ -17,11 +17,11 @@ get_covariate_name_from_id <- function(id) {
     purrr::pluck("title")
 }
 
-add_id_for_iteration <- function(df) {
+add_id_for_iteration <- function(df, strip_cols) {
   # Allow for the possibility that they have more than one record at each site at each date
   # Make distinct for them, but also handle the possibility of different latitude/longitude
   # So best to just distinguish entirely, using row number
-  df %>%
+  id <- df %>%
     dplyr::distinct(site, latitude, longitude, sample_date) %>%
     dplyr::arrange(site, sample_date, latitude, longitude) %>%
     dplyr::mutate(...id = glue::glue("{site}_{sample_date}")) %>%
@@ -30,6 +30,13 @@ add_id_for_iteration <- function(df) {
     dplyr::ungroup() %>%
     dplyr::mutate(...id = glue::glue("{...id}_{row}")) %>%
     dplyr::select(-row)
+
+  if (strip_cols) {
+    id
+  } else {
+    df %>%
+      dplyr::left_join(id, by = c("site", "latitude", "longitude", "sample_date"))
+  }
 }
 
 lookup_collection <- function(x) {

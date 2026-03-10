@@ -33,13 +33,13 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Add an ID for iterating over (with site/date/lat/long distinct)
   se <- se %>%
-    add_id_for_iteration()
+    add_id_for_iteration(strip_cols = FALSE)
 
   # Get (non-summary) zonal statistics
   zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats)
 
   zonal_stats <- zonal_stats %>%
-    add_id_for_iteration() %>% # Add id back on
+    add_id_for_iteration(strip_cols = TRUE) %>% # Add id back on
     dplyr::left_join(zonal_stats, by = c("site", "sample_date", "latitude", "longitude")) %>%
     # just keep ID and covariates -> do not need lat/long/date, join back on later
     dplyr::select(...id, covariates) %>%
