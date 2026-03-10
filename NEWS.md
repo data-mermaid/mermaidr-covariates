@@ -1,3 +1,7 @@
+# mermaidrcovariates 0.1.1
+
+* Fix bug with calculating `n_dates` returned from `get_summary_zonal_statistics()`.
+
 # mermaidrcovariates 0.1.0
 
 * `list_covariates()` returns a data frame by default, and the print method when
