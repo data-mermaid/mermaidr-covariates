@@ -145,11 +145,13 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
     purrr::list_rbind(names_to = "...id")
 
   zonal_stats %>%
+    dplyr::group_by(...id) %>%
+    dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE)) %>%
+    dplyr::ungroup() %>%
     # TODO -> handle no data returned, e.g. with covariate "Daily Sea Surface Temperature (SST)"
     # Add n_dates, add covariate, remove "band_" character
     dplyr::mutate(
       covariate = covariate_name,
-      n_dates = dplyr::n_distinct(date, na.rm = TRUE),
       band = stringr::str_remove(band, "band_"),
       band = as.numeric(band)
     ) %>%
