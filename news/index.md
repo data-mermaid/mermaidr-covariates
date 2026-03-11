@@ -4,6 +4,11 @@
 
 - Fix bug with calculating `n_dates` returned from
   [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md).
+- Fix bug where
+  [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
+  and
+  [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md)
+  were stripping columns from `se` in returned data.
 
 ## mermaidrcovariates 0.1.0
 

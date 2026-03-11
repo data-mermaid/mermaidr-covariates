@@ -180,3 +180,9 @@ for each date, along with the value on that date.
 - [`list_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_covariates.md)
   : List available covariates
 
+# Articles
+
+### All vignettes
+
+- [Getting environmental covariates for GFCR
+  locations](https://data-mermaid.github.io/mermaidr-covariates/articles/covariates.md):

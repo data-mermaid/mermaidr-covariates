@@ -3,17 +3,14 @@
 This analysis extracts covariates for GFCR project sites from MERMAID,
 then combines that with coral cover data to plot the relationship
 between the two. In this example, the environmental data is maximum
-degree heating weeks (DHW) for a given number of days prior to the
-survey.
+daily Sea Surface Temperature (SST) for a given number of days prior to
+the survey.
 
 ## Load packages
 
 Load libraries to use for analysis.
 
 ``` r
-# Need to run this to ensure that rstac works, because the API is missing "type" in Items:
-# remotes::install_github("sharlagelfand/rstac", ref = "invalid-item")
-
 # remotes::install_github("data-mermaid/mermaidr")
 # remotes::install_github("data-mermaid/mermaidr-covariates")
 
@@ -40,26 +37,26 @@ gfcr_summary_sampleevents <- summary_sampleevents %>%
 gfcr_summary_sampleevents
 ```
 
-    ## # A tibble: 73 × 380
-    ##    project_id      project tags  country site_id site  latitude longitude reef_type
-    ##    <chr>           <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>    
-    ##  1 8a747031-4ebd-… Invest… Unit… Fiji    2ecee0… GA1      -16.5      179. barrier  
-    ##  2 8a747031-4ebd-… Invest… Unit… Fiji    4f1394… GA2      -16.5      179. barrier  
-    ##  3 8a747031-4ebd-… Invest… Unit… Fiji    f3ae80… GA3      -16.5      179. barrier  
-    ##  4 8a747031-4ebd-… Invest… Unit… Fiji    35cbcc… GA4      -16.6      179. barrier  
-    ##  5 8a747031-4ebd-… Invest… Unit… Fiji    53220e… GA5      -16.6      179. barrier  
-    ##  6 8a747031-4ebd-… Invest… Unit… Fiji    2f53e7… GA6      -16.6      179. fringing 
-    ##  7 8a747031-4ebd-… Invest… Unit… Fiji    4e28c5… QR1      -16.1      180. barrier  
-    ##  8 8a747031-4ebd-… Invest… Unit… Fiji    14b477… QR2      -16.1      180. barrier  
-    ##  9 8a747031-4ebd-… Invest… Unit… Fiji    687440… QR3      -16.2      180. barrier  
-    ## 10 8a747031-4ebd-… Invest… Unit… Fiji    fd9428… QR4      -16.2      180. barrier  
-    ## # ℹ 63 more rows
-    ## # ℹ 371 more variables: reef_zone <chr>, reef_exposure <chr>, management_id <chr>,
-    ## #   management <chr>, management_est_year <int>, management_size <dbl>,
-    ## #   management_parties <chr>, management_compliance <chr>, management_rules <chr>,
-    ## #   sample_date <date>, data_policy_beltfish <chr>, data_policy_benthiclit <chr>,
-    ## #   data_policy_benthicpit <chr>, data_policy_benthicpqt <chr>,
-    ## #   data_policy_habitatcomplexity <chr>, data_policy_bleachingqc <chr>, …
+    ## # A tibble: 130 × 382
+    ##    project_id     project tags  country site_id site  latitude longitude reef_type
+    ##    <chr>          <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>    
+    ##  1 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  2 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  3 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  4 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  5 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  6 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  7 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  8 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ##  9 1370aaba-fe43… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+    ## 10 1370aaba-fe43… Gulf o… Glob… Jordan  04e931… Nort…     29.5      35.0 fringing 
+    ## # ℹ 120 more rows
+    ## # ℹ 373 more variables: reef_zone <chr>, reef_exposure <chr>,
+    ## #   management_id <chr>, management <chr>, management_est_year <int>,
+    ## #   management_size <dbl>, management_parties <chr>, management_compliance <chr>,
+    ## #   management_rules <chr>, sample_date <date>, data_policy_beltfish <chr>,
+    ## #   data_policy_benthiclit <chr>, data_policy_benthicpit <chr>,
+    ## #   data_policy_benthicpqt <chr>, data_policy_habitatcomplexity <chr>, …
 
 ### Summary of hard coral cover for projects
 
@@ -75,15 +72,16 @@ gfcr_summary_sampleevents %>%
   )
 ```
 
-    ## # A tibble: 6 × 5
-    ##   project                              tags  country n_sites average_hard_coral_c…¹
-    ##   <chr>                                <chr> <chr>     <int>                  <dbl>
-    ## 1 Investing in Coral Reefs and the Bl… Unit… Fiji         27                  38.0 
-    ## 2 Maldives RREEF (GFCR)                Glob… Maldiv…      11                  43.4 
-    ## 3 SLCRI Bar Reef Seascape              Inte… Sri La…      11                   9.68
-    ## 4 SLCRI Kayankerni Seascape            Glob… Sri La…      11                  44.4 
-    ## 5 SLCRI Pigeon Island Seascape         Glob… Sri La…       7                  55.9 
-    ## 6 Terumbu Karang Sehat Indonesia Prog… Cons… Indone…       6                  53.7 
+    ## # A tibble: 7 × 5
+    ##   project                             tags  country n_sites average_hard_coral_c…¹
+    ##   <chr>                               <chr> <chr>     <int>                  <dbl>
+    ## 1 Gulf of Aqaba Resilient Reefs Prog… Glob… Jordan       29                  21.4 
+    ## 2 Investing in Coral Reefs and the B… Unit… Fiji         53                  30.9 
+    ## 3 Maldives RREEF (GFCR)               Glob… Maldiv…      11                  43.4 
+    ## 4 SLCRI Bar Reef Seascape             Inte… Sri La…      11                   9.68
+    ## 5 SLCRI Kayankerni Seascape           Inte… Sri La…      11                  44.4 
+    ## 6 SLCRI Pigeon Island Seascape        Inte… Sri La…       7                  55.9 
+    ## 7 Terumbu Karang Sehat Indonesia Pro… Cons… Indone…       8                  50.0 
     ## # ℹ abbreviated name: ¹​average_hard_coral_cover
 
 ## Get covariates for these sites
@@ -92,83 +90,92 @@ Next, get the relevant covariates for these sites.
 
 ### List covariates
 
-List available covariates. We have available the monthly aggregation of
-Degree Heating Weeks (DHW).
+List available covariates.
 
 ``` r
 list_covariates()
 ```
 
-    ## $`noaa-monthly-max-dhw`
-    ## ###Collection
-    ## - id: noaa-monthly-max-dhw
-    ## - title: NOAA Degree Heating Week (DHW) - Monthly Aggregation
-    ## - description: 
-    ## The NOAA Coral Reef Watch (CRW) daily global 5km satellite coral bleaching Degree Heating Week (DHW) product shows accumulated heat stress, which can lead to coral bleaching and death. The scale ranges from 0 to 20 °C-weeks. The DHW product accumulates the instantaneous bleaching heat stress, measured by CRW's Coral Bleaching HotSpot, during the most recent 12-week period. It is directly related to the timing and intensity of coral bleaching.
-    ## - field(s): 
-    ## type, id, stac_version, description, links, stac_extensions, title, extent, license, keywords, providers, summaries
+    ## # A tibble: 10 × 10
+    ##    id           title description start_date end_date   license keywords providers
+    ##    <chr>        <chr> <chr>       <date>     <date>     <chr>   <chr>    <list>   
+    ##  1 10da4b11-c7… Huma… "This data… 2021-12-28 NA         propri… climate… <tibble> 
+    ##  2 3e410700-2e… MEOW… "This data… 2012-01-01 2012-12-31 propri… <NA>     <tibble> 
+    ##  3 50b810fb-5f… Dail… "Sea surfa… 1985-01-01 2026-01-13 CC0-1.0 climate… <tibble> 
+    ##  4 640da5d3-53… ACA … "Allen Cor… 2018-01-01 2022-12-31 CC-BY-… allen c… <tibble> 
+    ##  5 aca_extent   ACA … "ACA Reef … 2026-01-01 NA         CC0-1.0 aca, re… <tibble> 
+    ##  6 countries    Coun… "Country B… 2026-01-01 NA         CC0-1.0 adminis… <tibble> 
+    ##  7 daily_sst    Dail… "A collect… 1985-01-01 1985-01-03 CC0-1.0 climate… <tibble> 
+    ##  8 disp_points  Disp… "Dispersal… 2026-01-01 NA         CC0-1.0 dispers… <tibble> 
+    ##  9 lulc         Land… "Land Use … 2000-01-01 2020-01-01 CC0-1.0 land co… <tibble> 
+    ## 10 sediment_ex… Glob… "Global Se… 2000-01-01 2000-01-01 propri… sedimen… <tibble> 
+    ## # ℹ 2 more variables: `sci:citation` <chr>, bbox <list>
 
-### Get maximum DHW for previous year
+### Get maximum SST for previous year
 
-Focus on degree heating weeks (DHW), and get the max (of the monthly
-average) for the 365 days prior to the survey data. Review the survey
-data:
+Focus on Sea Surface Temperature, and get the max for the 60 days prior
+to the survey data. Review the survey data:
 
 ``` r
 gfcr_summary_sampleevents %>%
   distinct(project, site, latitude, longitude, sample_date)
 ```
 
-    ## # A tibble: 73 × 5
-    ##    project                                     site  latitude longitude sample_date
-    ##    <chr>                                       <chr>    <dbl>     <dbl> <date>     
-    ##  1 Investing in Coral Reefs and the Blue Econ… GA1      -16.5      179. 2025-10-08 
-    ##  2 Investing in Coral Reefs and the Blue Econ… GA2      -16.5      179. 2025-10-08 
-    ##  3 Investing in Coral Reefs and the Blue Econ… GA3      -16.5      179. 2025-10-09 
-    ##  4 Investing in Coral Reefs and the Blue Econ… GA4      -16.6      179. 2025-10-09 
-    ##  5 Investing in Coral Reefs and the Blue Econ… GA5      -16.6      179. 2025-10-08 
-    ##  6 Investing in Coral Reefs and the Blue Econ… GA6      -16.6      179. 2025-10-08 
-    ##  7 Investing in Coral Reefs and the Blue Econ… QR1      -16.1      180. 2025-09-24 
-    ##  8 Investing in Coral Reefs and the Blue Econ… QR2      -16.1      180. 2025-09-24 
-    ##  9 Investing in Coral Reefs and the Blue Econ… QR3      -16.2      180. 2025-09-24 
-    ## 10 Investing in Coral Reefs and the Blue Econ… QR4      -16.2      180. 2025-09-25 
-    ## # ℹ 63 more rows
+    ## # A tibble: 130 × 5
+    ##    project                                 site     latitude longitude sample_date
+    ##    <chr>                                   <chr>       <dbl>     <dbl> <date>     
+    ##  1 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2024-12-08 
+    ##  2 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2025-07-30 
+    ##  3 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2024-12-01 
+    ##  4 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2024-12-09 
+    ##  5 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2025-10-28 
+    ##  6 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2024-12-24 
+    ##  7 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2024-12-06 
+    ##  8 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2025-10-29 
+    ##  9 Gulf of Aqaba Resilient Reefs Programme Aqaba M…     29.4      35.0 2025-09-01 
+    ## 10 Gulf of Aqaba Resilient Reefs Programme Norther…     29.5      35.0 2025-10-26 
+    ## # ℹ 120 more rows
 
-The
-[`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
-function takes the site latitude and longitude, as well as the survey
-date, to find the data at that site for `n` days prior, then aggregates
-it. The buffer size is set to 1000 metres.
+We can access SST data by using the function
+[`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md),
+which takes the site latitude and longitude, as well as the survey date,
+to find the data at that site for `n_days` days prior, within the given
+`radius`, and *spatially* aggregates it according to the specified
+`spatial_stat`.
+
+For example, to get the **maximum** SST over the 0 days prior to (and
+including) the sample event, using the *mean* SST within 100m of the
+sites:
 
 ``` r
-max_dhw <- gfcr_summary_sampleevents %>%
-  get_zonal_statistics("noaa-monthly-max-dhw", n_days = 365, buffer = 1000, stats = "max")
+max_sst <- gfcr_summary_sampleevents %>%
+  get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 60, radius = 100, spatial_stats = "mean", temporal_stats = "max")
 ```
 
 Look at the returned data, keeping only the project information, site,
 survey date, hard coral cover, and covariates.
 
 ``` r
-max_dhw <- max_dhw %>%
+max_sst <- max_sst %>%
   select(site, sample_date, hard_coral_cover, covariates)
 
-max_dhw
+max_sst
 ```
 
-    ## # A tibble: 73 × 4
-    ##    site  sample_date hard_coral_cover covariates      
-    ##    <chr> <date>                 <dbl> <list>          
-    ##  1 GA1   2025-10-08              62.3 <tibble [1 × 6]>
-    ##  2 GA2   2025-10-08              31.2 <tibble [1 × 6]>
-    ##  3 GA3   2025-10-09              24.6 <tibble [1 × 6]>
-    ##  4 GA4   2025-10-09              42.6 <tibble [1 × 6]>
-    ##  5 GA5   2025-10-08              11.5 <tibble [1 × 6]>
-    ##  6 GA6   2025-10-08              57.4 <tibble [1 × 6]>
-    ##  7 QR1   2025-09-24              27.9 <tibble [1 × 6]>
-    ##  8 QR2   2025-09-24              96.7 <tibble [1 × 6]>
-    ##  9 QR3   2025-09-24              77.0 <tibble [1 × 6]>
-    ## 10 QR4   2025-09-25              13.1 <tibble [1 × 6]>
-    ## # ℹ 63 more rows
+    ## # A tibble: 130 × 4
+    ##    site                 sample_date hard_coral_cover covariates      
+    ##    <chr>                <date>                 <dbl> <list>          
+    ##  1 Aqaba Marine Reserve 2024-12-08              31.6 <tibble [1 × 8]>
+    ##  2 Aqaba Marine Reserve 2025-07-30              31.7 <tibble [1 × 8]>
+    ##  3 Aqaba Marine Reserve 2024-12-01              32.7 <tibble [1 × 8]>
+    ##  4 Aqaba Marine Reserve 2024-12-09              30.4 <tibble [1 × 8]>
+    ##  5 Aqaba Marine Reserve 2025-10-28              37.6 <tibble [1 × 8]>
+    ##  6 Aqaba Marine Reserve 2024-12-24              42.3 <tibble [1 × 8]>
+    ##  7 Aqaba Marine Reserve 2024-12-06              25.8 <tibble [1 × 8]>
+    ##  8 Aqaba Marine Reserve 2025-10-29              44.6 <tibble [1 × 8]>
+    ##  9 Aqaba Marine Reserve 2025-09-01              30.2 <tibble [1 × 8]>
+    ## 10 Northern Deep Corals 2025-10-26              15.7 <tibble [1 × 8]>
+    ## # ℹ 120 more rows
 
 ### Expand covariates
 
@@ -177,47 +184,47 @@ they are, you can see they contain start and end date of the data used
 for the covariates, the band, and the summarised value.
 
 ``` r
-max_dhw <- max_dhw %>%
+max_sst <- max_sst %>%
   unnest(covariates)
 
-max_dhw
+max_sst
 ```
 
-    ## # A tibble: 73 × 9
-    ##    site  sample_date hard_coral_cover covariate            start_date end_date  
-    ##    <chr> <date>                 <dbl> <chr>                <date>     <date>    
-    ##  1 GA1   2025-10-08              62.3 noaa-monthly-max-dhw 2024-11-01 2025-04-01
-    ##  2 GA2   2025-10-08              31.2 noaa-monthly-max-dhw 2024-11-01 2025-04-01
-    ##  3 GA3   2025-10-09              24.6 noaa-monthly-max-dhw 2024-11-01 2025-04-01
-    ##  4 GA4   2025-10-09              42.6 noaa-monthly-max-dhw 2024-11-01 2025-04-01
-    ##  5 GA5   2025-10-08              11.5 noaa-monthly-max-dhw 2024-11-01 2025-04-01
-    ##  6 GA6   2025-10-08              57.4 noaa-monthly-max-dhw 2024-11-01 2025-04-01
-    ##  7 QR1   2025-09-24              27.9 noaa-monthly-max-dhw 2024-10-01 2025-04-01
-    ##  8 QR2   2025-09-24              96.7 noaa-monthly-max-dhw 2024-10-01 2025-04-01
-    ##  9 QR3   2025-09-24              77.0 noaa-monthly-max-dhw 2024-10-01 2025-04-01
-    ## 10 QR4   2025-09-25              13.1 noaa-monthly-max-dhw 2024-10-01 2025-04-01
-    ##     band statistic value
-    ##    <dbl> <chr>     <dbl>
-    ##  1     1 max        4.86
-    ##  2     1 max        4.80
-    ##  3     1 max        4.80
-    ##  4     1 max        5.82
-    ##  5     1 max        6.81
-    ##  6     1 max        6.81
-    ##  7     1 max        2.96
-    ##  8     1 max        2.96
-    ##  9     1 max        2.47
-    ## 10     1 max        2.48
-    ## # ℹ 63 more rows
+    ## # A tibble: 130 × 11
+    ##    site                 sample_date hard_coral_cover covariate                    
+    ##    <chr>                <date>                 <dbl> <chr>                        
+    ##  1 Aqaba Marine Reserve 2024-12-08              31.6 Daily Sea Surface Temperature
+    ##  2 Aqaba Marine Reserve 2025-07-30              31.7 Daily Sea Surface Temperature
+    ##  3 Aqaba Marine Reserve 2024-12-01              32.7 Daily Sea Surface Temperature
+    ##  4 Aqaba Marine Reserve 2024-12-09              30.4 Daily Sea Surface Temperature
+    ##  5 Aqaba Marine Reserve 2025-10-28              37.6 Daily Sea Surface Temperature
+    ##  6 Aqaba Marine Reserve 2024-12-24              42.3 Daily Sea Surface Temperature
+    ##  7 Aqaba Marine Reserve 2024-12-06              25.8 Daily Sea Surface Temperature
+    ##  8 Aqaba Marine Reserve 2025-10-29              44.6 Daily Sea Surface Temperature
+    ##  9 Aqaba Marine Reserve 2025-09-01              30.2 Daily Sea Surface Temperature
+    ## 10 Northern Deep Corals 2025-10-26              15.7 Daily Sea Surface Temperature
+    ##    start_date end_date   n_dates  band temporal_stat spatial_stat value
+    ##    <date>     <date>       <int> <dbl> <chr>         <chr>        <dbl>
+    ##  1 2024-10-10 2024-12-08      60     1 max           mean          26.1
+    ##  2 2025-06-01 2025-07-30      60     1 max           mean          29.3
+    ##  3 2024-10-03 2024-12-01      60     1 max           mean          26.3
+    ##  4 2024-10-11 2024-12-09      60     1 max           mean          26.1
+    ##  5 2025-08-30 2025-10-28      60     1 max           mean          28.0
+    ##  6 2024-10-26 2024-12-24      60     1 max           mean          24.7
+    ##  7 2024-10-08 2024-12-06      60     1 max           mean          26.1
+    ##  8 2025-08-31 2025-10-29      60     1 max           mean          28.0
+    ##  9 2025-07-04 2025-09-01      60     1 max           mean          29.3
+    ## 10 2025-08-28 2025-10-26      60     1 max           mean          28  
+    ## # ℹ 120 more rows
 
 ## Visualize
 
-Finally, visualize coral cover against the maximum mean DHW for the past
-365 days.
+Finally, visualize coral cover against the maximum Sea Surface
+Temperature for the past 60 days.
 
 ``` r
 ggplot(
-  max_dhw,
+  max_sst,
   aes(
     x = value,
     y = hard_coral_cover
@@ -226,8 +233,8 @@ ggplot(
   geom_point(color = "darkblue", alpha = 0.6) +
   geom_smooth(method = "lm", color = "red", linetype = "dashed") +
   labs(
-    title = paste("Coral Cover vs. Max. DHW (Previous 365 Days)"),
-    x = "Maximum DHW",
+    title = paste("Coral Cover vs. Max. SST (Previous 60 Days)"),
+    x = "Maximum SST",
     y = "Hard Coral Cover (%)"
   ) +
   theme_minimal()
