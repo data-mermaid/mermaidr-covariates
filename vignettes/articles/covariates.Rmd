@@ -251,4 +251,4 @@ ggplot(
   theme_minimal()
 ```
 
-![plot of chunk plot](figure/plot-1.png)
+![](figure/plot-1.png)
