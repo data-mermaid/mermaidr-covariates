@@ -1,6 +1,8 @@
 # mermaidrcovariates 0.1.1
 
 * Fix bug with calculating `n_dates` returned from `get_summary_zonal_statistics()`.
+* Fix bug where `get_zonal_statistics()` and `get_summary_zonal_statistics()` were
+stripping columns from `se` in returned data.
 
 # mermaidrcovariates 0.1.0
 
