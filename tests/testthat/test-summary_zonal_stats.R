@@ -33,6 +33,9 @@ test_that("get_summary_zonal_statistics returns spatial_stats and temporal_stats
 })
 
 test_that("summary_zonal_stats works with sample_date renamed", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -66,6 +69,9 @@ test_that("summary_zonal_stats works with sample_date renamed", {
 })
 
 test_that("summary_zonal_stats works with different date_col, retains both cols -- same date", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -101,6 +107,9 @@ test_that("summary_zonal_stats works with different date_col, retains both cols 
 })
 
 test_that("summary_zonal_stats works with different date_col, retains both cols -- different date", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -134,9 +143,9 @@ test_that("summary_zonal_stats works with different date_col, retains both cols 
 
   expect_true(
     new_date_covariates %>%
-        dplyr::select(covariates) %>%
-        tidyr::unnest(covariates) %>%
-        dplyr::pull(end_date) %>% unique() ==
-    "2026-01-01"
+      dplyr::select(covariates) %>%
+      tidyr::unnest(covariates) %>%
+      dplyr::pull(end_date) %>% unique() ==
+      "2026-01-01"
   )
 })

@@ -99,8 +99,10 @@ test_that("NA returned for all columns when there is no data within date range",
   expect_true(is.na(covariates[["value"]]))
 })
 
-
 test_that("get_zonal_statistics works with sample_date renamed", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -132,6 +134,9 @@ test_that("get_zonal_statistics works with sample_date renamed", {
 })
 
 test_that("get_zonal_statistics works with different date_col, retains both cols -- same date", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -165,6 +170,9 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
 })
 
 test_that("get_zonal_statistics works with different date_col, retains both cols -- different date", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",

@@ -22,8 +22,8 @@ add_id_for_iteration <- function(df, strip_cols, date_col) {
   # Make distinct for them, but also handle the possibility of different latitude/longitude
   # So best to just distinguish entirely, using row number
   id <- df %>%
-      dplyr::mutate(...date_temp = !!rlang::sym(date_col)) %>%
-      dplyr::distinct(site, latitude, longitude, ...date_temp) %>%
+    dplyr::mutate(...date_temp = !!rlang::sym(date_col)) %>%
+    dplyr::distinct(site, latitude, longitude, ...date_temp) %>%
     dplyr::arrange(site, ...date_temp, latitude, longitude) %>%
     dplyr::mutate(...id = glue::glue("{site}_{...date_temp}")) %>%
     dplyr::group_by(...id) %>%
@@ -33,7 +33,7 @@ add_id_for_iteration <- function(df, strip_cols, date_col) {
     dplyr::select(-row)
 
   id <- id %>%
-      dplyr::rename_with(\(x) date_col, ...date_temp)
+    dplyr::rename_with(\(x) date_col, ...date_temp)
 
   if (strip_cols) {
     id
