@@ -13,12 +13,14 @@
 #' @param radius Radius around site location, in metres. Defaults to 1000.
 #' @param spatial_stats Spatial statistics -- used to summarise all data around the site location, according to the \code{radius} set.
 #' @param temporal_stats Temporal statistics -- used to summarise the data over time.
+#' @param date_col Date back from (using \code{n_days}). Defaults to "sample_date".
 #'
 #' @export
 get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          radius = 1000,
                                          spatial_stats = c("min", "max", "mean"),
-                                         temporal_stats = c("min", "max", "mean")) {
+                                         temporal_stats = c("min", "max", "mean"),
+                                         date_col = "sample_date") {
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -33,14 +35,14 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Add an ID for iterating over (with site/date/lat/long distinct)
   se <- se %>%
-    add_id_for_iteration(strip_cols = FALSE)
+    add_id_for_iteration(strip_cols = FALSE, date_col)
 
   # Get (non-summary) zonal statistics
-  zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats)
+  zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats, date_col = date_col)
 
   zonal_stats <- zonal_stats %>%
-    add_id_for_iteration(strip_cols = TRUE) %>% # Add id back on
-    dplyr::left_join(zonal_stats, by = c("site", "sample_date", "latitude", "longitude")) %>%
+    add_id_for_iteration(strip_cols = TRUE, date_col) %>% # Add id back on
+    dplyr::left_join(zonal_stats, by = c("site", date_col, "latitude", "longitude")) %>%
     # just keep ID and covariates -> do not need lat/long/date, join back on later
     dplyr::select(...id, covariates) %>%
     # Unnest covariates, remove date

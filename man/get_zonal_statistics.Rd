@@ -9,7 +9,8 @@ get_zonal_statistics(
   covariate,
   n_days = 365,
   radius = 1000,
-  spatial_stats = c("min", "max", "mean")
+  spatial_stats = c("min", "max", "mean"),
+  date_col = "sample_date"
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ and the 364 days prior. Defaults to 365.}
 
 \item{spatial_stats}{Spatial statistics -- used to summarise all data around
 the site location, according to the \code{radius} set.}
+
+\item{date_col}{Date back from (using \code{n_days}). Defaults to "sample_date".}
 }
 \description{
 Get zonal statistics. For *each* of the `n_days` prior to the sample event date,
