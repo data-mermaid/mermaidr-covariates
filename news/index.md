@@ -1,5 +1,16 @@
 # Changelog
 
+## mermaidrcovariates 0.1.2
+
+- Add
+  [`search_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/search_covariates.md)
+  to search by title or description
+- Add `date_col` to
+  [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
+  and
+  [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md),
+  which allows for using a column other than `"sample_date"`.
+
 ## mermaidrcovariates 0.1.1
 
 - Fix bug with calculating `n_dates` returned from

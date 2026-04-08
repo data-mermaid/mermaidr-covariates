@@ -13,7 +13,8 @@ get_zonal_statistics(
   covariate,
   n_days = 365,
   radius = 1000,
-  spatial_stats = c("min", "max", "mean")
+  spatial_stats = c("min", "max", "mean"),
+  date_col = "sample_date"
 )
 ```
 
@@ -42,3 +43,7 @@ get_zonal_statistics(
 
   Spatial statistics – used to summarise all data around the site
   location, according to the `radius` set.
+
+- date_col:
+
+  Date back from (using `n_days`). Defaults to "sample_date".

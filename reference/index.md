@@ -8,3 +8,5 @@
   : Get zonal statistics
 - [`list_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_covariates.md)
   : List available covariates
+- [`search_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/search_covariates.md)
+  : Search available covariates

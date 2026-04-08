@@ -14,7 +14,8 @@ get_summary_zonal_statistics(
   n_days = 365,
   radius = 1000,
   spatial_stats = c("min", "max", "mean"),
-  temporal_stats = c("min", "max", "mean")
+  temporal_stats = c("min", "max", "mean"),
+  date_col = "sample_date"
 )
 ```
 
@@ -47,3 +48,7 @@ get_summary_zonal_statistics(
 - temporal_stats:
 
   Temporal statistics – used to summarise the data over time.
+
+- date_col:
+
+  Date back from (using `n_days`). Defaults to "sample_date".
