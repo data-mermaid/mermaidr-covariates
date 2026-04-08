@@ -54,20 +54,10 @@ list_covariates <- function(as_data_frame = TRUE) {
 
   # If as_data_frame = TRUE (the default), reformat
   if (as_data_frame) {
-    res %>%
-      purrr::map_dfr(\(x) {
-        x %>%
-          purrr::compact() %>% # In case of any empty entries
-          dplyr::as_tibble()
-      }) %>%
-      dplyr::select(id, title, description, start_date, end_date, dplyr::everything())
+    reshape_covariates_df(res)
   } else {
     # Otherwise, just return it as a list
-    res <- purrr::map(res, \(x) {
-      structure(x, class = c("list", "covariate"))
-    })
-    names(res) <- res %>% purrr::map_chr("title")
-    res
+    add_covariates_list_classes(res)
   }
 }
 
@@ -106,4 +96,22 @@ print.covariate <- function(x) {
   cat("-", "Description:", x$description, fill = TRUE)
 
   invisible(x)
+}
+
+reshape_covariates_df <- function(covariates) {
+  covariates %>%
+    purrr::map_dfr(\(x) {
+      x %>%
+        # purrr::compact() %>% # In case of any empty entries
+        dplyr::as_tibble()
+    }) %>%
+    dplyr::select(id, title, description, start_date, end_date, dplyr::everything())
+}
+
+add_covariates_list_classes <- function(covariates) {
+  covariates <- purrr::map(covariates, \(x) {
+    structure(x, class = c("list", "covariate"))
+  })
+  names(covariates) <- covariates %>% purrr::map_chr("title")
+  covariates
 }

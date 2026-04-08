@@ -17,25 +17,29 @@ get_covariate_name_from_id <- function(id) {
     purrr::pluck("title")
 }
 
-add_id_for_iteration <- function(df, strip_cols) {
+add_id_for_iteration <- function(df, strip_cols, date_col) {
   # Allow for the possibility that they have more than one record at each site at each date
   # Make distinct for them, but also handle the possibility of different latitude/longitude
   # So best to just distinguish entirely, using row number
   id <- df %>%
-    dplyr::distinct(site, latitude, longitude, sample_date) %>%
-    dplyr::arrange(site, sample_date, latitude, longitude) %>%
-    dplyr::mutate(...id = glue::glue("{site}_{sample_date}")) %>%
+    dplyr::mutate(...date_temp = !!rlang::sym(date_col)) %>%
+    dplyr::distinct(site, latitude, longitude, ...date_temp) %>%
+    dplyr::arrange(site, ...date_temp, latitude, longitude) %>%
+    dplyr::mutate(...id = glue::glue("{site}_{...date_temp}")) %>%
     dplyr::group_by(...id) %>%
     dplyr::mutate(row = dplyr::row_number()) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(...id = glue::glue("{...id}_{row}")) %>%
     dplyr::select(-row)
 
+  id <- id %>%
+    dplyr::rename_with(\(x) date_col, ...date_temp)
+
   if (strip_cols) {
     id
   } else {
     df %>%
-      dplyr::left_join(id, by = c("site", "latitude", "longitude", "sample_date"))
+      dplyr::left_join(id, by = c("site", "latitude", "longitude", date_col))
   }
 }
 

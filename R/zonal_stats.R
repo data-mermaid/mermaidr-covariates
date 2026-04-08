@@ -12,11 +12,13 @@
 #' @param radius Radius around site location, in metres. Defaults to 1000.
 #' @param spatial_stats Spatial statistics -- used to summarise all data around
 #' the site location, according to the \code{radius} set.
+#' @param date_col Date back from (using \code{n_days}). Defaults to "sample_date".
 #'
 #' @export
 get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  radius = 1000,
-                                 spatial_stats = c("min", "max", "mean")) {
+                                 spatial_stats = c("min", "max", "mean"),
+                                 date_col = "sample_date") {
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -34,14 +36,17 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
     # Add an ID for iterating over (with site/date/lat/long distinct)
     se <- se %>%
-      add_id_for_iteration(strip_cols = FALSE)
+      add_id_for_iteration(strip_cols = FALSE, date_col)
   }
 
   se_list <- se %>%
     split(.$...id)
 
   # Get zonal stats for all SEs
-  zonal_stats <- get_zonal_stats(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats)
+  zonal_stats <- get_zonal_stats(
+    se_list, covariate_id, covariate_name, n_days,
+    radius, spatial_stats, date_col
+  )
 
   # Attach to sample events and remove ID
   se %>%
@@ -49,10 +54,10 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     dplyr::select(-...id)
 }
 
-get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
+get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col = "sample_date") {
   # Get sample_date
   sample_date <- df %>%
-    dplyr::pull(sample_date)
+    dplyr::pull(dplyr::all_of(date_col))
 
   input_sample_date_end <- sample_date
 
@@ -115,7 +120,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 }
 
 
-get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats) {
+get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col) {
   zonal_stats <- se_list %>%
     purrr::map(
       \(se)
@@ -123,7 +128,8 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
         covariate_id,
         n_days,
         radius = radius,
-        spatial_stats = spatial_stats
+        spatial_stats = spatial_stats,
+        date_col = date_col
       ),
       .progress = TRUE
     ) %>%
@@ -172,12 +178,14 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
                                      "min", "max", "mean", "count", "sum", "std",
                                      "median", "majority", "minority", "unique",
                                      "range", "nodata", "area", "freq_hist"
-                                   )) {
+                                   ),
+                                   date_col = date_col) {
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
   stac_items <- get_items_for_zonal_stats(
     se,
     covariate_id,
-    n_days = n_days
+    n_days = n_days,
+    date_col = date_col
   )
 
   # Returns a list with elements start_date, end_date, urls
