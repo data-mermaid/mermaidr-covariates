@@ -87,3 +87,35 @@ get_covariate_id <- function(x) {
 
   covariate_id
 }
+
+determine_covariate_interval <- function(covariate_id) {
+  # Determine whether a covariate is:
+  # daily
+  # monthly
+  # annually
+  # once only
+
+  # by looking at its start date, adding one year, then seeing how many items are returned
+
+  covariates <- list_covariates()
+
+  start_date <- covariates %>%
+    dplyr::filter(id == covariate_id) %>%
+    pull(start_date)
+
+  items <- rstac::stac(stac_url) %>%
+    rstac::stac_search(
+      collections = covariate_id,
+      datetime = start_end_to_interval(start_date, start_date + lubridate::years(1))
+    ) %>%
+    rstac::get_request()
+
+  n_items <- items$numberMatched
+
+  dplyr::case_when(
+    n_items < 2 ~ "annual/once",
+    n_items < 15 ~ "monthly",
+    n_items >= 15 & n_items <= 300 ~ "check",
+    n_items > 300 ~ "daily"
+  )
+}

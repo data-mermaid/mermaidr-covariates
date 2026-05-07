@@ -19,6 +19,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  radius = 1000,
                                  spatial_stats = c("min", "max", "mean"),
                                  date_col = "sample_date") {
+                                 chunk_threshold = 50) {
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -44,8 +45,8 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Get zonal stats for all SEs
   zonal_stats <- get_zonal_stats(
-    se_list, covariate_id, covariate_name, n_days,
-    radius, spatial_stats, date_col
+    se_list, covariate_id, covariate_name, n_,
+    chunk_threshold = chunk_threshold
   )
 
   # Attach to sample events and remove ID
@@ -119,13 +120,22 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col =
   )
 }
 
-get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col, chunk_threshold = 50) {
-get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col, chunk_threshold = 50) {
-  # If n_days >= 50, just get by SE
+get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col, chunk_threshold = 100) {
+  # If n_days >= chunk_threshold, just get by SE
+  # Also checking that the interval is daily, in this case
+  # Otherwise, if it is e.g. monthly, then we might want to increase the chunk size
+  # Because then we would not actually be getting 50 items, but say 1-2 if it is monthly
 
+  # browser()
 
+  covariate_interval <- determine_covariate_interval(covariate_id)
 
-  if (n_days >= chunk_threshold) {
+  if (!covariate_interval %in% c("annual/once", "daily")) {
+    browser()
+  }
+  do_by_se <- n_days >= chunk_threshold & covariate_interval == "daily"
+
+  if (do_by_se) {
     zonal_stats <- se_list %>%
       purrr::map(
         \(se)
@@ -142,11 +152,17 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
     # Otherwise, chunk SEs and get that way
     ses <- dplyr::bind_rows(se_list)
     chunk_size <- floor(chunk_threshold / n_days)
-    n_chunks <- nrow(ses) / chunk_size
+    n_chunks <- ceiling(nrow(ses) / chunk_size)
 
-    se_list <- ses %>%
-      dplyr::mutate(...chunk = cut(dplyr::row_number(), n_chunks, label = FALSE)) %>%
-      split(.$...chunk)
+    if (n_chunks == 1) {
+        se_list <- ses %>%
+            dplyr::mutate(...chunk = 1) %>%
+            split(.$...chunk)
+    } else {
+        se_list <- ses %>%
+            dplyr::mutate(...chunk = cut(dplyr::row_number(), n_chunks, label = FALSE)) %>%
+            split(.$...chunk)
+    }
 
     zonal_stats <- se_list %>%
       purrr::map(
