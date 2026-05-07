@@ -9,7 +9,7 @@
 list_covariates <- function(as_data_frame = TRUE) {
   # Get collections
   res <- rstac::stac(stac_url) |>
-    rstac::collections() |>
+    rstac::collections(limit = 9999) |>
     rstac::get_request()
 
   # Just keep "collections" entry
