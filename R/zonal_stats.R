@@ -120,7 +120,10 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col =
 }
 
 get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col, chunk_threshold = 50) {
+get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col, chunk_threshold = 50) {
   # If n_days >= 50, just get by SE
+
+
 
   if (n_days >= chunk_threshold) {
     zonal_stats <- se_list %>%
@@ -152,7 +155,8 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
           covariate_id,
           n_days,
           radius = radius,
-          spatial_stats = spatial_stats
+          spatial_stats = spatial_stats,
+          chunk_threshold = chunk_threshold
         ),
         .progress = TRUE
       )
@@ -212,7 +216,7 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
                                      "median", "majority", "minority", "unique",
                                      "range", "nodata", "area", "freq_hist"
                                    ),
-                                   date_col = date_col) {
+                                   date_col = date_col,  chunk_threshold) {
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
   stac_items <- get_items_for_zonal_stats(
     se,
@@ -237,7 +241,7 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
   # Set up requests to parallelize
 
   request_base <- httr2::request(zonal_stats_raster_url) %>%
-    httr2::req_throttle(capacity = 50, fill_time_s = 30) %>%
+    httr2::req_throttle(capacity = chunk_threshold, fill_time_s = 30) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = list(
@@ -298,7 +302,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
                                       "min", "max", "mean", "count", "sum", "std",
                                       "median", "majority", "minority", "unique",
                                       "range", "nodata", "area", "freq_hist"
-                                    )) {
+                                    ), chunk_threshold) {
   # TODO -> reduce ALL duplication from get_zonal_stats_single
 
   # Multiple SEs here, so get items for each
@@ -329,7 +333,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
   # Set up requests to parallelize
 
   request_base <- httr2::request(zonal_stats_raster_url) %>%
-    httr2::req_throttle(capacity = 50, fill_time_s = 30) %>%
+    httr2::req_throttle(capacity = chunk_threshold, fill_time_s = 30) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = NULL,
