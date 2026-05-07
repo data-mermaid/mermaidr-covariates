@@ -15,6 +15,7 @@ For more details on using `mermaidr` in general, please see the
 You can install `mermaidrcovariates` from GitHub with:
 
 ``` r
+
 # install.packages("remotes")
 remotes::install_github("data-mermaid/mermaidr-covariates")
 ```
@@ -29,6 +30,7 @@ For this example, we will work with hard coral cover data, available
 from the Benthic PIT method.
 
 ``` r
+
 library(mermaidrcovariates)
 library(mermaidr)
 
@@ -42,6 +44,7 @@ name and average hard coral cover, using the `tidyverse` package for
 data manipulation.
 
 ``` r
+
 library(tidyverse)
 
 se <- se %>%
@@ -55,6 +58,7 @@ the
 function:
 
 ``` r
+
 list_covariates()
 #> # A tibble: 10 × 10
 #>    id         title description start_date end_date   license keywords providers
@@ -86,6 +90,7 @@ including) the sample event, using the *mean* SST within 100m of the
 sites:
 
 ``` r
+
 max_sst <- se %>%
   get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean", temporal_stats = "max")
 ```
@@ -95,6 +100,7 @@ they are, you can see they contain start and end date of the data used
 for the covariates, the band, and the summarised value.
 
 ``` r
+
 max_sst %>%
   unnest(covariates)
 #> # A tibble: 10 × 12
@@ -133,6 +139,7 @@ In this case, we omit `temporal_stats` and just get the mean SST within
 100m of the sites, for all 20 days:
 
 ``` r
+
 sst_by_day <- se %>%
   get_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean")
 

@@ -11,6 +11,7 @@ the survey.
 Load libraries to use for analysis.
 
 ``` r
+
 # remotes::install_github("data-mermaid/mermaidr")
 # remotes::install_github("data-mermaid/mermaidr-covariates")
 
@@ -27,6 +28,7 @@ projects whose tags contain “GFCR”, and projects that have hard coral
 cover data.
 
 ``` r
+
 summary_sampleevents <- mermaid_get_summary_sampleevents()
 
 gfcr_summary_sampleevents <- summary_sampleevents %>%
@@ -64,6 +66,7 @@ Summarise projects to show their tags, country, number of sites, and
 average hard coral cover.
 
 ``` r
+
 gfcr_summary_sampleevents %>%
   group_by(project, tags, country) %>%
   summarise(
@@ -93,6 +96,7 @@ Next, get the relevant covariates for these sites.
 List available covariates.
 
 ``` r
+
 list_covariates()
 ```
 
@@ -117,6 +121,7 @@ Focus on Sea Surface Temperature, and get the max for the 60 days prior
 to the survey data. Review the survey data:
 
 ``` r
+
 gfcr_summary_sampleevents %>%
   distinct(project, site, latitude, longitude, sample_date)
 ```
@@ -148,6 +153,7 @@ including) the sample event, using the *mean* SST within 100m of the
 sites:
 
 ``` r
+
 max_sst <- gfcr_summary_sampleevents %>%
   get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 60, radius = 100, spatial_stats = "mean", temporal_stats = "max")
 ```
@@ -156,6 +162,7 @@ Look at the returned data, keeping only the project information, site,
 survey date, hard coral cover, and covariates.
 
 ``` r
+
 max_sst <- max_sst %>%
   select(site, sample_date, hard_coral_cover, covariates)
 
@@ -184,6 +191,7 @@ they are, you can see they contain start and end date of the data used
 for the covariates, the band, and the summarised value.
 
 ``` r
+
 max_sst <- max_sst %>%
   unnest(covariates)
 
@@ -223,6 +231,7 @@ Finally, visualize coral cover against the maximum Sea Surface
 Temperature for the past 60 days.
 
 ``` r
+
 ggplot(
   max_sst,
   aes(
