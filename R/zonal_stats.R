@@ -153,13 +153,13 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
     n_chunks <- ceiling(nrow(ses) / chunk_size)
 
     if (n_chunks == 1) {
-        se_list <- ses %>%
-            dplyr::mutate(...chunk = 1) %>%
-            split(.$...chunk)
+      se_list <- ses %>%
+        dplyr::mutate(...chunk = 1) %>%
+        split(.$...chunk)
     } else {
-        se_list <- ses %>%
-            dplyr::mutate(...chunk = cut(dplyr::row_number(), n_chunks, label = FALSE)) %>%
-            split(.$...chunk)
+      se_list <- ses %>%
+        dplyr::mutate(...chunk = cut(dplyr::row_number(), n_chunks, label = FALSE)) %>%
+        split(.$...chunk)
     }
 
     zonal_stats <- se_list %>%
