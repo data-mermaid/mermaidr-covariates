@@ -18,8 +18,9 @@
 get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  radius = 1000,
                                  spatial_stats = c("min", "max", "mean"),
-                                 date_col = "sample_date") {
-                                 chunk_threshold = 50) {
+                                 date_col = "sample_date",
+                                 chunk_threshold = 50,
+                                 dedupe_items) {
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -44,9 +45,10 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     split(.$...id)
 
   # Get zonal stats for all SEs
-  zonal_stats <- get_zonal_stats(
-    se_list, covariate_id, covariate_name, n_,
-    chunk_threshold = chunk_threshold
+  zonal_stats <- get_zonal_stats(se_list, covariate_id, covariate_name, n_days,
+    radius, spatial_stats,
+    chunk_threshold = chunk_threshold,
+    dedupe_items
   )
 
   # Attach to sample events and remove ID
@@ -55,7 +57,21 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     dplyr::select(-...id)
 }
 
-get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col = "sample_date") {
+prepare_rstac_request <- function(q, ...) {
+  rstac:::check_query(q)
+  q$verb <- "GET"
+  q$encode <- NULL
+  q$version <- rstac:::stac_version(q, ...)
+  q <- rstac:::before_request(q)
+  list(
+    q = q,
+    url = rstac:::resolve_url(q$base_url, q$endpoint),
+    query = rstac:::query_encode(q$params)
+  )
+}
+
+
+get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365,date_col = "sample_date", prepare_only = FALSE) {
   # Get sample_date
   sample_date <- df %>%
     dplyr::pull(dplyr::all_of(date_col))
@@ -67,6 +83,18 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col =
 
   # Construct interval
   input_interval <- start_end_to_interval(input_sample_date_start, input_sample_date_end)
+
+  if (prepare_only) {
+    query_info <- rstac::stac(stac_url) |>
+      rstac::stac_search(
+        collections = covariate_id,
+        datetime = input_interval,
+        limit = 999999
+      ) %>%
+      prepare_rstac_request()
+
+    return(query_info)
+  }
 
   # Search for items between those dates
   relevant_items <- rstac::stac(stac_url) |>
@@ -120,7 +148,10 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col =
   )
 }
 
-get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col, chunk_threshold = 100) {
+get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius,
+                            date_col,
+                            spatial_stats, chunk_threshold = 100, dedupe_items) {
+
   # If n_days >= chunk_threshold, just get by SE
   # Also checking that the interval is daily, in this case
   # Otherwise, if it is e.g. monthly, then we might want to increase the chunk size
@@ -132,6 +163,7 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
     browser()
   }
   do_by_se <- n_days >= chunk_threshold & covariate_interval == "daily"
+  # do_by_se <- FALSE
 
   if (do_by_se) {
     zonal_stats <- se_list %>%
@@ -150,7 +182,13 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
     # Otherwise, chunk SEs and get that way
     ses <- dplyr::bind_rows(se_list)
     chunk_size <- floor(chunk_threshold / n_days)
-    n_chunks <- ceiling(nrow(ses) / chunk_size)
+
+    if (chunk_size == 0) {
+      chunk_size <- chunk_threshold
+      n_chunks <- 1
+    } else {
+      n_chunks <- ceiling(nrow(ses) / chunk_size)
+    }
 
     if (n_chunks == 1) {
       se_list <- ses %>%
@@ -170,7 +208,8 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
           n_days,
           radius = radius,
           spatial_stats = spatial_stats,
-          chunk_threshold = chunk_threshold
+          chunk_threshold = chunk_threshold,
+          dedupe_items = dedupe_items
         ),
         .progress = TRUE
       )
@@ -193,7 +232,7 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
       }
     })
 
-  if (n_days >= chunk_threshold) {
+  if (do_by_se) {
     zonal_stats <- zonal_stats %>%
       purrr::list_rbind(names_to = "...id")
   } else {
@@ -255,7 +294,7 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
   # Set up requests to parallelize
 
   request_base <- httr2::request(zonal_stats_raster_url) %>%
-    httr2::req_throttle(capacity = chunk_threshold, fill_time_s = 30) %>%
+    httr2::req_throttle(capacity = nrow(stac_items), fill_time_s = 30) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = list(
@@ -316,17 +355,21 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
                                       "min", "max", "mean", "count", "sum", "std",
                                       "median", "majority", "minority", "unique",
                                       "range", "nodata", "area", "freq_hist"
-                                    ), chunk_threshold) {
+                                    ), chunk_threshold, dedupe_items) {
   # TODO -> reduce ALL duplication from get_zonal_stats_single
 
   # Multiple SEs here, so get items for each
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
+
+  start <- Sys.time()
   stac_items <- se %>%
     dplyr::select(-...chunk) %>%
     split(.$...id) %>%
     purrr::map_dfr(\(x) get_items_for_zonal_stats(x, covariate_id, n_days = n_days),
       .id = "...id"
     )
+
+  end <- Sys.time()
 
   stac_items <- stac_items %>%
     dplyr::left_join(se, by = "...id")
@@ -358,43 +401,92 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
     )) %>%
     httr2::req_error(is_error = \(res) FALSE)
 
-  stac_items <- stac_items %>%
-    dplyr::mutate(...secondary_id = glue::glue("{...id}_{url}")) %>%
-    split(.$...secondary_id)
+  if (dedupe_items) {
+    stac_items <- stac_items %>%
+      dplyr::mutate(...secondary_id = glue::glue("{latitude}_{longitude}_{url}"))
 
-  requests <- purrr::map(
-    stac_items,
-    \(x) {
-      request_base %>%
-        httr2::req_body_json_modify(
-          url = x[["url"]],
-          aoi = list(
-            type = "Point",
-            coordinates = c(x[["longitude"]], x[["latitude"]]),
-            radius = radius
-          ),
-        )
-    }
-  )
+    stac_items_dedupe <- stac_items %>%
+      dplyr::distinct(latitude, longitude, url, ...secondary_id) %>%
+      split(.$...secondary_id)
 
-  res <- httr2::req_perform_parallel(requests, progress = FALSE)
-
-  names(res) <- names(stac_items)
-
-  # Format the results of each call
-  res %>%
-    purrr::keep(\(x) x$status_code == 200) %>%
-    purrr::imap(
-      \(res, date) {
-        res %>%
-          httr2::resp_body_json() %>%
-          purrr::map_dfr(\(x) {
-            x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
-            dplyr::as_tibble(x)
-          }, .id = "band")
+    requests <- purrr::map(
+      stac_items_dedupe,
+      \(x) {
+        request_base %>%
+          httr2::req_body_json_modify(
+            url = x[["url"]],
+            aoi = list(
+              type = "Point",
+              coordinates = c(x[["longitude"]], x[["latitude"]]),
+              radius = radius
+            ),
+          )
       }
-    ) %>%
-    purrr::list_rbind(names_to = "...secondary_id") %>%
-    dplyr::left_join(stac_items %>% dplyr::bind_rows(), by = "...secondary_id") %>%
-    dplyr::select(-...secondary_id, -...chunk)
+    )
+
+    start <- Sys.time()
+
+    res <- httr2::req_perform_parallel(requests, progress = FALSE)
+
+    end <- Sys.time()
+
+    names(res) <- names(stac_items_dedupe)
+
+    # Format the results of each call
+    res %>%
+      purrr::keep(\(x) x$status_code == 200) %>%
+      purrr::imap(
+        \(res, date) {
+          res %>%
+            httr2::resp_body_json() %>%
+            purrr::map_dfr(\(x) {
+              x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
+              dplyr::as_tibble(x)
+            }, .id = "band")
+        }
+      ) %>%
+      purrr::list_rbind(names_to = "...secondary_id") %>%
+      dplyr::left_join(stac_items %>% dplyr::bind_rows(), by = "...secondary_id") %>%
+      dplyr::select(-...secondary_id, -...chunk)
+  } else {
+    stac_items <- stac_items %>%
+      dplyr::mutate(...secondary_id = glue::glue("{...id}_{url}")) %>%
+      split(.$...secondary_id)
+
+    requests <- purrr::map(
+      stac_items,
+      \(x) {
+        request_base %>%
+          httr2::req_body_json_modify(
+            url = x[["url"]],
+            aoi = list(
+              type = "Point",
+              coordinates = c(x[["longitude"]], x[["latitude"]]),
+              radius = radius
+            ),
+          )
+      }
+    )
+
+    res <- httr2::req_perform_parallel(requests, progress = FALSE)
+
+    names(res) <- names(stac_items)
+
+    # Format the results of each call
+    res %>%
+      purrr::keep(\(x) x$status_code == 200) %>%
+      purrr::imap(
+        \(res, date) {
+          res %>%
+            httr2::resp_body_json() %>%
+            purrr::map_dfr(\(x) {
+              x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
+              dplyr::as_tibble(x)
+            }, .id = "band")
+        }
+      ) %>%
+      purrr::list_rbind(names_to = "...secondary_id") %>%
+      dplyr::left_join(stac_items %>% dplyr::bind_rows(), by = "...secondary_id") %>%
+      dplyr::select(-...secondary_id, -...chunk)
+  }
 }

@@ -20,7 +20,8 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          radius = 1000,
                                          spatial_stats = c("min", "max", "mean"),
                                          date_col = "sample_date",
-                                         chunk_threshold = 50) {
+                                         chunk_threshold = 50,
+                                         dedupe_items = FALSE) {
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -38,8 +39,10 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
     add_id_for_iteration(strip_cols = FALSE, date_col)
 
   # Get (non-summary) zonal statistics
-  zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats, date_col = date_col, chunk_threshold= chunk_threshold)
-
+  zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats,
+                                      date_col = date_col,
+                                      chunk_threshold = chunk_threshold,
+                                      dedupe_items = dedupe_items)
   zonal_stats <- zonal_stats %>%
     add_id_for_iteration(strip_cols = TRUE, date_col) %>% # Add id back on
     dplyr::left_join(zonal_stats, by = c("site", date_col, "latitude", "longitude")) %>%
