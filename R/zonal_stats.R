@@ -56,7 +56,6 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     dplyr::left_join(zonal_stats, by = "...id") %>%
     dplyr::select(-...id)
 }
-
 prepare_rstac_request <- function(q, ...) {
   rstac:::check_query(q)
   q$verb <- "GET"
@@ -83,18 +82,6 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365,date_col = 
 
   # Construct interval
   input_interval <- start_end_to_interval(input_sample_date_start, input_sample_date_end)
-
-  if (prepare_only) {
-    query_info <- rstac::stac(stac_url) |>
-      rstac::stac_search(
-        collections = covariate_id,
-        datetime = input_interval,
-        limit = 999999
-      ) %>%
-      prepare_rstac_request()
-
-    return(query_info)
-  }
 
   # Search for items between those dates
   relevant_items <- rstac::stac(stac_url) |>
