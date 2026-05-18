@@ -17,30 +17,48 @@ get_covariate_name_from_id <- function(id) {
     purrr::pluck("title")
 }
 
-add_id_for_iteration <- function(df, strip_cols, date_col) {
-  # Allow for the possibility that they have more than one record at each site at each date
-  # Make distinct for them, but also handle the possibility of different latitude/longitude
-  # So best to just distinguish entirely, using row number
-  id <- df %>%
-    dplyr::mutate(...date_temp = !!rlang::sym(date_col)) %>%
-    dplyr::distinct(site, latitude, longitude, ...date_temp) %>%
-    dplyr::arrange(site, ...date_temp, latitude, longitude) %>%
-    dplyr::mutate(...id = glue::glue("{site}_{...date_temp}")) %>%
-    dplyr::group_by(...id) %>%
-    dplyr::mutate(row = dplyr::row_number()) %>%
-    dplyr::ungroup() %>%
-    dplyr::mutate(...id = glue::glue("{...id}_{row}")) %>%
-    dplyr::select(-row)
+add_id_for_iteration <- function(df, date_col, n_days, dedupe_items) {
+    df <- df %>%
+        dplyr::mutate(...date_temp = !!rlang::sym(date_col))
 
-  id <- id %>%
-    dplyr::rename_with(\(x) date_col, ...date_temp)
+  if (!dedupe_items) {
+    df <- df %>%
+      dplyr::mutate(...id = glue::glue("{site_id}_{...date_temp}"))
 
-  if (strip_cols) {
-    id
-  } else {
-    df %>%
-      dplyr::left_join(id, by = c("site", "latitude", "longitude", date_col))
+    return(df)
   }
+
+  # Deduplicate overlapping API calls
+  # e.g. if they have two samples within a year (or whatever n_days is),
+  # many of the items will be the same
+  # So determine which overlap, then iterate over those
+  # Rather than just the site and sample date
+
+    # Add row number to get it back into the same order
+    df <- df %>%
+        mutate(...row = dplyr::row_number())
+
+  df %>%
+    dplyr::group_by(latitude, longitude) %>%    # For "site", actually just use lat/long
+    dplyr::arrange(...date_temp) %>%
+    dplyr::mutate(
+      ...prev_date = dplyr::lag(...date_temp),
+      ...diff = ...date_temp - ...prev_date,
+      ...over_n_days = ...diff > n_days,
+      ...start_new = dplyr::coalesce(...over_n_days, TRUE), # So that the first row is filled in
+      ...group = dplyr::case_when(...start_new ~ ...date_temp)
+    ) %>%
+    tidyr::fill(...group, .direction = "down") %>%
+    dplyr::group_by(latitude, longitude, ...group) %>%
+    mutate(
+      ...start_date = min(...date_temp),
+      ...end_date = max(...date_temp)
+    ) %>%
+    dplyr::ungroup() %>%
+    dplyr::mutate(...id = glue::glue("{latitude}_{longitude}_{...start_date}_{...end_date}")) %>%
+      dplyr::arrange(...row) %>%
+    dplyr::select(dplyr::all_of(names(df)), ...start_date, ...end_date, ...id) %>%
+      dplyr::select(-...date_temp)
 }
 
 lookup_collection <- function(x) {

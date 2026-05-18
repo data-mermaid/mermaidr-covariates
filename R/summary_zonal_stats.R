@@ -20,8 +20,12 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          radius = 1000,
                                          spatial_stats = c("min", "max", "mean"),
                                          date_col = "sample_date",
-                                         chunk_threshold = 50,
+                                         temporal_stats = c("min", "max", "mean"),
+                                         chunk_threshold = 100,
                                          dedupe_items = FALSE) {
+
+    original_names <- names(se)
+
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -34,9 +38,10 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
     covariate_name <- covariate
   }
 
-  # Add an ID for iterating over (with site/date/lat/long distinct)
+  # Add an ID for iterating over (splitting by lat/long/sample date,
+  # accounting for overlapping sample dates to reduce duplicating API calls)
   se <- se %>%
-    add_id_for_iteration(strip_cols = FALSE, date_col)
+      add_id_for_iteration(date_col, n_days, dedupe_items)
 
   # Get (non-summary) zonal statistics
   zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats,
@@ -44,8 +49,16 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                       chunk_threshold = chunk_threshold,
                                       dedupe_items = dedupe_items)
   zonal_stats <- zonal_stats %>%
-    add_id_for_iteration(strip_cols = TRUE, date_col) %>% # Add id back on
-    dplyr::left_join(zonal_stats, by = c("site", date_col, "latitude", "longitude")) %>%
+    add_id_for_iteration(date_col, n_days, dedupe_items)
+
+  # Get (non-summary) zonal statistics
+  zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats,
+    chunk_threshold = chunk_threshold,
+    dedupe_items = dedupe_items
+  )
+
+  zonal_stats <- zonal_stats %>%
+      add_id_for_iteration(date_col, n_days, dedupe_items) %>% # Add id back on
     # just keep ID and covariates -> do not need lat/long/date, join back on later
     dplyr::select(...id, covariates) %>%
     # Unnest covariates, remove date
@@ -102,5 +115,5 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
   # Re-attach to existing df, even if it was not distinct
   se %>%
     dplyr::left_join(zonal_stats_df, by = "...id") %>%
-    dplyr::select(-...id)
+    dplyr::select(dplyr::all_of(original_names), covariates)
 }
