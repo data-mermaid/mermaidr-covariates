@@ -21,6 +21,9 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  date_col = "sample_date",
                                  chunk_threshold = 100,
                                  dedupe_items) {
+  chunk_size <- 100
+  dedupe_items <- TRUE
+
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -46,7 +49,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
   # Get zonal stats for all SEs
   zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name, n_days,
     radius, spatial_stats,
-    chunk_threshold = chunk_threshold,
+    chunk_size = chunk_size,
     dedupe_items
   )
 
@@ -139,11 +142,6 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius,
                             date_col, spatial_stats, chunk_threshold = 100, dedupe_items) {
 
-  # If n_days >= chunk_threshold, just get by SE
-  # Also checking that the interval is daily, in this case
-  # Otherwise, if it is e.g. monthly, then we might want to increase the chunk size
-  # Because then we would not actually be getting 50 items, but say 1-2 if it is monthly
-
   covariate_interval <- determine_covariate_interval(covariate_id)
 
   if (!covariate_interval %in% c("daily")) {
@@ -180,7 +178,7 @@ get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radiu
         n_days,
         radius = radius,
         spatial_stats = spatial_stats,
-        chunk_threshold = chunk_threshold,
+        chunk_size = chunk_size,
         dedupe_items = dedupe_items
       ),
       .progress = TRUE
@@ -322,7 +320,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
                                       "min", "max", "mean", "count", "sum", "std",
                                       "median", "majority", "minority", "unique",
                                       "range", "nodata", "area", "freq_hist"
-                                    ), chunk_threshold, dedupe_items) {
+                                    ), chunk_size, dedupe_items) {
   # TODO -> reduce ALL duplication from get_zonal_stats_single
 
   # Multiple SEs here, so get items for each
@@ -339,7 +337,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
         dplyr::select(...id, latitude, longitude),
       by = "...id"
     ) %>%
-      dplyr::distinct()
+    dplyr::distinct()
 
   # Returns a list with elements start_date, end_date, urls
   # and NULL if there are no items
@@ -356,7 +354,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
 
   # Set up requests to parallelize
   request_base <- httr2::request(zonal_stats_raster_url) %>%
-    httr2::req_throttle(capacity = chunk_threshold, fill_time_s = 3) %>%
+    httr2::req_throttle(capacity = chunk_size, fill_time_s = 3) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = NULL,

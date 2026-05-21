@@ -23,8 +23,10 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          temporal_stats = c("min", "max", "mean"),
                                          chunk_threshold = 100,
                                          dedupe_items = FALSE) {
+  chunk_size <- 100
+  dedupe_items <- TRUE
 
-    original_names <- names(se)
+  original_names <- names(se)
 
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
@@ -53,7 +55,7 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Get (non-summary) zonal statistics
   zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats,
-    chunk_threshold = chunk_threshold,
+    chunk_size = chunk_size,
     dedupe_items = dedupe_items
   )
 
