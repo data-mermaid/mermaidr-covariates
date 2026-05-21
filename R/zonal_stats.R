@@ -57,7 +57,8 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col = "sample_date") {
   # Get sample_date
   sample_date <- df %>%
-    dplyr::pull(dplyr::all_of(date_col))
+    dplyr::pull(dplyr::all_of(date_col)) %>%
+    unique()
 
   input_sample_date_end <- sample_date
 
@@ -118,7 +119,6 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365, date_col =
     )
   )
 }
-
 
 get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius, spatial_stats, date_col) {
   zonal_stats <- se_list %>%
@@ -203,12 +203,15 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
 
   # Set up requests to parallelize
 
+  lat_long <- se %>%
+    dplyr::distinct(latitude, longitude)
+
   request_base <- httr2::request(zonal_stats_raster_url) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = list(
         type = "Point",
-        coordinates = c(se[["longitude"]], se[["latitude"]]),
+        coordinates = c(lat_long[["longitude"]], lat_long[["latitude"]]),
         radius = radius
       ),
       url = NULL,
@@ -232,14 +235,18 @@ get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
 
   names(res) <- stac_items[["date"]]
 
-  # TODO -> handle this later on
-  # if (httr2::resp_status(res) != 200) {
-  #   stop(call. = FALSE, paste0(
-  #     "Error getting zonal statistics: ",
-  #     httr2::resp_status(res), " ",
-  #     httr2::resp_status_desc(res)
-  #   ))
-  # }
+  statuses <- res %>% purrr::map_dbl(httr2::resp_status)
+  descs <- res %>% purrr::map_chr(httr2::resp_status_desc)
+
+  if (any(statuses != 200)) {
+    status_desc <- paste(statuses, descs) %>%
+      unique() %>%
+      paste(sep = ", ")
+
+    stop(call. = FALSE, paste(
+      "Error getting zonal statistics:", status_desc
+    ))
+  }
 
   # Format the results of each call
   res %>%
