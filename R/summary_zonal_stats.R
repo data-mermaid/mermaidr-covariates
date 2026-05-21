@@ -19,8 +19,8 @@
 get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          radius = 1000,
                                          spatial_stats = c("min", "max", "mean"),
-                                         date_col = "sample_date",
-                                         temporal_stats = c("min", "max", "mean")) {
+                                         temporal_stats = c("min", "max", "mean"),
+                                         date_col = "sample_date") {
   chunk_size <- 100
 
   original_names <- names(se)
@@ -43,9 +43,11 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
     add_id_for_iteration(date_col, n_days)
 
   # Get (non-summary) zonal statistics
-  zonal_stats <- get_zonal_statistics(se, covariate, n_days = n_days,
-                                      radius = radius, spatial_stats = spatial_stats,
-                                      date_col = date_col)
+  zonal_stats <- get_zonal_statistics(se, covariate,
+    n_days = n_days,
+    radius = radius, spatial_stats = spatial_stats,
+    date_col = date_col
+  )
   zonal_stats <- zonal_stats %>%
     add_id_for_iteration(date_col, n_days)
 

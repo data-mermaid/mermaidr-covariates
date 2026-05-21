@@ -18,10 +18,11 @@ get_covariate_name_from_id <- function(id) {
 }
 
 add_id_for_iteration <- function(df, date_col, n_days) {
-
   df <- df %>%
-    dplyr::mutate(...date_temp = !!rlang::sym(date_col),
-                  ...date_temp = as.Date(...date_temp))
+    dplyr::mutate(
+      ...date_temp = !!rlang::sym(date_col),
+      ...date_temp = as.Date(...date_temp)
+    )
 
   # Deduplicate overlapping API calls
   # e.g. if they have two samples within a year (or whatever n_days is),
