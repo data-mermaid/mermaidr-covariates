@@ -52,6 +52,16 @@ add_id_for_iteration <- function(df, date_col, n_days) {
     dplyr::select(-...date_temp)
 }
 
+add_id_for_joining <- function(df, date_col) {
+  df %>%
+    dplyr::mutate(
+      ...date_temp = !!rlang::sym(date_col),
+      ...date_temp = as.Date(...date_temp),
+      ...join_id = glue::glue("{project_id}_{site}_{latitude}_{longitude}_{...date_temp}_{dplyr::row_number()}")
+    ) %>%
+    dplyr::select(-...date_temp)
+}
+
 lookup_collection <- function(x) {
   rstac::stac(stac_url) %>%
     rstac::collections(collection_id = x) %>%

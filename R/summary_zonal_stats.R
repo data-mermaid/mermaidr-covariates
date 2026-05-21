@@ -48,13 +48,11 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
     radius = radius, spatial_stats = spatial_stats,
     date_col = date_col
   )
-  zonal_stats <- zonal_stats %>%
-    add_id_for_iteration(date_col, n_days)
 
   zonal_stats <- zonal_stats %>%
-    add_id_for_iteration(date_col, n_days) %>% # Add id back on
+    add_id_for_joining(date_col) %>% # Add joining ID on
     # just keep ID and covariates -> do not need lat/long/date, join back on later
-    dplyr::select(...id, covariates) %>%
+    dplyr::select(...join_id, covariates) %>%
     # Unnest covariates, remove date
     tidyr::unnest(covariates) %>%
     dplyr::select(-date)
@@ -97,17 +95,19 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
   # Put into a df-column called covariates
 
   zonal_stats_df <- zonal_stats_summary %>%
-    dplyr::right_join(se, by = "...id") %>%
+    dplyr::right_join(se %>%
+      add_id_for_joining(date_col), by = "...join_id") %>%
     dplyr::mutate(
       covariate = covariate_name,
       start_date = start_date,
       end_date = end_date
     ) %>%
-    dplyr::select(...id, covariate, start_date, end_date, n_dates, band, temporal_stat, spatial_stat, value) %>%
-    tidyr::nest(covariates = -...id)
+    dplyr::select(...join_id, covariate, start_date, end_date, n_dates, band, temporal_stat, spatial_stat, value) %>%
+    tidyr::nest(covariates = -...join_id)
 
   # Re-attach to existing df, even if it was not distinct
   se %>%
-    dplyr::left_join(zonal_stats_df, by = "...id") %>%
+    add_id_for_joining(date_col) %>%
+    dplyr::left_join(zonal_stats_df, by = "...join_id") %>%
     dplyr::select(dplyr::all_of(original_names), covariates)
 }

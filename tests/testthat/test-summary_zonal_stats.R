@@ -151,33 +151,56 @@ test_that("summary_zonal_stats works with different date_col, retains both cols 
 })
 
 test_that("Parellelization produces results identical to prior method", {
+
+    # Summary
+  summary_covariates_to_test_parallelization_against <- readRDS(
+    here::here(
+      "inst", "extdata",
+      "summary_covariates_to_test_parallelization_against.rds"
+    )
+  ) %>%
+    dplyr::arrange(project_id, site, sample_date)
+
+  ses <- summary_covariates_to_test_parallelization_against %>%
+    dplyr::select(-covariates)
+
+  new_summary_covariates <- ses %>%
+    get_summary_zonal_statistics("Daily Sea Surface Temperature",
+      n_days = 10,
+      spatial_stats = "mean",
+      temporal_stats = "mean", radius = 100
+    ) %>%
+    dplyr::arrange(project_id, site, sample_date)
+
+  expect_equal(
+    new_summary_covariates,
+    summary_covariates_to_test_parallelization_against,
+    ignore_attr = TRUE
+  )
+
+  # Non-summary
+
   covariates_to_test_parallelization_against <- readRDS(
     here::here(
       "inst", "extdata",
       "covariates_to_test_parallelization_against.rds"
     )
-  )
+  ) %>%
+    dplyr::arrange(project_id, site, sample_date)
 
   ses <- covariates_to_test_parallelization_against %>%
     dplyr::select(-covariates)
 
   new_covariates <- ses %>%
-    get_summary_zonal_statistics("Daily Sea Surface Temperature",
+    get_zonal_statistics("Daily Sea Surface Temperature",
       n_days = 10,
-      spatial_stats = "mean",
-      temporal_stats = "mean", radius = 100
-    )
-
-  r1 <- 30
-  r <- 35
+      spatial_stats = "mean", , radius = 100
+    ) %>%
+    dplyr::arrange(project_id, site, sample_date)
 
   expect_equal(
-    new_covariates %>%
-      dplyr::arrange(project_id, site, sample_date) %>%
-        dplyr::slice(r1:r),
-    covariates_to_test_parallelization_against %>%
-      dplyr::arrange(project_id, site, sample_date) %>%
-        dplyr::slice(r1:r),
+    new_covariates,
+    covariates_to_test_parallelization_against,
     ignore_attr = TRUE
   )
 })
