@@ -34,9 +34,9 @@ add_id_for_iteration <- function(df, date_col, n_days, dedupe_items) {
   # So determine which overlap, then iterate over those
   # Rather than just the site and sample date
 
-    # Add row number to get it back into the same order
-    df <- df %>%
-        mutate(...row = dplyr::row_number())
+  # Add row number to get it back into the same order
+  df <- df %>%
+    mutate(...row = dplyr::row_number())
 
   df %>%
     dplyr::group_by(latitude, longitude) %>%    # For "site", actually just use lat/long
