@@ -17,26 +17,17 @@ get_covariate_name_from_id <- function(id) {
     purrr::pluck("title")
 }
 
-add_id_for_iteration <- function(df, date_col, n_days, dedupe_items) {
+add_id_for_iteration <- function(df, date_col, n_days) {
+
   df <- df %>%
-    dplyr::mutate(...date_temp = !!rlang::sym(date_col))
-
-  if (!dedupe_items) {
-    df <- df %>%
-      dplyr::mutate(...id = glue::glue("{site_id}_{...date_temp}"))
-
-    return(df)
-  }
+    dplyr::mutate(...date_temp = !!rlang::sym(date_col),
+                  ...date_temp = as.Date(...date_temp))
 
   # Deduplicate overlapping API calls
   # e.g. if they have two samples within a year (or whatever n_days is),
   # many of the items will be the same
   # So determine which overlap, then iterate over those
   # Rather than just the site and sample date
-
-  # Add row number to get it back into the same order
-  df <- df %>%
-    dplyr::mutate(...row = dplyr::row_number())
 
   df %>%
     dplyr::group_by(latitude, longitude) %>% # For "site", actually just use lat/long
@@ -50,13 +41,12 @@ add_id_for_iteration <- function(df, date_col, n_days, dedupe_items) {
     ) %>%
     tidyr::fill(...group, .direction = "down") %>%
     dplyr::group_by(latitude, longitude, ...group) %>%
-    mutate(
+    dplyr::mutate(
       ...start_date = min(...date_temp),
       ...end_date = max(...date_temp)
     ) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(...id = glue::glue("{latitude}_{longitude}_{...start_date}_{...end_date}")) %>%
-    dplyr::arrange(...row) %>%
     dplyr::select(dplyr::all_of(names(df)), ...start_date, ...end_date, ...id) %>%
     dplyr::select(-...date_temp)
 }

@@ -18,9 +18,7 @@
 get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  radius = 1000,
                                  spatial_stats = c("min", "max", "mean"),
-                                 date_col = "sample_date",
-                                 chunk_threshold = 100,
-                                 dedupe_items) {
+                                 date_col = "sample_date") {
   chunk_size <- 100
 
   if (nrow(se) == 0) {
@@ -42,12 +40,12 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     # Add an ID for iterating over (splitting by lat/long/sample date,
     # accounting for overlapping sample dates to reduce duplicating API calls)
     se <- se %>%
-      add_id_for_iteration(date_col, n_days, dedupe_items)
+      add_id_for_iteration(date_col, n_days)
   }
 
   # Get zonal stats for all SEs
-  zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name, n_days,
-    radius, spatial_stats,
+  zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name,
+    n_days = n_days, radius = radius, date_col = date_col, spatial_stats = spatial_stats,
     chunk_size = chunk_size
   )
 
@@ -55,18 +53,6 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
   se %>%
     dplyr::left_join(zonal_stats, by = "...id") %>%
     dplyr::select(-...id)
-}
-prepare_rstac_request <- function(q, ...) {
-  rstac:::check_query(q)
-  q$verb <- "GET"
-  q$encode <- NULL
-  q$version <- rstac:::stac_version(q, ...)
-  q <- rstac:::before_request(q)
-  list(
-    q = q,
-    url = rstac:::resolve_url(q$base_url, q$endpoint),
-    query = rstac:::query_encode(q$params)
-  )
 }
 
 get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
@@ -132,174 +118,65 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   )
 }
 
-get_zonal_stats <- function(se_list, covariate_id, covariate_name, n_days, radius,
-                            date_col, spatial_stats, chunk_threshold = 100, dedupe_items) {
-  covariate_interval <- determine_covariate_interval(covariate_id)
+get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
+                            date_col, spatial_stats, chunk_size) {
+  se_list <- ses %>%
+    split(.$...id)
 
-  if (!covariate_interval %in% c("daily")) {
-    browser()
-  }
-
-  if (do_by_se) {
-    zonal_stats <- se_list %>%
-      purrr::map(
-        \(se)
-        get_zonal_stats_single(se,
-          covariate_id,
-          n_days,
-          radius = radius,
-          spatial_stats = spatial_stats,
-          date_col = date_col
-        ),
-        .progress = TRUE
-      )
-  } else {
-    # Otherwise, chunk SEs and get that way
-    ses <- dplyr::bind_rows(se_list)
-    chunk_size <- floor(chunk_threshold / n_days)
-
-    zonal_stats <- se_list %>%
-      purrr::map(
-        \(se)
-        get_zonal_stats_chunked(
-          se,
-          covariate_id,
-          n_days,
-          radius = radius,
-          spatial_stats = spatial_stats,
-          chunk_size = chunk_size
-        ),
-        .progress = TRUE
-      )
-
-    zonal_stats <- zonal_stats %>%
-      purrr::map(\(x) {
-        if (nrow(x) == 0) {
-          dplyr::tibble(
-            start_date = NA,
-            end_date = NA,
-            date = NA,
-            band = NA,
-            spatial_stat = spatial_stats,
-            value = NA
-          ) %>%
-            tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
-        } else {
-          x
-        }
-      })
-
-    zonal_stats <- zonal_stats %>%
-      purrr::list_rbind(names_to = "...id")
-
-    zonal_stats %>%
-      dplyr::group_by(...id) %>%
-      dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE)) %>%
-      dplyr::ungroup() %>%
-      # TODO -> handle no data returned, e.g. with covariate "Daily Sea Surface Temperature (SST)"
-      # Add n_dates, add covariate, remove "band_" character
-      dplyr::mutate(
-        covariate = covariate_name,
-        band = stringr::str_remove(band, "band_"),
-        band = as.numeric(band)
-      ) %>%
-      # reorganize to have a column `spatial_stat` and `value`, instead of a column for each stat
-      tidyr::pivot_longer(
-        cols = dplyr::all_of(spatial_stats),
-        names_to = "spatial_stat",
-        values_to = "value"
-      ) %>%
-      # reorganize covariates columns
-      dplyr::select(...id, covariate, start_date, end_date, n_dates, date, band, spatial_stat, value) %>%
-      tidyr::nest(covariates = -...id, .by = "...id") # Nest covariates
-  }
-}
-
-get_zonal_stats_single <- function(se, covariate_id, n_days = 30, radius = 1000,
-                                   bands = list(1), approx_stats = FALSE,
-                                   spatial_stats = c(
-                                     "min", "max", "mean", "count", "sum", "std",
-                                     "median", "majority", "minority", "unique",
-                                     "range", "nodata", "area", "freq_hist"
-                                   ),
-                                   date_col = date_col, chunk_threshold) {
-  # Set up zonal_stats requests by getting relevant STAC items for each sample event
-  stac_items <- get_items_for_zonal_stats(
-    se,
-    covariate_id,
-    n_days = n_days,
-    date_col = date_col
-  )
-
-  # Returns a list with elements start_date, end_date, urls
-  # and NULL if there are no items
-
-  # Handle case where SE does not have any items
-
-  if (all(is.na(stac_items[["url"]]))) {
-    return(dplyr::tibble())
-  }
-
-  # Get zonal stats for each URL
-
-  # TODO -> handle no stats returned
-
-  # Set up requests to parallelize
-
-  request_base <- httr2::request(zonal_stats_raster_url) %>%
-    httr2::req_throttle(capacity = nrow(stac_items), fill_time_s = 30) %>%
-    httr2::req_user_agent("mermaidr-covariates") %>%
-    httr2::req_body_json(list(
-      aoi = list(
-        type = "Point",
-        coordinates = c(se[["longitude"]], se[["latitude"]]),
-        radius = radius
+  zonal_stats <- se_list %>%
+    purrr::map(
+      \(se)
+      get_zonal_stats_chunked(
+        se,
+        covariate_id,
+        n_days,
+        radius = radius,
+        spatial_stats = spatial_stats,
+        chunk_size = chunk_size
       ),
-      url = NULL,
-      stats = as.list(spatial_stats),
-      bands = bands,
-      approx_stats = approx_stats
-    )) %>%
-    httr2::req_error(is_error = \(res) FALSE)
+      .progress = TRUE
+    )
 
-  requests <- purrr::map(
-    stac_items[["url"]],
-    \(x) {
-      request_base %>%
-        httr2::req_body_json_modify(
-          url = x
-        )
-    }
-  )
-
-  res <- httr2::req_perform_parallel(requests, progress = FALSE)
-
-  names(res) <- stac_items[["date"]]
-
-  # TODO -> handle this later on
-  # if (httr2::resp_status(res) != 200) {
-  #   stop(call. = FALSE, paste0(
-  #     "Error getting zonal statistics: ",
-  #     httr2::resp_status(res), " ",
-  #     httr2::resp_status_desc(res)
-  #   ))
-  # }
-
-  # Format the results of each call
-  res %>%
-    purrr::keep(\(x) x$status_code == 200) %>%
-    purrr::imap(
-      \(res, date) {
-        res %>%
-          httr2::resp_body_json() %>%
-          purrr::map_dfr(\(x) {
-            x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
-            dplyr::as_tibble(x)
-          }, .id = "band")
+  zonal_stats <- zonal_stats %>%
+    purrr::map(\(x) {
+      if (nrow(x) == 0) {
+        dplyr::tibble(
+          start_date = NA,
+          end_date = NA,
+          date = NA,
+          band = NA,
+          spatial_stat = spatial_stats,
+          value = NA
+        ) %>%
+          tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
+      } else {
+        x
       }
+    })
+
+  zonal_stats <- zonal_stats %>%
+    purrr::list_rbind(names_to = "...id")
+
+  zonal_stats %>%
+    dplyr::group_by(...id) %>%
+    dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE)) %>%
+    dplyr::ungroup() %>%
+    # TODO -> handle no data returned, e.g. with covariate "Daily Sea Surface Temperature (SST)"
+    # Add n_dates, add covariate, remove "band_" character
+    dplyr::mutate(
+      covariate = covariate_name,
+      band = stringr::str_remove(band, "band_"),
+      band = as.numeric(band)
     ) %>%
-    purrr::list_rbind(names_to = "date") %>%
-    dplyr::bind_cols(stac_items %>% dplyr::distinct(start_date, end_date))
+    # reorganize to have a column `spatial_stat` and `value`, instead of a column for each stat
+    tidyr::pivot_longer(
+      cols = dplyr::all_of(spatial_stats),
+      names_to = "spatial_stat",
+      values_to = "value"
+    ) %>%
+    # reorganize covariates columns
+    dplyr::select(...id, covariate, start_date, end_date, n_dates, date, band, spatial_stat, value) %>%
+    tidyr::nest(covariates = -...id, .by = "...id") # Nest covariates
 }
 
 get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000,

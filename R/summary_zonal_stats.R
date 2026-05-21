@@ -20,11 +20,8 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          radius = 1000,
                                          spatial_stats = c("min", "max", "mean"),
                                          date_col = "sample_date",
-                                         temporal_stats = c("min", "max", "mean"),
-                                         chunk_threshold = 100,
-                                         dedupe_items = FALSE) {
+                                         temporal_stats = c("min", "max", "mean")) {
   chunk_size <- 100
-  dedupe_items <- TRUE
 
   original_names <- names(se)
 
@@ -43,22 +40,17 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
   # Add an ID for iterating over (splitting by lat/long/sample date,
   # accounting for overlapping sample dates to reduce duplicating API calls)
   se <- se %>%
-    add_id_for_iteration(date_col, n_days, dedupe_items)
+    add_id_for_iteration(date_col, n_days)
 
   # Get (non-summary) zonal statistics
-  zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats,
-    date_col = date_col,
-    chunk_threshold = chunk_threshold,
-    dedupe_items = dedupe_items
-  )
+  zonal_stats <- get_zonal_statistics(se, covariate, n_days = n_days,
+                                      radius = radius, spatial_stats = spatial_stats,
+                                      date_col = date_col)
   zonal_stats <- zonal_stats %>%
-    add_id_for_iteration(date_col, n_days, dedupe_items)
-
-  # Get (non-summary) zonal statistics
-  zonal_stats <- get_zonal_statistics(se, covariate, n_days, radius, spatial_stats)
+    add_id_for_iteration(date_col, n_days)
 
   zonal_stats <- zonal_stats %>%
-    add_id_for_iteration(date_col, n_days, dedupe_items) %>% # Add id back on
+    add_id_for_iteration(date_col, n_days) %>% # Add id back on
     # just keep ID and covariates -> do not need lat/long/date, join back on later
     dplyr::select(...id, covariates) %>%
     # Unnest covariates, remove date
