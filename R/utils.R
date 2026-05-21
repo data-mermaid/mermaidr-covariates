@@ -18,8 +18,8 @@ get_covariate_name_from_id <- function(id) {
 }
 
 add_id_for_iteration <- function(df, date_col, n_days, dedupe_items) {
-    df <- df %>%
-        dplyr::mutate(...date_temp = !!rlang::sym(date_col))
+  df <- df %>%
+    dplyr::mutate(...date_temp = !!rlang::sym(date_col))
 
   if (!dedupe_items) {
     df <- df %>%
@@ -36,10 +36,10 @@ add_id_for_iteration <- function(df, date_col, n_days, dedupe_items) {
 
   # Add row number to get it back into the same order
   df <- df %>%
-    mutate(...row = dplyr::row_number())
+    dplyr::mutate(...row = dplyr::row_number())
 
   df %>%
-    dplyr::group_by(latitude, longitude) %>%    # For "site", actually just use lat/long
+    dplyr::group_by(latitude, longitude) %>% # For "site", actually just use lat/long
     dplyr::arrange(...date_temp) %>%
     dplyr::mutate(
       ...prev_date = dplyr::lag(...date_temp),
@@ -56,9 +56,9 @@ add_id_for_iteration <- function(df, date_col, n_days, dedupe_items) {
     ) %>%
     dplyr::ungroup() %>%
     dplyr::mutate(...id = glue::glue("{latitude}_{longitude}_{...start_date}_{...end_date}")) %>%
-      dplyr::arrange(...row) %>%
+    dplyr::arrange(...row) %>%
     dplyr::select(dplyr::all_of(names(df)), ...start_date, ...end_date, ...id) %>%
-      dplyr::select(-...date_temp)
+    dplyr::select(-...date_temp)
 }
 
 lookup_collection <- function(x) {
@@ -104,36 +104,4 @@ get_covariate_id <- function(x) {
   }
 
   covariate_id
-}
-
-determine_covariate_interval <- function(covariate_id) {
-  # Determine whether a covariate is:
-  # daily
-  # monthly
-  # annually
-  # once only
-
-  # by looking at its start date, adding one year, then seeing how many items are returned
-
-  covariates <- list_covariates()
-
-  start_date <- covariates %>%
-    dplyr::filter(id == covariate_id) %>%
-    pull(start_date)
-
-  items <- rstac::stac(stac_url) %>%
-    rstac::stac_search(
-      collections = covariate_id,
-      datetime = start_end_to_interval(start_date, start_date + lubridate::years(1))
-    ) %>%
-    rstac::get_request()
-
-  n_items <- items$numberMatched
-
-  dplyr::case_when(
-    n_items < 2 ~ "annual/once",
-    n_items < 15 ~ "monthly",
-    n_items >= 15 & n_items <= 300 ~ "check",
-    n_items > 300 ~ "daily"
-  )
 }

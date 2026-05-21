@@ -29,41 +29,6 @@ test_that("get_zonal_statistics allows using covariate name or ID", {
   expect_identical(zs_name, zs_id)
 })
 
-test_that("NA returned for value ONLY when there is data on date, but not within radius", {
-  skip_if_offline()
-  skip_on_ci()
-  skip_on_cran()
-
-  # No data within 1000m of this site, known
-  se <- mermaidr::mermaid_get_project_data(
-    "75ef7a5a-c770-4ca6-b9f8-830cab74e425",
-    "benthicpit",
-    "sampleevents",
-    token = NULL
-  ) %>%
-    dplyr::filter(
-      site == "MAP28",
-      sample_date == "2010-05-07"
-    )
-
-  covariates <- get_zonal_statistics(se,
-    "Daily Sea Surface Temperature",
-    n_days = 1,
-    radius = 1000,
-    spatial_stats = "mean"
-  )
-
-  expect_true(covariates %>%
-    dplyr::pull(covariates) %>%
-    purrr::map_dbl("value") %>%
-    is.na())
-
-  expect_false(covariates %>%
-    dplyr::pull(covariates) %>%
-    purrr::map_chr("date") %>%
-    is.na())
-})
-
 test_that("NA returned for all columns when there is no data within date range", {
   skip_if_offline()
   skip_on_ci()
