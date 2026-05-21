@@ -149,3 +149,35 @@ test_that("summary_zonal_stats works with different date_col, retains both cols 
       "2026-01-01"
   )
 })
+
+test_that("Parellelization produces results identical to prior method", {
+  covariates_to_test_parallelization_against <- readRDS(
+    here::here(
+      "inst", "extdata",
+      "covariates_to_test_parallelization_against.rds"
+    )
+  )
+
+  ses <- covariates_to_test_parallelization_against %>%
+    dplyr::select(-covariates)
+
+  new_covariates <- ses %>%
+    get_summary_zonal_statistics("Daily Sea Surface Temperature",
+      n_days = 10,
+      spatial_stats = "mean",
+      temporal_stats = "mean", radius = 100
+    )
+
+  r1 <- 30
+  r <- 35
+
+  expect_equal(
+    new_covariates %>%
+      dplyr::arrange(project_id, site, sample_date) %>%
+        dplyr::slice(r1:r),
+    covariates_to_test_parallelization_against %>%
+      dplyr::arrange(project_id, site, sample_date) %>%
+        dplyr::slice(r1:r),
+    ignore_attr = TRUE
+  )
+})
