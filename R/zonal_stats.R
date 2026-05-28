@@ -13,12 +13,14 @@
 #' @param spatial_stats Spatial statistics -- used to summarise all data around
 #' the site location, according to the \code{radius} set.
 #' @param date_col Date back from (using \code{n_days}). Defaults to "sample_date".
+#' @param .progress Whether to show progress bar and time remaining. Defaults to TRUE.
 #'
 #' @export
 get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  radius = 1000,
                                  spatial_stats = c("min", "max", "mean"),
-                                 date_col = "sample_date") {
+                                 date_col = "sample_date",
+                                 .progress = TRUE) {
   chunk_size <- 100
 
   if (nrow(se) == 0) {
@@ -46,7 +48,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
   # Get zonal stats for all SEs
   zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name,
     n_days = n_days, radius = radius, date_col = date_col, spatial_stats = spatial_stats,
-    chunk_size = chunk_size
+    chunk_size = chunk_size, .progress = .progress
   )
 
   # Attach to sample events and remove ID
@@ -144,7 +146,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 }
 
 get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
-                            date_col, spatial_stats, chunk_size) {
+                            date_col, spatial_stats, chunk_size, .progress = TRUE) {
   se_list <- ses %>%
     split(.$...id)
 
@@ -159,7 +161,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
         spatial_stats = spatial_stats,
         chunk_size = chunk_size
       ),
-      .progress = TRUE
+      .progress = .progress
     )
 
   zonal_stats <- zonal_stats %>%

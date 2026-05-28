@@ -11,7 +11,8 @@ get_summary_zonal_statistics(
   radius = 1000,
   spatial_stats = c("min", "max", "mean"),
   temporal_stats = c("min", "max", "mean"),
-  date_col = "sample_date"
+  date_col = "sample_date",
+  .progress = TRUE
 )
 }
 \arguments{
@@ -30,6 +31,8 @@ and the 364 days prior. Defaults to 365.}
 \item{temporal_stats}{Temporal statistics -- used to summarise the data over time.}
 
 \item{date_col}{Date back from (using \code{n_days}). Defaults to "sample_date".}
+
+\item{.progress}{Whether to show progress bar and time remaining. Defaults to TRUE.}
 }
 \description{
 Get zonal statistics. Unlike \code{get_zonal_statistics}, this summarises the

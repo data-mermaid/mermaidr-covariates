@@ -14,13 +14,15 @@
 #' @param spatial_stats Spatial statistics -- used to summarise all data around the site location, according to the \code{radius} set.
 #' @param temporal_stats Temporal statistics -- used to summarise the data over time.
 #' @param date_col Date back from (using \code{n_days}). Defaults to "sample_date".
+#' @param .progress Whether to show progress bar and time remaining. Defaults to TRUE.
 #'
 #' @export
 get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          radius = 1000,
                                          spatial_stats = c("min", "max", "mean"),
                                          temporal_stats = c("min", "max", "mean"),
-                                         date_col = "sample_date") {
+                                         date_col = "sample_date",
+                                         .progress = TRUE) {
   chunk_size <- 100
 
   original_names <- names(se)
@@ -46,7 +48,8 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
   zonal_stats <- get_zonal_statistics(se, covariate,
     n_days = n_days,
     radius = radius, spatial_stats = spatial_stats,
-    date_col = date_col
+    date_col = date_col,
+    .progress = .progress
   )
 
   zonal_stats <- zonal_stats %>%
