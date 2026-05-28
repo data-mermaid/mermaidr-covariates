@@ -78,7 +78,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
   se_relevant <- se_flag_relevant %>%
     dplyr::filter(...date_relevant) %>%
-    dplyr::select(-...date_relevant) %>%
+    dplyr::select(-...date_relevant, -...start_date, -...end_date) %>%
     dplyr::group_by(project, site, latitude, longitude, ...date_temp) %>%
     # Recalculate based on relevant dates
     dplyr::mutate(
