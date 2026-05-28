@@ -62,6 +62,26 @@ add_id_for_joining <- function(df, date_col) {
     dplyr::select(-...date_temp)
 }
 
+split_for_chunking <- function(df, covariate_id, n_days) {
+  covariate_interval <- determine_covariate_interval(covariate_id)
+
+  if (covariate_interval == "daily" & n_days < chunk_size) {
+    se_per_chunk <- ceiling(chunk_size / n_days)
+
+    df %>%
+      dplyr::mutate(...chunk = (dplyr::row_number() - 1) %/% se_per_chunk) %>%
+      split(.$...chunk)
+  } else {
+    df %>%
+      split(.$...id)
+  }
+}
+
+combine_from_chunking <- function(df) {
+    df %>%
+        dplyr::bind_rows()
+}
+
 lookup_collection <- function(x) {
   rstac::stac(stac_url) %>%
     rstac::collections(collection_id = x) %>%
@@ -105,4 +125,36 @@ get_covariate_id <- function(x) {
   }
 
   covariate_id
+}
+
+determine_covariate_interval <- function(covariate_id) {
+  # Determine whether a covariate is:
+  # daily
+  # monthly
+  # annually
+  # once only
+
+  # by looking at its start date, adding one year, then seeing how many items are returned
+
+  covariates <- list_covariates()
+
+  start_date <- covariates %>%
+    dplyr::filter(id == covariate_id) %>%
+    dplyr::pull(start_date)
+
+  items <- rstac::stac(stac_url) %>%
+    rstac::stac_search(
+      collections = covariate_id,
+      datetime = start_end_to_interval(start_date, start_date + lubridate::years(1))
+    ) %>%
+    rstac::get_request()
+
+  n_items <- items$numberMatched
+
+  dplyr::case_when(
+    n_items < 2 ~ "annual/once",
+    n_items < 15 ~ "monthly",
+    n_items >= 15 & n_items <= 300 ~ "check",
+    n_items > 300 ~ "daily"
+  )
 }

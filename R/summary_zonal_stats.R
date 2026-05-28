@@ -23,7 +23,6 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          temporal_stats = c("min", "max", "mean"),
                                          date_col = "sample_date",
                                          .progress = TRUE) {
-  chunk_size <- 100
 
   original_names <- names(se)
 

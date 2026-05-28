@@ -47,8 +47,8 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Get zonal stats for all SEs
   zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name,
-    n_days = n_days, radius = radius, date_col = date_col, spatial_stats = spatial_stats,
-    chunk_size = chunk_size, .progress = .progress
+    n_days = n_days, radius = radius, date_col = date_col,
+    spatial_stats = spatial_stats, .progress = .progress
   )
 
   # Attach to sample events and remove ID
@@ -65,6 +65,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     dplyr::pull(covariates) %>%
     purrr::pluck(1) %>%
     names()
+
 
   se_flag_relevant <- se %>%
     dplyr::rename_with(\(x) "...date_temp", dplyr::all_of(date_col)) %>%
@@ -157,9 +158,11 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 }
 
 get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
-                            date_col, spatial_stats, chunk_size, .progress = TRUE) {
+                            date_col, spatial_stats, .progress = TRUE) {
+  # Potentially split not by ...id, if n_days is small
+
   se_list <- ses %>%
-    split(.$...id)
+    split_for_chunking(covariate_id, n_days)
 
   zonal_stats <- se_list %>%
     purrr::map(
@@ -169,8 +172,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
         covariate_id,
         n_days,
         radius = radius,
-        spatial_stats = spatial_stats,
-        chunk_size = chunk_size
+        spatial_stats = spatial_stats
       ),
       .progress = .progress
     )
@@ -193,7 +195,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
     })
 
   zonal_stats <- zonal_stats %>%
-    purrr::list_rbind(names_to = "...id")
+    combine_from_chunking()
 
   zonal_stats %>%
     dplyr::group_by(...id) %>%
@@ -223,13 +225,13 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
                                       "min", "max", "mean", "count", "sum", "std",
                                       "median", "majority", "minority", "unique",
                                       "range", "nodata", "area", "freq_hist"
-                                    ), chunk_size) {
+                                    )) {
   # Multiple SEs here, so get items for each
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
 
   stac_items <- se %>%
     split(.$...id) %>%
-    purrr::map_dfr(\(x) get_items_for_zonal_stats(se, covariate_id, n_days = n_days),
+    purrr::map_dfr(\(x) get_items_for_zonal_stats(x, covariate_id, n_days = n_days),
       .id = "...id"
     ) %>%
     dplyr::mutate(...secondary_id = glue::glue("{...id}__{date}")) %>%

@@ -228,8 +228,8 @@ test_that("Parellelization produces results identical to prior method", {
   new_covariates <- ses %>%
     get_zonal_statistics("Daily Sea Surface Temperature",
       n_days = 10,
-      spatial_stats = "mean", , radius = 100,
-      .progress = FALSE
+      spatial_stats = "mean", radius = 100,
+      .progress = TRUE
     ) %>%
     dplyr::arrange(project_id, site, sample_date)
 
