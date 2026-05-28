@@ -56,31 +56,28 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Only keep zonal stats that are actually relevant for SE, not all combined intervals
   # Also updating start_date and end_date
-  se_names <- names(se)
+  covariates_cols <- se %>% dplyr::pull(covariates) %>% purrr::pluck(1) %>% names()
+
   se_flag_relevant <- se %>%
+    dplyr::rename_with(\(x) "...date_temp", dplyr::all_of(date_col)) %>%
+      dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
     tidyr::unnest(covariates) %>%
     dplyr::mutate(
-      ...date_temp = !!rlang::sym(date_col),
-      ...date_temp = as.Date(...date_temp)
-    ) %>%
-    dplyr::mutate(
-        start_date = ...date_temp - (n_days - 1),
-        end_date = ...date_temp,
+      start_date = ...date_temp - (n_days - 1),
+      end_date = ...date_temp,
       ...date_relevant = date >= start_date & date <= end_date
     )
 
   se_relevant <- se_flag_relevant %>%
     dplyr::filter(...date_relevant) %>%
-    dplyr::select(-...date_temp, -...date_relevant) %>%
-      dplyr::group_by(project, site, latitude, longitude, sample_date) %>%
-      dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE))  %>% # Recalculate based on relevant dates
-      dplyr::ungroup()
-
-  se_new_names <- names(se_relevant)
-  covariates_cols <- setdiff(se_new_names, se_names)
+    dplyr::select(-...date_relevant) %>%
+    dplyr::group_by(project, site, latitude, longitude, ...date_temp) %>%
+    dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE)) %>% # Recalculate based on relevant dates
+    dplyr::ungroup()
 
   se_relevant %>%
-    tidyr::nest(covariates = dplyr::all_of(covariates_cols))
+    tidyr::nest(covariates = dplyr::all_of(covariates_cols)) %>%
+    dplyr::rename_with(\(x) date_col, ...date_temp)
 }
 
 get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {

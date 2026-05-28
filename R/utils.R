@@ -57,7 +57,7 @@ add_id_for_joining <- function(df, date_col) {
     dplyr::mutate(
       ...date_temp = !!rlang::sym(date_col),
       ...date_temp = as.Date(...date_temp),
-      ...join_id = glue::glue("{project_id}_{site}_{latitude}_{longitude}_{...date_temp}_{dplyr::row_number()}")
+      ...join_id = glue::glue("{project}_{site}_{latitude}_{longitude}_{...date_temp}_{dplyr::row_number()}")
     ) %>%
     dplyr::select(-...date_temp)
 }
