@@ -71,16 +71,21 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
     tidyr::unnest(covariates) %>%
     dplyr::mutate(
-      start_date = ...date_temp - (n_days - 1),
-      end_date = ...date_temp,
-      ...date_relevant = (date >= start_date & date <= end_date) | (is.na(date))
+      ...start_date = ...date_temp - (n_days - 1),
+      ...end_date = ...date_temp,
+      ...date_relevant = (date >= ...start_date & date <= ...end_date) | (is.na(date))
     )
 
   se_relevant <- se_flag_relevant %>%
     dplyr::filter(...date_relevant) %>%
     dplyr::select(-...date_relevant) %>%
     dplyr::group_by(project, site, latitude, longitude, ...date_temp) %>%
-    dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE)) %>% # Recalculate based on relevant dates
+    # Recalculate based on relevant dates
+    dplyr::mutate(
+      n_dates = dplyr::n_distinct(date, na.rm = TRUE),
+      start_date = min(date),
+      end_date = max(date)
+    ) %>%
     dplyr::ungroup()
 
   se_relevant %>%

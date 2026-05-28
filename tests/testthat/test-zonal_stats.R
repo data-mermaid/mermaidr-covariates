@@ -135,6 +135,7 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
   skip_if_offline()
   skip_on_ci()
   skip_on_cran()
+
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -171,4 +172,36 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
       dplyr::pull(end_date) %>% unique() ==
       "2026-01-01"
   )
+})
+
+test_that("start_date and end_date are the actual dates of covariate data,
+not the start/end date based on the date_col and n_days", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
+  se <- mermaidr::mermaid_get_project_data(
+    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
+    "fishbelt",
+    "sampleevents",
+    limit = 1
+  )
+
+  se <- se %>%
+    dplyr::mutate(date = as.Date("1985-01-05")) # 1985-01-01 is the first date of data
+
+  covariates <- se %>%
+    dplyr::select(project, site, latitude, longitude, sample_date, date) %>%
+    get_zonal_statistics(
+      "Daily Sea Surface Temperature",
+      n_days = 10,
+      radius = 10,
+      spatial_stats = "mean",
+      date_col = "date"
+    )
+
+  covariates <- covariates[["covariates"]][[1]]
+
+  expect_true(covariates[["start_date"]][[1]] == min(covariates[["date"]]))
+  expect_true(covariates[["end_date"]][[1]] == max(covariates[["date"]]))
 })
