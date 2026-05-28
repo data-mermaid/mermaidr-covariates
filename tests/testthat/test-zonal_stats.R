@@ -214,8 +214,7 @@ test_that("Parellelization produces results identical to prior method", {
   skip_on_cran()
 
   covariates_to_test_parallelization_against <- readRDS(
-    here::here(
-      "inst", "extdata",
+    test_path(
       "covariates_to_test_parallelization_against.rds"
     )
   ) %>%
