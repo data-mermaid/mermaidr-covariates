@@ -66,7 +66,6 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     purrr::pluck(1) %>%
     names()
 
-
   se_flag_relevant <- se %>%
     dplyr::rename_with(\(x) "...date_temp", dplyr::all_of(date_col)) %>%
     dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
