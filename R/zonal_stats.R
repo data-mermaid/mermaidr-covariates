@@ -178,23 +178,6 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
     )
 
   zonal_stats <- zonal_stats %>%
-    purrr::map(\(x) {
-      if (nrow(x) == 0) {
-        dplyr::tibble(
-          start_date = NA,
-          end_date = NA,
-          date = NA,
-          band = NA,
-          spatial_stat = spatial_stats,
-          value = NA
-        ) %>%
-          tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
-      } else {
-        x
-      }
-    })
-
-  zonal_stats <- zonal_stats %>%
     combine_from_chunking()
 
   zonal_stats %>%
@@ -249,7 +232,21 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
   # Handle case where SEs do not have any items
 
   if (all(is.na(stac_items[["url"]]))) {
-    return(dplyr::tibble())
+    res <- se %>%
+      dplyr::select(...id) %>%
+      dplyr::bind_cols(
+        dplyr::tibble(
+          start_date = NA,
+          end_date = NA,
+          date = NA,
+          band = NA,
+          spatial_stat = spatial_stats,
+          value = NA
+        )
+      ) %>%
+      tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
+
+    return(res)
   }
 
   # Get zonal stats for each URL
