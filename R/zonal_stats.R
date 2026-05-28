@@ -53,16 +53,22 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Attach to sample events and remove ID
   se <- se %>%
-    dplyr::left_join(zonal_stats, by = "...id") %>%
+    dplyr::left_join(zonal_stats,
+      by = "...id",
+      relationship = "many-to-many"
+    ) %>%
     dplyr::select(-...id)
 
   # Only keep zonal stats that are actually relevant for SE, not all combined intervals
   # Also updating start_date and end_date
-  covariates_cols <- se %>% dplyr::pull(covariates) %>% purrr::pluck(1) %>% names()
+  covariates_cols <- se %>%
+    dplyr::pull(covariates) %>%
+    purrr::pluck(1) %>%
+    names()
 
   se_flag_relevant <- se %>%
     dplyr::rename_with(\(x) "...date_temp", dplyr::all_of(date_col)) %>%
-      dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
+    dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
     tidyr::unnest(covariates) %>%
     dplyr::mutate(
       start_date = ...date_temp - (n_days - 1),
@@ -225,7 +231,8 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
     dplyr::left_join(
       se %>%
         dplyr::select(...id, latitude, longitude),
-      by = "...id"
+      by = "...id",
+      relationship = "many-to-many"
     ) %>%
     dplyr::distinct()
 
@@ -291,6 +298,9 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
       }
     ) %>%
     purrr::list_rbind(names_to = "...secondary_id") %>%
-    dplyr::left_join(stac_items %>% dplyr::bind_rows(), by = "...secondary_id") %>%
+    dplyr::left_join(stac_items %>% dplyr::bind_rows(),
+      by = "...secondary_id",
+      relationship = "one-to-one"
+    ) %>%
     dplyr::select(-...secondary_id)
 }
