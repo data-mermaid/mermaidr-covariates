@@ -73,7 +73,7 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     dplyr::mutate(
       start_date = ...date_temp - (n_days - 1),
       end_date = ...date_temp,
-      ...date_relevant = date >= start_date & date <= end_date
+      ...date_relevant = (date >= start_date & date <= end_date) | (is.na(date))
     )
 
   se_relevant <- se_flag_relevant %>%

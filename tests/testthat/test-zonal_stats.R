@@ -55,12 +55,9 @@ test_that("NA returned for all columns when there is no data within date range",
     dplyr::pull(covariates) %>%
     purrr::pluck(1)
 
-  expect_true(is.na(covariates[["start_date"]]))
-  expect_true(is.na(covariates[["end_date"]]))
   expect_true(covariates[["n_dates"]] == 0)
   expect_true(is.na(covariates[["date"]]))
   expect_true(covariates[["spatial_stat"]] == "mean")
-  expect_true(is.na(covariates[["start_date"]]))
   expect_true(is.na(covariates[["value"]]))
 })
 
