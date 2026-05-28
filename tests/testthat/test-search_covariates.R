@@ -1,16 +1,28 @@
 test_that("search_covariates() allows searching by title, is not case sensitive", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   res <- search_covariates("MEOW")
 
   expect_true(all(stringr::str_detect(tolower(res$title), "meow")))
 })
 
 test_that("search_covariates() allows searching by description, is not case sensitive", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   res <- search_covariates(description = "Alan Coral Atlas")
 
   expect_true(all(stringr::str_detect(tolower(res$description), "alan coral atlas")))
 })
 
 test_that("search_covariates() allows searching by title AND description, is not case sensitive", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   res <- search_covariates("MEOW", "Alan Coral Atlas")
 
   expect_true(nrow(res) == 0)
@@ -22,6 +34,10 @@ test_that("search_covariates() allows searching by title AND description, is not
 })
 
 test_that("without title or description, search_covariates() is identical to list_covariates()", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   s <- search_covariates()
   l <- list_covariates()
 
@@ -29,6 +45,10 @@ test_that("without title or description, search_covariates() is identical to lis
 })
 
 test_that("search_covariates() argument `as_data_frame` works", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   res <- search_covariates("MEOW", as_data_frame = FALSE)
 
   expect_true(all(purrr::map_lgl(res, \(x) "covariate" %in% class(x))))

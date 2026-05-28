@@ -10,7 +10,8 @@ get_zonal_statistics(
   n_days = 365,
   radius = 1000,
   spatial_stats = c("min", "max", "mean"),
-  date_col = "sample_date"
+  date_col = "sample_date",
+  .progress = TRUE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ and the 364 days prior. Defaults to 365.}
 the site location, according to the \code{radius} set.}
 
 \item{date_col}{Date back from (using \code{n_days}). Defaults to "sample_date".}
+
+\item{.progress}{Whether to show progress bar and time remaining. Defaults to TRUE.}
 }
 \description{
 Get zonal statistics. For *each* of the `n_days` prior to the sample event date,

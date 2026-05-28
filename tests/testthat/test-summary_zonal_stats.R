@@ -36,6 +36,7 @@ test_that("summary_zonal_stats works with sample_date renamed", {
   skip_if_offline()
   skip_on_ci()
   skip_on_cran()
+
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -72,6 +73,7 @@ test_that("summary_zonal_stats works with different date_col, retains both cols 
   skip_if_offline()
   skip_on_ci()
   skip_on_cran()
+
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -110,6 +112,7 @@ test_that("summary_zonal_stats works with different date_col, retains both cols 
   skip_if_offline()
   skip_on_ci()
   skip_on_cran()
+
   se <- mermaidr::mermaid_get_project_data(
     "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
     "fishbelt",
@@ -147,5 +150,35 @@ test_that("summary_zonal_stats works with different date_col, retains both cols 
       tidyr::unnest(covariates) %>%
       dplyr::pull(end_date) %>% unique() ==
       "2026-01-01"
+  )
+})
+
+test_that("Parellelization produces results identical to prior method", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
+  # Summary
+  summary_covariates_to_test_parallelization_against <- readRDS(
+      test_path("summary_covariates_to_test_parallelization_against.rds")
+  ) %>%
+    dplyr::arrange(project_id, site, sample_date)
+
+  ses <- summary_covariates_to_test_parallelization_against %>%
+    dplyr::select(-covariates)
+
+  new_summary_covariates <- ses %>%
+    get_summary_zonal_statistics("Daily Sea Surface Temperature",
+      n_days = 10,
+      spatial_stats = "mean",
+      temporal_stats = "mean", radius = 100,
+      .progress = FALSE
+    ) %>%
+    dplyr::arrange(project_id, site, sample_date)
+
+  expect_equal(
+    new_summary_covariates,
+    summary_covariates_to_test_parallelization_against,
+    ignore_attr = TRUE
   )
 })
