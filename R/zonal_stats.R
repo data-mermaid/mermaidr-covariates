@@ -158,8 +158,6 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
 
 get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
                             date_col, spatial_stats, .progress = TRUE) {
-  # Potentially split not by ...id, if n_days is small
-
   se_list <- ses %>%
     split_for_chunking(covariate_id, n_days)
 
@@ -231,79 +229,27 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
   # Handle case where SEs do not have any items
 
   if (all(is.na(stac_items[["url"]]))) {
-    res <- se %>%
-      dplyr::select(...id) %>%
-      dplyr::bind_cols(
-        dplyr::tibble(
-          start_date = NA,
-          end_date = NA,
-          date = NA,
-          band = NA,
-          spatial_stat = spatial_stats,
-          value = NA
-        )
-      ) %>%
-      tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
+    res <- create_empty_zonal_stats(se, spatial_stats)
 
     return(res)
   }
 
   # Get zonal stats for each URL
+  GET_zonal_stats(stac_items, "...secondary_id", radius, bands, approx_stats, spatial_stats)
+}
 
-  # TODO -> handle no stats returned
-
-  # Set up requests to parallelize
-  request_base <- httr2::request(zonal_stats_raster_url) %>%
-    httr2::req_throttle(capacity = chunk_size, fill_time_s = 3) %>%
-    httr2::req_user_agent("mermaidr-covariates") %>%
-    httr2::req_body_json(list(
-      aoi = NULL,
-      url = NULL,
-      stats = as.list(spatial_stats),
-      bands = bands,
-      approx_stats = approx_stats
-    )) %>%
-    httr2::req_error(is_error = \(res) FALSE)
-
-  stac_items <- stac_items %>%
-    split(.$...secondary_id)
-
-  requests <- purrr::map(
-    stac_items,
-    \(x) {
-      request_base %>%
-        httr2::req_body_json_modify(
-          url = x[["url"]],
-          aoi = list(
-            type = "Point",
-            coordinates = c(x[["longitude"]], x[["latitude"]]),
-            radius = radius
-          ),
-        )
-    }
-  )
-
-  res <- httr2::req_perform_parallel(requests, progress = FALSE)
-
-  names(res) <- names(stac_items)
-
-  # Format the results of each call
-  res %>%
-    purrr::keep(\(x) x$status_code == 200) %>%
-    purrr::imap(
-      \(res, date) {
-        res %>%
-          httr2::resp_body_json() %>%
-          purrr::map_dfr(\(x) {
-            x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
-            dplyr::as_tibble(x)
-          }, .id = "band")
-      }
+create_empty_zonal_stats <- function(se, spatial_stats) {
+  se %>%
+    dplyr::select(...id) %>%
+    dplyr::bind_cols(
+      dplyr::tibble(
+        start_date = NA,
+        end_date = NA,
+        date = NA,
+        band = NA,
+        spatial_stat = spatial_stats,
+        value = NA
+      )
     ) %>%
-    purrr::list_rbind(names_to = "...secondary_id") %>%
-    dplyr::left_join(stac_items %>% dplyr::bind_rows(),
-      by = "...secondary_id",
-      relationship = "one-to-one"
-    ) %>%
-    dplyr::select(-...secondary_id)
+    tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
 }

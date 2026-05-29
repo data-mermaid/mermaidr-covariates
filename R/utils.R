@@ -65,6 +65,7 @@ add_id_for_joining <- function(df, date_col) {
 split_for_chunking <- function(df, covariate_id, n_days) {
   covariate_interval <- determine_covariate_interval(covariate_id)
 
+  # Potentially split not by ...id, if n_days is small
   if (covariate_interval == "daily" & n_days < chunk_size) {
     se_per_chunk <- ceiling(chunk_size / n_days)
 
@@ -78,8 +79,8 @@ split_for_chunking <- function(df, covariate_id, n_days) {
 }
 
 combine_from_chunking <- function(df) {
-    df %>%
-        dplyr::bind_rows()
+  df %>%
+    dplyr::bind_rows()
 }
 
 lookup_collection <- function(x) {
