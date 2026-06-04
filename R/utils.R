@@ -207,6 +207,20 @@ is_parquet_asset <- function(asset) {
   )
 }
 
+get_asset_type <- function(asset) {
+  cog <- is_cog_asset(asset)
+  if (cog) {
+    return("cog")
+  }
+
+  parquet <- is_parquet_asset(asset)
+  if (parquet) {
+    return("parquet")
+  }
+
+  NA_character_
+}
+
 matching_x_asset <- function(assets, asset_names, type) {
   matches_x_asset <- purrr::map_lgl(
     asset_names,
@@ -231,7 +245,7 @@ matching_x_asset <- function(assets, asset_names, type) {
   NULL
 }
 
-find_x_assets <- function(item, common_asset_names, type) {
+get_x_assets <- function(item, common_asset_names, type) {
   assets <- item[["assets"]]
 
   # Check common asset names first
@@ -252,15 +266,15 @@ find_x_assets <- function(item, common_asset_names, type) {
   NA_character_
 }
 
-find_cog_assets <- function(item) {
-  find_x_assets(item, c("data", "Cloud Optimized GeoTIFF", "cog", "image"), "cog")
+get_cog_assets <- function(item) {
+  get_x_assets(item, c("data", "Cloud Optimized GeoTIFF", "cog", "image"), "cog")
 }
 
-find_parquet_assets <- function(item) {
-  find_x_assets(item, c("data", "parquet", "geoparquet", "vector"), "parquet")
+get_parquet_assets <- function(item) {
+  get_x_assets(item, c("data", "parquet", "geoparquet", "vector"), "parquet")
 }
 
-check_collection_type <- function(collection) {
+get_collection_type <- function(collection) {
   # Look at the first item
   item <- rstac::stac(stac_url) %>%
     rstac::collections(collection) %>%
@@ -270,19 +284,78 @@ check_collection_type <- function(collection) {
   item <- item[["features"]][[1]]
 
   # Look for COG assets and parquet assets
-  cog_assets <- find_cog_assets(item)
-  parquet_assets <- find_parquet_assets(item)
+  cog_assets <- get_cog_assets(item)
+  parquet_assets <- get_parquet_assets(item)
 
   is_raster <- !identical(cog_assets, NA_character_)
   is_vector <- !identical(parquet_assets, NA_character_)
 
   if (is_raster & is_vector) {
-      "raster + vector"
+    "raster + vector"
   } else if (is_raster) {
-      "raster"
+    "raster"
   } else if (is_vector) {
-      "vector"
+    "vector"
   } else {
-      "unknown"
+    "unknown"
   }
+}
+
+get_collection_bands_and_columns <- function(collection) {
+  # Look through all assets -- determine if each is cog or parquet, then get either bands or columns
+  #
+  #   collection_type <- get_collection_type(collection)
+  #
+  #   if (!stringr::str_detect(collection_type, "vector")) {
+  #     NA_character_
+  #     # stop("Cannot get columns for `", collection, "` -- must be a vector collection",
+  #     #   call. = FALSE
+  #     # )
+  #   }
+
+  # Look at the first item
+  item <- rstac::stac(stac_url) %>%
+    rstac::collections(collection) %>%
+    rstac::items(limit = 1) %>%
+    rstac::get_request()
+
+  item <- item[["features"]][[1]]
+
+  # Look through all assets
+  assets <- item[["assets"]]
+
+  # Determine asset type
+  # If parquet, get columns
+  # If COG, get bands
+  bands_or_cols <- purrr::map(
+    assets,
+    \(asset) {
+      asset_type <- get_asset_type(asset)
+
+      if (is.na(asset_type)) {
+        return(NULL)
+      }
+
+      names_lookup <- switch(asset_type,
+        "cog" = "raster:bands",
+        "parquet" = "table:columns"
+      )
+
+      bands_or_cols <- purrr::map(asset[[names_lookup]], \(x) dplyr::tibble(name = x[["name"]]))
+
+      # If cog, need to return what # band they are
+      id_col <- switch(asset_type,
+        "cog" = "band",
+        "parquet" = NULL
+      )
+
+      bands_or_cols %>%
+        purrr:::list_rbind(names_to = id_col)
+    }
+  )
+
+  names(bands_or_cols) <- names(assets)
+
+  bands_or_cols %>%
+    purrr::compact()
 }
