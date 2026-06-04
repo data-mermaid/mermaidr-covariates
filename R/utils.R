@@ -341,7 +341,21 @@ get_collection_bands_and_columns <- function(collection) {
         "parquet" = "table:columns"
       )
 
-      bands_or_cols <- purrr::map(asset[[names_lookup]], \(x) dplyr::tibble(name = x[["name"]]))
+      if (is.null(asset[[names_lookup]])) {
+        return(dplyr::tibble(band = 1, name = NA_character_))
+      }
+
+      bands_or_cols <- purrr::map(
+        asset[[names_lookup]],
+        \(x) {
+          x_name <- x[["name"]]
+          if (is.null(x_name)) {
+            x_name <- NA_character_
+          }
+          dplyr::tibble(name = x_name)
+        }
+      )
+
 
       # If cog, need to return what # band they are
       id_col <- switch(asset_type,
