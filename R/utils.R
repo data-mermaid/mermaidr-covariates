@@ -159,3 +159,130 @@ determine_covariate_interval <- function(covariate_id) {
     n_items > 300 ~ "daily"
   )
 }
+
+# Determining whether a covariate is vector/raster/vector + raster
+# Taking cue from isCogAsset() etc
+# https://github.com/data-mermaid/mermaid-zonal-stats-ui/blob/main/src/services/stacApi.js#L45
+
+is_x_asset <- function(asset, mime_types, file_extensions) {
+  if (is.null(asset)) {
+    return(FALSE)
+  }
+
+  mime_type_matches <- stringr::str_detect(
+    asset[["type"]], mime_types
+  )
+
+  if (any(mime_type_matches)) {
+    return(TRUE)
+  }
+
+  href <- tolower(asset[["href"]])
+
+  file_extension_matches <- stringr::str_ends(href, file_extensions)
+
+  if (any(file_extension_matches)) {
+    return(TRUE)
+  }
+
+  FALSE
+}
+
+is_cog_asset <- function(asset) {
+  is_x_asset(
+    asset,
+    c(
+      "profile=cloud-optimized", "image/tiff", "application/geotiff",
+      "image/tiff; application=geotiff"
+    ),
+    c(".tif", ".tiff")
+  )
+}
+
+is_parquet_asset <- function(asset) {
+  is_x_asset(
+    asset,
+    c("parquet", "application/x-parquet", "application/vnd.apache.parquet"),
+    ".parquet"
+  )
+}
+
+matching_x_asset <- function(assets, asset_names, type) {
+  matches_x_asset <- purrr::map_lgl(
+    asset_names,
+    \(asset_name) {
+      switch(type,
+        "cog" = is_cog_asset(assets[[asset_name]]),
+        "parquet" = is_parquet_asset(assets[[asset_name]])
+      )
+    }
+  )
+
+  names(matches_x_asset) <- asset_names
+
+  if (any(matches_x_asset)) {
+    matching_assets <- matches_x_asset %>%
+      purrr::keep(\(x) x) %>%
+      names()
+
+    return(matching_assets)
+  }
+
+  NULL
+}
+
+find_x_assets <- function(item, common_asset_names, type) {
+  assets <- item[["assets"]]
+
+  # Check common asset names first
+  matching_assets <- matching_x_asset(assets, common_asset_names, type)
+
+  if (!is.null(matching_assets)) {
+    return(matching_assets)
+  }
+
+  # As a fallback, check all assets
+  matching_assets <- matching_x_asset(assets, names(assets), type)
+
+  if (!is.null(matching_assets)) {
+    return(matching_assets)
+  }
+
+  # Otherwise, no matching assets
+  NA_character_
+}
+
+find_cog_assets <- function(item) {
+  find_x_assets(item, c("data", "Cloud Optimized GeoTIFF", "cog", "image"), "cog")
+}
+
+find_parquet_assets <- function(item) {
+  find_x_assets(item, c("data", "parquet", "geoparquet", "vector"), "parquet")
+}
+
+check_collection_type <- function(collection) {
+  # Look at the first item
+  item <- rstac::stac(stac_url) %>%
+    rstac::collections(collection) %>%
+    rstac::items(limit = 1) %>%
+    rstac::get_request()
+
+  item <- item[["features"]][[1]]
+
+  # Look for COG assets and parquet assets
+  cog_assets <- find_cog_assets(item)
+  parquet_assets <- find_parquet_assets(item)
+
+  is_raster <- !identical(cog_assets, NA_character_)
+  is_vector <- !identical(parquet_assets, NA_character_)
+
+  if (is_raster & is_vector) {
+      "raster + vector"
+  } else if (is_raster) {
+      "raster"
+  } else if (is_vector) {
+      "vector"
+  } else {
+      "unknown"
+  }
+}
