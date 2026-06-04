@@ -3,9 +3,23 @@ attach_covariate_data <- function(se, covariate, dataset = NULL, col = NULL, dat
   items <- get_collection_items(covariate)
   items
 
+  # Check inputs
+  check_inputs_covariate_data(items, covariate, dataset, col, date_col)
+}
+
+get_collection_items <- function(x) {
+  items <- rstac::stac(stac_url) %>%
+    rstac::collections(collection_id = x) %>%
+    rstac::items() %>%
+    rstac::get_request()
+
+  items[["features"]]
+}
+
+check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = NULL, date_col = "sample_date") {
   # If the covariate contains more than one item, they need to give date information
   if (length(items) > 1 & is.null(date_col)) {
-    usethis::ui_stop("Covariat \"{covariate}\" is date-dependent. Please supply a date column in `date_col`.")
+    usethis::ui_stop("Covariate \"{covariate}\" is date-dependent. Please supply a date column in `date_col`.")
   }
 
   # Use first item for checks
@@ -16,9 +30,22 @@ attach_covariate_data <- function(se, covariate, dataset = NULL, col = NULL, dat
   asset_types <- get_all_asset_types(first_item) %>%
     purrr::keep(\(x) !is.na(x))
 
+  assets_names <- paste0(names(asset_types), collapse = "\", \"")
+  assets_names <- glue::glue('"{assets_names}"')
+
+  # Check that specified asset exists
+  if (!is.null(dataset)) {
+    asset <- assets[[dataset]]
+    if (is.null(asset)) {
+      usethis::ui_stop(
+        "Dataset \"{dataset}\" does not exist. Valid datasets are: {assets_names}."
+      )
+    }
+  }
+
   if (length(asset_types) > 1 & is.null(dataset)) {
-    usethis::ui_stop('Covariate \"{covariate}\" contains more than one dataset. Please specify which to use in `dataset`.
-      Options: {paste0(names(asset_types), collapse = "\", \"")}')
+    usethis::ui_stop("Covariate \"{covariate}\" contains more than one dataset. Please specify which to use in `dataset`.
+      Options: {assets_names}.")
   }
 
   if (length(asset_types) == 1) {
@@ -34,26 +61,20 @@ attach_covariate_data <- function(se, covariate, dataset = NULL, col = NULL, dat
     # Actually, name the bands/columns!
     if (asset_types[[dataset]] == "parquet") {
       cols <- bands_cols[["name"]] %>% paste0(collapse = '", "')
+      cols <- glue::glue('"{cols}"')
 
       usethis::ui_stop(
         "Dataset \"{dataset}\" contains more than one column of data. Please specify which to use in `col`.
-      Options: \"{cols}\"."
+      Options: {cols}."
       )
     } else {
-      browser()
+      tibble_string <- paste(capture.output(print(bands_cols)), collapse = "\n")
+      usethis::ui_stop(
+        "Dataset \"{dataset}\" contains more than one band of data. Please specify which to use in `col`. You may specify by band number or by name.\nOptions: \n{tibble_string}"
+      )
     }
   }
 }
-
-get_collection_items <- function(x) {
-  items <- rstac::stac(stac_url) %>%
-    rstac::collections(collection_id = x) %>%
-    rstac::items() %>%
-    rstac::get_request()
-
-  items[["features"]]
-}
-
 
 # Determining whether a covariate is vector/raster/vector + raster
 # Taking cue from isCogAsset() etc
