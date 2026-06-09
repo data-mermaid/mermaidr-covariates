@@ -4,7 +4,11 @@ attach_covariate_data <- function(se, covariate, dataset = NULL, col = NULL, dat
   items
 
   # Check inputs
-  check_inputs_covariate_data(items, covariate, dataset, col, date_col)
+  type_and_bands_cols <- check_inputs_covariate_data(items, covariate, dataset, col, date_col)
+
+  # Based on type,
+
+  #
 }
 
 get_collection_items <- function(x) {
@@ -33,8 +37,13 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
   assets_names <- paste0(names(asset_types), collapse = "\", \"")
   assets_names <- glue::glue('"{assets_names}"')
 
-  # Check that specified asset exists
   if (!is.null(dataset)) {
+    # Check that they only specified one dataset
+    if (length(dataset) > 1) {
+      usethis::ui_stop("You may only specify one dataset.")
+    }
+
+    # Check that specified asset exists
     asset <- assets[[dataset]]
     if (is.null(asset)) {
       usethis::ui_stop(
@@ -53,12 +62,12 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
   }
 
   asset <- assets[[dataset]]
+  asset_type <- asset_types[[dataset]]
 
   # If there is more than one col (band or column) in the specified asset, they need to specify
   bands_cols <- get_asset_bands_or_columns(asset)
 
   if (nrow(bands_cols) > 1 & is.null(col)) {
-    # Actually, name the bands/columns!
     if (asset_types[[dataset]] == "parquet") {
       cols <- bands_cols[["name"]] %>% paste0(collapse = '", "')
       cols <- glue::glue('"{cols}"')
@@ -74,6 +83,61 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
       )
     }
   }
+
+  # Check that band/col are valid
+  if (asset_type == "cog") {
+    if (is.null(col)) { # There is, by definition, only one band, otherwise would have errored with col being NULL
+      col <- bands_cols[["band"]]
+    }
+    band <- col
+    numeric_band <- suppressWarnings(as.numeric(band))
+    if (is.numeric(band)) {
+      valid_band <- band %in% bands_cols[["band"]]
+    } else if (!is.na(numeric_band)) {
+      valid_band <- band %in% bands_cols[["band"]]
+      if (valid_band) {
+        band <- numeric_band
+      }
+    } else if (is.character(band)) {
+      valid_band <- band %in% bands_cols[["name"]]
+
+      if (valid_band) {
+        band <- bands_cols %>%
+          dplyr::filter(name == !!band) %>%
+          dplyr::pull(band)
+      }
+    }
+
+    if (!valid_band) {
+      tibble_string <- paste(capture.output(print(bands_cols)), collapse = "\n")
+      usethis::ui_stop(
+        "Band \"{col}\" is not a valid band.\nOptions (You may specify by band number or by name): \n{tibble_string}"
+      )
+    }
+  } else if (asset_type == "parquet") {
+    valid_col <- col %in% bands_cols[["name"]]
+
+    if (!valid_col) {
+      cols <- bands_cols[["name"]] %>% paste0(collapse = '", "')
+      cols <- glue::glue('"{cols}"')
+      usethis::ui_stop(
+        "Column \"{col}\" is not valid. \nOptions: \n{cols}"
+      )
+    }
+  }
+
+  # If all inputs pass, return info on the data set's type and its bands/cols
+  res <- list(
+    asset_type = asset_type,
+    bands_cols = bands_cols
+  )
+
+  # If it is a cog, attach the band NUMBER too
+  if (asset_type == "cog") {
+    res <- append(res, list(band = band))
+  }
+
+  return(res)
 }
 
 # Determining whether a covariate is vector/raster/vector + raster
