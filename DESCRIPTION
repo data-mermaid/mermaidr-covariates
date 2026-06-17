@@ -14,7 +14,9 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
+    DBI,
     dplyr,
+    duckspatial,
     glue,
     httr2,
     lubridate,

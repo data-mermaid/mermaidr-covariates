@@ -1,16 +1,18 @@
-attach_covariate_data <- function(se, covariate, dataset = NULL, col = NULL, date_col = "sample_date") {
-
+attach_covariate_data <- function(se, covariate, dataset = NULL, columns = NULL, date_col = "sample_date") {
   covariate_id <- get_covariate_id(covariate)
 
   # Get covariate items
   items <- get_collection_items(covariate_id)
   items
 
-  # Check inputs
-  type_and_bands_cols <- check_inputs_covariate_data(items, covariate_id, dataset, col, date_col)
+  # Check inputs -- returns the dataset type, its bands/columns, and URL
+  asset_info <- check_inputs_covariate_data(items, covariate_id, dataset, columns, date_col)
 
-  # Get covariate data, using the same method as in
+  # Ensure data is parquet
 
+  # Do spatial join with DuckDB, select relevant columns (all, if columns = NULL)
+  se %>%
+    join_se_to_parquet(asset_info[["url"]], columns)
 }
 
 get_collection_items <- function(x) {
@@ -69,24 +71,25 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
   asset_type <- asset_types[[dataset]]
 
   # If there is more than one col (band or column) in the specified asset, they need to specify
+  # Remove -- this is not needed for now, attaching all of the data
   bands_cols <- get_asset_bands_or_columns(asset)
-
-  if (nrow(bands_cols) > 1 & is.null(col)) {
-    if (asset_types[[dataset]] == "parquet") {
-      cols <- bands_cols[["name"]] %>% paste0(collapse = '", "')
-      cols <- glue::glue('"{cols}"')
-
-      usethis::ui_stop(
-        "Dataset \"{dataset}\" contains more than one column of data. Please specify which to use in `col`.
-      Options: {cols}."
-      )
-    } else {
-      tibble_string <- paste(capture.output(print(bands_cols)), collapse = "\n")
-      usethis::ui_stop(
-        "Dataset \"{dataset}\" contains more than one band of data. Please specify which to use in `col`. You may specify by band number or by name.\nOptions: \n{tibble_string}"
-      )
-    }
-  }
+  #
+  # if (nrow(bands_cols) > 1 & is.null(col)) {
+  #   if (asset_types[[dataset]] == "parquet") {
+  #     cols <- bands_cols[["name"]] %>% paste0(collapse = '", "')
+  #     cols <- glue::glue('"{cols}"')
+  #
+  #     usethis::ui_stop(
+  #       "Dataset \"{dataset}\" contains more than one column of data. Please specify which to use in `col`.
+  #     Options: {cols}."
+  #     )
+  #   } else {
+  #     tibble_string <- paste(capture.output(print(bands_cols)), collapse = "\n")
+  #     usethis::ui_stop(
+  #       "Dataset \"{dataset}\" contains more than one band of data. Please specify which to use in `col`. You may specify by band number or by name.\nOptions: \n{tibble_string}"
+  #     )
+  #   }
+  # }
 
   # Check that band/col are valid
   if (asset_type == "cog") {
@@ -118,7 +121,7 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
         "Band \"{col}\" is not a valid band.\nOptions (You may specify by band number or by name): \n{tibble_string}"
       )
     }
-  } else if (asset_type == "parquet") {
+  } else if (asset_type == "parquet" & !is.null(col)) {
     valid_col <- col %in% bands_cols[["name"]]
 
     if (!valid_col) {
@@ -130,9 +133,10 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
     }
   }
 
-  # If all inputs pass, return info on the data set's type and its bands/cols
+  # If all inputs pass, return info on the dataset's type, URL, and its bands/cols
   res <- list(
-    asset_type = asset_type,
+    type = asset_type,
+    url = asset[["href"]],
     bands_cols = bands_cols
   )
 
@@ -142,4 +146,60 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
   }
 
   return(res)
+}
+
+join_se_to_parquet <- function(se, url, columns) {
+
+  # Set up connection, create a table called "temp" with the data from the parquet file
+  conn <- create_parquet_table(url)
+
+  # Do not need to check that columns are in the data, because done upstream in attach_covariate_data()
+
+  # TODO -> check that they share a CRS?
+
+  # Convert the SEs to sf
+  se_sf <- se %>%
+    sf::st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
+
+  # Write to connection
+  duckspatial::ddbs_write_table(conn, se_sf, "points", quiet = TRUE)
+
+  res <- duckspatial::ddbs_join(
+      conn  = conn,
+      x     = "points", # se
+      y     = "temp", # parquet
+      join  = "intersects"
+    )
+
+  # If relevant, select specific columns
+  if (!is.null(columns)) {
+    res <- res %>%
+      dplyr::select(dplyr::all_of(c(names(se), columns)))
+  }
+
+  res <- res %>%
+    sf::st_as_sf() %>%
+    sf::st_drop_geometry()
+
+  # Disconnect db connection
+  duckdb::dbDisconnect(conn)
+
+  res
+}
+
+create_parquet_table <- function(url) {
+  # Create connection, enable reading remote parquet
+  conn <- duckspatial::ddbs_create_conn()
+  DBI::dbExecute(conn, "INSTALL httpfs; LOAD httpfs;")
+  DBI::dbExecute(conn, "SET enable_progress_bar = false;") # Don't show progress bar
+
+  exec_command <- glue::glue("
+  CREATE OR REPLACE VIEW temp AS
+  SELECT * FROM read_parquet('{url}')")
+
+  exec_command <- as.character(exec_command)
+
+  DBI::dbExecute(conn, exec_command)
+
+  conn
 }
