@@ -24,6 +24,15 @@ add_id_for_iteration <- function(df, date_col, n_days) {
       ...date_temp = as.Date(...date_temp)
     )
 
+  # If n_days = NULL, then there is no date information used
+  # Just iterate by lat/long
+  if (is.null(n_days)) {
+    df <- df %>%
+      dplyr::mutate(...id = glue::glue("{latitude}_{longitude}"))
+
+    return(df)
+  }
+
   # Deduplicate overlapping API calls
   # e.g. if they have two samples within a year (or whatever n_days is),
   # many of the items will be the same
@@ -63,10 +72,18 @@ add_id_for_joining <- function(df, date_col) {
 }
 
 split_for_chunking <- function(df, covariate_id, n_days) {
-  covariate_interval <- determine_covariate_interval(covariate_id)
+
+  covariate_interval <- get_covariate_interval(covariate_id)
+
+  split_by_chunk <- covariate_interval == "once"
+  if (!split_by_chunk) {
+    split_by_chunk <- (covariate_interval == "daily" & n_days < chunk_size)
+  } else {
+    n_days <- 1 # Need for setting SEs by chunk if it is just once
+  }
 
   # Potentially split not by ...id, if n_days is small
-  if (covariate_interval == "daily" & n_days < chunk_size) {
+  if (split_by_chunk) {
     se_per_chunk <- ceiling(chunk_size / n_days)
 
     df %>%
@@ -128,7 +145,7 @@ get_covariate_id <- function(x) {
   covariate_id
 }
 
-determine_covariate_interval <- function(covariate_id) {
+get_covariate_interval <- function(covariate_id) {
   # Determine whether a covariate is:
   # daily
   # monthly
@@ -153,9 +170,8 @@ determine_covariate_interval <- function(covariate_id) {
   n_items <- items$numberMatched
 
   dplyr::case_when(
-    n_items < 2 ~ "annual/once",
-    n_items < 15 ~ "monthly",
-    n_items >= 15 & n_items <= 300 ~ "check",
+    n_items == 1 ~ "once",
+    n_items > 1 & n_items <= 300 ~ "check",
     n_items > 300 ~ "daily"
   )
 }

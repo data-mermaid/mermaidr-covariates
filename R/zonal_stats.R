@@ -18,8 +18,10 @@
 #' @export
 get_zonal_statistics <- function(se, covariate, n_days = 365,
                                  radius = 1000,
+                                 bands = list(1),
                                  spatial_stats = c("min", "max", "mean"),
                                  date_col = "sample_date",
+                                 type = "raster",
                                  .progress = TRUE) {
   chunk_size <- 100
 
@@ -47,8 +49,8 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Get zonal stats for all SEs
   zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name,
-    n_days = n_days, radius = radius, date_col = date_col,
-    spatial_stats = spatial_stats, .progress = .progress
+    n_days = n_days, radius = radius, bands = bands, date_col = date_col,
+    spatial_stats = spatial_stats, type = type, .progress = .progress
   )
 
   # Attach to sample events and remove ID
@@ -61,6 +63,14 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 
   # Only keep zonal stats that are actually relevant for SE, not all combined intervals
   # Also updating start_date and end_date
+
+  # Only do this if daily, otherwise just return SE
+  covariate_interval <- get_covariate_interval(covariate_id)
+
+  if (covariate_interval != "daily") {
+    return(se)
+  }
+
   covariates_cols <- se %>%
     dplyr::pull(covariates) %>%
     purrr::pluck(1) %>%
@@ -94,6 +104,18 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 }
 
 get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
+
+  # Double check covariate interval -- if it is annual/once, then do not need to get items by date
+  covariate_interval <- get_covariate_interval(covariate_id)
+
+  if (covariate_interval == "once") {
+    relevant_items <- rstac::stac(stac_url) |>
+    rstac::stac_search(
+      collections = covariate_id
+    ) |>
+    rstac::get_request()
+  } else {
+
   # Since intervals are combined, we can no longer just go back n_days from sample_date
   df <- df %>%
     dplyr::distinct(...start_date, ...end_date)
@@ -112,6 +134,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
       limit = 999999
     ) |>
     rstac::get_request()
+  }
 
   if (relevant_items[["numberReturned"]] == 0) {
     return(
@@ -140,10 +163,16 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   start_date <- min(item_dates)
   end_date <- max(item_dates)
 
-  # Get URL of each item's `data` asset
+  # Get URL of each item's `data` OR `cog` asset
   zonal_stats_urls <- relevant_items %>%
     purrr::map_chr(\(x) {
-      x[["assets"]][["data"]][["href"]]
+      assets <- x[["assets"]]
+      asset <- c("data", "cog")[[which(c("data", "cog") %in% names(assets))]]
+      if (length(asset) != 1) {
+        browser()
+      } else {
+        assets[[asset]][["href"]]
+      }
     })
 
   return(
@@ -156,8 +185,8 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   )
 }
 
-get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
-                            date_col, spatial_stats, .progress = TRUE) {
+get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, bands,
+                            date_col, spatial_stats, type, .progress = TRUE) {
   se_list <- ses %>%
     split_for_chunking(covariate_id, n_days)
 
@@ -169,13 +198,19 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
         covariate_id,
         n_days,
         radius = radius,
-        spatial_stats = spatial_stats
+        bands = bands,
+        spatial_stats = spatial_stats,
+        type = type
       ),
       .progress = .progress
     )
 
   zonal_stats <- zonal_stats %>%
     combine_from_chunking()
+
+  # browser()
+
+  # TODO START HERE
 
   zonal_stats %>%
     dplyr::group_by(...id) %>%
@@ -185,8 +220,13 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
     # Add n_dates, add covariate, remove "band_" character
     dplyr::mutate(
       covariate = covariate_name,
-      band = stringr::str_remove(band, "band_"),
-      band = as.numeric(band)
+      # NEW, returning "column" instead of band, so it's consistent across vector and raster
+      # and then keep "band_", so it's e.g. column = band_1, pretty clear
+      column = band
+      # band = stringr::str_remove(band, "band_"),
+      # Not necessarily numeric, in case it is column
+      # If they have specified band by name, can we return that?
+      # band = as.numeric(band)
     ) %>%
     # reorganize to have a column `spatial_stat` and `value`, instead of a column for each stat
     tidyr::pivot_longer(
@@ -195,7 +235,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius,
       values_to = "value"
     ) %>%
     # reorganize covariates columns
-    dplyr::select(...id, covariate, start_date, end_date, n_dates, date, band, spatial_stat, value) %>%
+    dplyr::select(...id, covariate, start_date, end_date, n_dates, date, column, spatial_stat, value) %>%
     tidyr::nest(covariates = -...id, .by = "...id") # Nest covariates
 }
 
@@ -205,7 +245,9 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
                                       "min", "max", "mean", "count", "sum", "std",
                                       "median", "majority", "minority", "unique",
                                       "range", "nodata", "area", "freq_hist"
-                                    )) {
+                                    ),
+                                    type) {
+
   # Multiple SEs here, so get items for each
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
 
@@ -235,7 +277,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
   }
 
   # Get zonal stats for each URL
-  GET_zonal_stats(stac_items, "...secondary_id", radius, bands, approx_stats, spatial_stats)
+  GET_zonal_stats(stac_items, "...secondary_id", radius, bands, approx_stats, spatial_stats, type = type)
 }
 
 create_empty_zonal_stats <- function(se, spatial_stats) {

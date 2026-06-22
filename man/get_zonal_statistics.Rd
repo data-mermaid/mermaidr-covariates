@@ -9,6 +9,7 @@ get_zonal_statistics(
   covariate,
   n_days = 365,
   radius = 1000,
+  bands = list(1),
   spatial_stats = c("min", "max", "mean"),
   date_col = "sample_date",
   .progress = TRUE

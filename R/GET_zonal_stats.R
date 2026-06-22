@@ -1,18 +1,38 @@
 GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
-                            approx_stats = FALSE, spatial_stats = "mean", columns = NULL) {
+                            approx_stats = FALSE, spatial_stats = "mean",
+                            type = "raster") {
+
+  endpoint_url <- switch(type,
+    "raster" = zonal_stats_raster_url,
+    "vector" = zonal_stats_vector_url
+  )
+
   # Set up requests to parallelize
-  request_base <- httr2::request(zonal_stats_raster_url) %>%
+  request_base <- httr2::request(endpoint_url) %>%
     httr2::req_throttle(capacity = chunk_size, fill_time_s = 3) %>%
     httr2::req_user_agent("mermaidr-covariates") %>%
     httr2::req_body_json(list(
       aoi = NULL,
       url = NULL,
-      columns = NULL,
-      stats = as.list(spatial_stats),
-      bands = bands,
-      approx_stats = approx_stats
+      # columns = NULL,
+      # bands = NULL,
+      # radius = radius
+      stats = as.list(spatial_stats)
+      # approx_stats = approx_stats
     )) %>%
     httr2::req_error(is_error = \(res) FALSE)
+
+  if (type == "raster") {
+    request_base <- request_base %>%
+      httr2::req_body_json_modify(
+        bands = bands
+      )
+  } else if (type == "vector") {
+    request_base <- request_base %>%
+      httr2::req_body_json_modify(
+        columns = bands
+      )
+  }
 
   stac_items <- stac_items %>%
     split(.[[id_col]])
@@ -25,9 +45,9 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
           url = x[["url"]],
           aoi = list(
             type = "Point",
-            coordinates = c(x[["longitude"]], x[["latitude"]]),
-            radius = radius
-          ),
+            coordinates = c(x[["longitude"]], x[["latitude"]])
+            # radius = radius
+          )
         )
     }
   )

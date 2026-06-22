@@ -116,7 +116,11 @@ get_all_asset_types <- function(item) {
   item[["assets"]] %>%
     purrr::map_chr(get_asset_type)
 }
+
 get_collection_type <- function(collection) {
+
+  collection <- get_covariate_id(collection)
+
   # Look at the first item
   item <- rstac::stac(stac_url) %>%
     rstac::collections(collection) %>%

@@ -22,6 +22,8 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          spatial_stats = c("min", "max", "mean"),
                                          temporal_stats = c("min", "max", "mean"),
                                          date_col = "sample_date",
+                                         dataset = NULL,
+                                         columns = NULL,
                                          .progress = TRUE) {
 
   original_names <- names(se)
@@ -91,9 +93,8 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
     dplyr::bind_rows()
 
   # Reshape zonal stats into the following format:
-  # covariate, start_date, n_days, end_date, band, temporal_stat, spatial_stat, value
+  # covariate, start_date, n_days, end_date, column, temporal_stat, spatial_stat, value
   # covariate will just be covariate name
-  # band is as is, with "_band" removed
   # Put into a df-column called covariates
 
   zonal_stats_df <- zonal_stats_summary %>%
@@ -104,7 +105,7 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
       start_date = start_date,
       end_date = end_date
     ) %>%
-    dplyr::select(...join_id, covariate, start_date, end_date, n_dates, band, temporal_stat, spatial_stat, value) %>%
+    dplyr::select(...join_id, covariate, start_date, end_date, n_dates, column, temporal_stat, spatial_stat, value) %>%
     tidyr::nest(covariates = -...join_id)
 
   # Re-attach to existing df, even if it was not distinct
