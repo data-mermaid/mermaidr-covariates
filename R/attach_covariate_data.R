@@ -157,6 +157,10 @@ join_se_to_parquet <- function(se, url, columns) {
 
   # TODO -> check that they share a CRS?
 
+  se <- se %>%
+    # Adding an internal ID, just to deal with any duplication issues
+    dplyr::mutate(...duckdb_id = dplyr::row_number())
+
   # Convert the SEs to sf
   se_sf <- se %>%
     sf::st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
@@ -178,11 +182,19 @@ join_se_to_parquet <- function(se, url, columns) {
   }
 
   res <- res %>%
-    sf::st_as_sf() %>%
-    sf::st_drop_geometry()
+    duckspatial::ddbs_collect() %>%
+    sf::st_drop_geometry() %>%
+    dplyr::select(-dplyr::any_of("bbox")) # If bbox is present, remove it
 
   # Disconnect db connection
   duckdb::dbDisconnect(conn)
+
+  # If there is no data returned (i.e., nothing joined), then the df is 0 rows
+  # Need to return the SEs still, even if there is no data
+  # This applies if there is no data for SOME of them, not just ALL of them
+  res <- se %>%
+    dplyr::left_join(res, by = names(se)) %>%
+    dplyr::select(-...duckdb_id)
 
   res
 }
