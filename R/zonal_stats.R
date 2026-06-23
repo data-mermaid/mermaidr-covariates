@@ -104,36 +104,64 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
 }
 
 get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
-
   # Double check covariate interval -- if it is annual/once, then do not need to get items by date
   covariate_interval <- get_covariate_interval(covariate_id)
 
   if (covariate_interval == "once") {
     relevant_items <- rstac::stac(stac_url) |>
-    rstac::stac_search(
-      collections = covariate_id
-    ) |>
-    rstac::get_request()
-  } else {
+      rstac::stac_search(
+        collections = covariate_id
+      ) |>
+      rstac::get_request()
+  } else if (covariate_interval == "periodic") {
+    # Look for items before the sample date
+    search_interval <- before_date_to_datetime(df[["...end_date"]])
+    potential_items <- rstac::stac(stac_url) |>
+      rstac::stac_search(
+        collections = covariate_id,
+        datetime = search_interval,
+        limit = 99999
+      ) |>
+      rstac::get_request()
 
-  # Since intervals are combined, we can no longer just go back n_days from sample_date
-  df <- df %>%
-    dplyr::distinct(...start_date, ...end_date)
-  # Subtract `n_days - 1` days - so it will be `ndays - 1` days before, and the sample date
-  input_sample_date_start <- df[["...start_date"]] - lubridate::days(n_days - 1)
-  input_sample_date_end <- df[["...end_date"]]
+    # Get the most recent item
+    item_dates <- potential_items[["features"]] %>%
+      purrr::imap_dfr(\(x, y) {
+        dplyr::tibble(
+          date = as.Date(x[["properties"]][["datetime"]]),
+          id = x[["id"]]
+        )
+      })
 
-  # Construct interval
-  input_interval <- start_end_to_interval(input_sample_date_start, input_sample_date_end)
+    latest_item <- item_dates %>%
+      dplyr::filter(date == max(date)) %>%
+      dplyr::pull(id)
 
-  # Search for items between those dates
-  relevant_items <- rstac::stac(stac_url) |>
-    rstac::stac_search(
-      collections = covariate_id,
-      datetime = input_interval,
-      limit = 999999
-    ) |>
-    rstac::get_request()
+    relevant_items <- rstac::stac(stac_url) |>
+      rstac::stac_search(
+        collections = covariate_id, ids = latest_item,
+        limit = 1
+      ) |>
+      rstac::get_request()
+  } else if (covariate_interval == "daily") {
+    # Since intervals are combined, we can no longer just go back n_days from sample_date
+    df <- df %>%
+      dplyr::distinct(...start_date, ...end_date)
+    # Subtract `n_days - 1` days - so it will be `ndays - 1` days before, and the sample date
+    input_sample_date_start <- df[["...start_date"]] - lubridate::days(n_days - 1)
+    input_sample_date_end <- df[["...end_date"]]
+
+    # Construct interval
+    input_interval <- start_end_to_interval(input_sample_date_start, input_sample_date_end)
+
+    # Search for items between those dates
+    relevant_items <- rstac::stac(stac_url) |>
+      rstac::stac_search(
+        collections = covariate_id,
+        datetime = input_interval,
+        limit = 999999
+      ) |>
+      rstac::get_request()
   }
 
   if (relevant_items[["numberReturned"]] == 0) {
@@ -156,7 +184,13 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   # Get the dates of items, to have start/end date
   item_dates <- relevant_items %>%
     purrr::map_chr(\(x) {
-      x[["properties"]][["datetime"]]
+      properties <- x[["properties"]]
+
+      if ("datetime" %in% names(properties)) {
+        properties[["datetime"]]
+      } else {
+        browser()
+      }
     })
 
   item_dates <- as.Date(item_dates)
@@ -206,23 +240,17 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, b
     )
 
   zonal_stats <- zonal_stats %>%
-    combine_from_chunking()
-
-  # browser()
-
-  # TODO START HERE
+    dplyr::bind_rows()
 
   zonal_stats %>%
     dplyr::group_by(...id) %>%
     dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE)) %>%
     dplyr::ungroup() %>%
-    # TODO -> handle no data returned, e.g. with covariate "Daily Sea Surface Temperature (SST)"
     # Add n_dates, add covariate, remove "band_" character
     dplyr::mutate(
       covariate = covariate_name,
       # NEW, returning "column" instead of band, so it's consistent across vector and raster
       # and then keep "band_", so it's e.g. column = band_1, pretty clear
-      column = band
       # band = stringr::str_remove(band, "band_"),
       # Not necessarily numeric, in case it is column
       # If they have specified band by name, can we return that?
@@ -250,7 +278,6 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
 
   # Multiple SEs here, so get items for each
   # Set up zonal_stats requests by getting relevant STAC items for each sample event
-
   stac_items <- se %>%
     split(.$...id) %>%
     purrr::map_dfr(\(x) get_items_for_zonal_stats(x, covariate_id, n_days = n_days),

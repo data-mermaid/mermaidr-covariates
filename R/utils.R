@@ -75,7 +75,7 @@ split_for_chunking <- function(df, covariate_id, n_days) {
 
   covariate_interval <- get_covariate_interval(covariate_id)
 
-  split_by_chunk <- covariate_interval == "once"
+  split_by_chunk <- covariate_interval %in% c("once", "periodic")
   if (!split_by_chunk) {
     split_by_chunk <- (covariate_interval == "daily" & n_days < chunk_size)
   } else {
@@ -93,11 +93,6 @@ split_for_chunking <- function(df, covariate_id, n_days) {
     df %>%
       split(.$...id)
   }
-}
-
-combine_from_chunking <- function(df) {
-  df %>%
-    dplyr::bind_rows()
 }
 
 lookup_collection <- function(x) {
@@ -145,33 +140,26 @@ get_covariate_id <- function(x) {
   covariate_id
 }
 
-get_covariate_interval <- function(covariate_id) {
+get_covariate_interval <- function(covariate) {
   # Determine whether a covariate is:
   # daily
-  # monthly
-  # annually
+  # periodic (e.g. every year, every 5 years, etc)
   # once only
 
   # by looking at its start date, adding one year, then seeing how many items are returned
+  # This does NOT work, because it doesn't tell us if the data is annual, every 5 years, etc
+  # Maybe add two years, then deal with ~ 600 instead
 
-  covariates <- list_covariates()
+  covariate <- get_covariate_id(covariate)
 
-  start_date <- covariates %>%
-    dplyr::filter(id == covariate_id) %>%
-    dplyr::pull(start_date)
+  items <- get_collection_items(covariate, simplify = FALSE)
 
-  items <- rstac::stac(stac_url) %>%
-    rstac::stac_search(
-      collections = covariate_id,
-      datetime = start_end_to_interval(start_date, start_date + lubridate::years(1))
-    ) %>%
-    rstac::get_request()
-
-  n_items <- items$numberMatched
+  n_items <- items[["numberMatched"]]
 
   dplyr::case_when(
     n_items == 1 ~ "once",
-    n_items > 1 & n_items <= 300 ~ "check",
+    n_items > 1 & n_items < 50 ~ "periodic",
+    n_items >= 50 & n_items <= 300 ~ "check",
     n_items > 300 ~ "daily"
   )
 }

@@ -56,20 +56,30 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
 
   names(res) <- names(stac_items)
 
+  if (length(bands) > 1) {
+    browser()
+  }
   # Format the results of each call
   res %>%
-    purrr::keep(\(x) x$status_code == 200) %>%
     purrr::imap(
       \(res, date) {
+        # If not a 200, return empty df
+        if (res[["status_code"]] != 200) {
+          return(
+            dplyr::tibble(column = NA_character_)
+          )
+        }
         res %>%
           httr2::resp_body_json() %>%
           purrr::map_dfr(\(x) {
             x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
             dplyr::as_tibble(x)
-          }, .id = "band")
+          }, .id = "column")
       }
     ) %>%
     purrr::list_rbind(names_to = id_col) %>%
+    # If any blanks, fill the column col -- if > 1 col, the browser above will catch it, and we will see
+    tidyr::fill(column, .direction = "updown") %>%
     dplyr::left_join(stac_items %>% dplyr::bind_rows(),
       by = id_col,
       relationship = "one-to-one"

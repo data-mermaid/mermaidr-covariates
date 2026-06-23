@@ -15,7 +15,7 @@ attach_covariate_data <- function(se, covariate, dataset = NULL, columns = NULL,
     join_se_to_parquet(asset_info[["url"]], columns)
 }
 
-get_collection_items <- function(x) {
+get_collection_items <- function(x, simplify = TRUE) {
   x <- get_covariate_id(x)
 
   items <- rstac::stac(stac_url) %>%
@@ -23,7 +23,11 @@ get_collection_items <- function(x) {
     rstac::items() %>%
     rstac::get_request()
 
-  items[["features"]]
+  if (simplify) {
+    items[["features"]]
+  } else {
+    items
+  }
 }
 
 check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = NULL, date_col = "sample_date") {
