@@ -81,8 +81,7 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
     # If any blanks, fill the column col -- if > 1 col, the browser above will catch it, and we will see
     tidyr::fill(column, .direction = "updown") %>%
     dplyr::left_join(stac_items %>% dplyr::bind_rows(),
-      by = id_col,
-      relationship = "one-to-one"
+      by = id_col
     ) %>%
     dplyr::select(-dplyr::all_of(id_col))
 }

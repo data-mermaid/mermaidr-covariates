@@ -115,7 +115,7 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
       rstac::get_request()
   } else if (covariate_interval == "periodic") {
     # Look for items before the sample date
-    search_interval <- before_date_to_datetime(df[["...end_date"]])
+    search_interval <- before_date_to_datetime(unique(df[["...end_date"]]))
     potential_items <- rstac::stac(stac_url) |>
       rstac::stac_search(
         collections = covariate_id,
@@ -197,22 +197,20 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   start_date <- min(item_dates)
   end_date <- max(item_dates)
 
-  # Get URL of each item's `data` OR `cog` asset
+  # Get URL of each item's relevant asset (cog type)
   zonal_stats_urls <- relevant_items %>%
     purrr::map_chr(\(x) {
       assets <- x[["assets"]]
-      asset <- c("data", "cog")[[which(c("data", "cog") %in% names(assets))]]
-      if (length(asset) != 1) {
+      cog_asset <- get_cog_assets(x)
+      if (length(cog_asset) != 1) {
         browser()
       } else {
-        assets[[asset]][["href"]]
+        assets[[cog_asset]][["href"]]
       }
     })
 
   return(
     dplyr::tibble(
-      start_date = start_date,
-      end_date = end_date,
       date = item_dates,
       url = zonal_stats_urls
     )
@@ -263,7 +261,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, b
       values_to = "value"
     ) %>%
     # reorganize covariates columns
-    dplyr::select(...id, covariate, start_date, end_date, n_dates, date, column, spatial_stat, value) %>%
+    dplyr::select(...id, covariate, dplyr::any_of(c("start_date", "end_date")), n_dates, date, column, spatial_stat, value) %>%
     tidyr::nest(covariates = -...id, .by = "...id") # Nest covariates
 }
 
@@ -275,22 +273,74 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
                                       "range", "nodata", "area", "freq_hist"
                                     ),
                                     type) {
+  covariate_interval <- get_covariate_interval(covariate_id)
 
-  # Multiple SEs here, so get items for each
-  # Set up zonal_stats requests by getting relevant STAC items for each sample event
-  stac_items <- se %>%
-    split(.$...id) %>%
-    purrr::map_dfr(\(x) get_items_for_zonal_stats(x, covariate_id, n_days = n_days),
-      .id = "...id"
-    ) %>%
-    dplyr::mutate(...secondary_id = glue::glue("{...id}__{date}")) %>%
-    dplyr::left_join(
-      se %>%
-        dplyr::select(...id, latitude, longitude),
-      by = "...id",
-      relationship = "many-to-many"
-    ) %>%
-    dplyr::distinct()
+  if (covariate_interval != "daily") {
+    # Rather than getting items each time, just get all of the items, then attach the relevant one
+    # TODO -- this doesn't even need to happen in chunks, could just happen at top level
+    items_info <- rstac::stac(stac_url) |>
+      rstac::stac_search(
+        collections = covariate_id,
+        limit = 1
+      ) |>
+      rstac::get_request()
+
+    n_items <- items_info$numberMatched
+
+    items <- rstac::stac(stac_url) |>
+      rstac::stac_search(
+        collections = covariate_id,
+        limit = n_items
+      ) |>
+      rstac::get_request()
+
+    # Get each item's date and COG asset url
+    cog_assets <- items[["features"]] %>%
+      purrr::map_dfr(\(x) {
+        dplyr::tibble(
+          date = as.Date(x[["properties"]][["datetime"]]),
+          url = x[["assets"]][[get_cog_assets(x)]][["href"]]
+        )
+      })
+
+    if (covariate_interval == "once") {
+      stac_items <- se %>%
+        dplyr::mutate(...join = TRUE) %>%
+        dplyr::left_join(cog_assets %>%
+          dplyr::mutate(...join = TRUE), by = "...join") %>%
+        dplyr::mutate(
+          ...secondary_id = glue::glue("{...id}__{date}")
+        )
+    } else {
+      stac_items <- se %>%
+        dplyr::mutate(...join = TRUE) %>%
+        dplyr::left_join(cog_assets %>%
+          dplyr::mutate(...join = TRUE), by = "...join") %>%
+        dplyr::filter(...end_date >= date) %>%
+        dplyr::group_by(...id) %>%
+        dplyr::filter(date == max(date)) %>%
+        dplyr::ungroup() %>%
+        dplyr::mutate(
+          ...secondary_id = glue::glue("{...id}__{date}")
+        )
+    }
+  } else {
+    # Multiple SEs here, so get items for each
+    # Set up zonal_stats requests by getting relevant STAC items for each sample event
+    stac_items <- se %>%
+      split(.$...id) %>%
+      purrr::map_dfr(\(x) get_items_for_zonal_stats(x, covariate_id, n_days = n_days),
+        .id = "...id"
+      ) %>%
+      dplyr::mutate(...secondary_id = glue::glue("{...id}__{date}")) %>%
+      dplyr::left_join(
+        se %>%
+          dplyr::select(...id, latitude, longitude),
+        by = "...id",
+        relationship = "many-to-many"
+      ) %>%
+      dplyr::distinct()
+  }
 
   # Returns a list with elements start_date, end_date, urls
   # and NULL if there are no items
