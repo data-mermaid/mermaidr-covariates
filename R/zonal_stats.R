@@ -16,12 +16,13 @@
 #' @param .progress Whether to show progress bar and time remaining. Defaults to TRUE.
 #'
 #' @export
-get_zonal_statistics <- function(se, covariate, n_days = 365,
-                                 radius = 1000,
-                                 bands = list(1),
+get_zonal_statistics <- function(se, covariate,
+                                 dataset = NULL,
+                                 bands = NULL,
+                                 n_days = NULL,
+                                 radius = 0,
                                  spatial_stats = c("min", "max", "mean"),
                                  date_col = "sample_date",
-                                 type = "raster",
                                  .progress = TRUE) {
   chunk_size <- 100
 
@@ -36,6 +37,12 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
   } else {
     covariate_name <- covariate
   }
+
+  # Check inputs -- returns the dataset type, its bands/columns, and URL
+  covariate_info <- check_inputs_zonal_stats(covariate, dataset, bands, n_days, radius,
+                                         spatial_stats)
+
+  browser()
 
   if (!"...id" %in% names(se)) {
     # Don't need to do this if get_summary_zonal_statistics() called get_zonal_
@@ -102,6 +109,111 @@ get_zonal_statistics <- function(se, covariate, n_days = 365,
     tidyr::nest(covariates = dplyr::all_of(covariates_cols)) %>%
     dplyr::rename_with(\(x) date_col, ...date_temp)
 }
+
+check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
+                                     n_days = NULL, radius = 0, spatial_stats = NULL) {
+
+  items <- get_collection_items(covariate)
+
+  # Use first item for checks
+  first_item <- items[[1]]
+
+  # Check the covariate contains raster data
+  cog_assets <- get_cog_assets(first_item)
+
+  # If there are NO cog assets, they may need to use attach_covariate_data() -- message with that instead
+  if (identical(cog_assets, NA_character_)) {
+    parquet_assets <- get_parquet_assets(first_item)
+    if (!identical(parquet_assets, NA_character_)) {
+      usethis::ui_stop("You cannot get zonal statistics for this covariate. Use `attach_covariate_data()` instead.")
+    }
+  }
+
+  # If there are multiple cog assets, they need to supply `dataset`
+  if (length(cog_assets) > 1) {
+
+    if (is.null(dataset)) {
+      usethis::ui_stop( "This covariate has multiple datasets to get zonal statistics for. Please specify using the `dataset` argument. Options are: {comma_sep_quoted(cog_assets)}.")
+    }
+
+    # If they have supplied `dataset`, it needs to match one of the cog assets
+
+    # Can do the same error for either -- just that `dataset` needs to match one of them, and here are the options
+  }
+
+  # Set asset_name to `cog_assets` if length 1, to `dataset` if not
+  asset_name <- ifelse(length(cog_assets) == 1, cog_assets, dataset)
+  assets <- first_item[["assets"]]
+  asset <- assets[[asset_name]]
+
+  # Check bands
+  asset_bands <- get_asset_bands_or_columns(asset)
+  bands_named <- !all(is.na(asset_bands[["name"]]))
+
+  if (bands_named) {
+    bands_err <- paste(capture.output(print(asset_bands)), collapse = "\n")
+    bands_name_err <- " You may specify by band number or by name."
+  } else {
+    bands_err <- paste0(asset_bands[["band"]], collapse = ", ")
+    bands_name_err <- NULL
+  }
+
+  if (nrow(asset_bands) == 1) {
+  # If there is only 1 asset, default to 1 -- even if they have not supplied
+    bands <- 1
+    bands_labels <- NULL
+  } else {
+  # If there are multiple, they must supply -- they can supply multiple, but need to be specific
+  # They can supply by name or by number
+    if (is.null(bands)) {
+      usethis::ui_stop(
+        "Please specify which band(s) to use in `bands`.{bands_name_err}\nOptions: \n{bands_err}."
+      )
+    } else {
+    # Confirm that all bands are valid ones
+      bands <- unlist(bands)
+      selected_bands <- asset_bands %>%
+        dplyr::filter(band %in% bands| name %in% bands)
+
+      if (nrow(selected_bands) != length(bands)) {
+        usethis::ui_stop("Invalid band(s) given in `bands`.{bands_name_err}\nOptions: \n{bands_err}")
+      }
+
+      # Prep band info for return: `bands` as a list, `bands_labels` as a df
+      bands <- as.list(bands)
+
+      # If there are no names for the bands, `bands_labels` is NULL
+      if (!bands_named) {
+        bands_labels <- NULL
+      } else {
+        bands_labels <- selected_bands
+      }
+    }
+  }
+
+  # Check that they have supplied sample_date if the covariate is date-dependent
+  # TODO: no done
+  covariate_interval <- get_covariate_interval(covariate)
+
+  # Check they have supplied n_days if the covariate is not once or periodic
+  if (!covariate_interval %in% c("once", "periodic") & is.null(n_days)) {
+    usethis::ui_stop("Please specify number of days to get covariate for in `n_days`.")
+  }
+
+  # Check they have supplied spatial_stat if radius != 0
+  if (radius > 0 & is.null(spatial_stats)) {
+    usethis::ui_stop("Please specify `spatial_stats`.")
+  }
+
+  # Return:
+  # covariate_interval
+  # bands (as list)
+  # bands_labels (df with labels, if relevant)
+  list(covariate_interval = covariate_interval,
+       bands = as.list(bands),
+       bands_labels = bands_labels)
+}
+
 
 get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   # Double check covariate interval -- if it is annual/once, then do not need to get items by date

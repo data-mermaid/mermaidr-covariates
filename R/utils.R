@@ -162,3 +162,8 @@ get_covariate_interval <- function(covariate) {
     n_items > 300 ~ "daily"
   )
 }
+
+comma_sep_quoted <- function(x) {
+  paste0(names(x), collapse = "\", \"")
+  glue::glue('"{x}"')
+}

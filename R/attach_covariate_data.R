@@ -44,9 +44,6 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
   asset_types <- get_all_asset_types(first_item) %>%
     purrr::keep(\(x) !is.na(x))
 
-  assets_names <- paste0(names(asset_types), collapse = "\", \"")
-  assets_names <- glue::glue('"{assets_names}"')
-
   if (!is.null(dataset)) {
     # Check that they only specified one dataset
     if (length(dataset) > 1) {
@@ -57,7 +54,7 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
     asset <- assets[[dataset]]
     if (is.null(asset)) {
       usethis::ui_stop(
-        "Dataset \"{dataset}\" does not exist. Valid datasets are: {assets_names}."
+        "Dataset \"{dataset}\" does not exist. Valid datasets are: {comma_sep_quoted(names(asset_types))}."
       )
     }
   }
@@ -129,10 +126,8 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
     valid_col <- col %in% bands_cols[["name"]]
 
     if (!valid_col) {
-      cols <- bands_cols[["name"]] %>% paste0(collapse = '", "')
-      cols <- glue::glue('"{cols}"')
       usethis::ui_stop(
-        "Column \"{col}\" is not valid. \nOptions: \n{cols}"
+        "Column \"{col}\" is not valid. \nOptions: \n{comma_sep_quoted(bands_cols[['name']])}"
       )
     }
   }
