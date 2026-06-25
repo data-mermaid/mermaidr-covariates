@@ -263,7 +263,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, b
     # reorganize covariates columns
     dplyr::select(...id, covariate, dplyr::any_of(c("start_date", "end_date")), n_dates, date, band, spatial_stat, value) %>%
     dplyr::distinct() %>%
-    tidyr::nest(covariates = -...id, .by = "...id") # Nest covariates
+    tidyr::nest(covariates = -...id, .by = "...id")
 }
 
 get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000,
@@ -363,7 +363,31 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
   }
 
   # Get zonal stats for each URL
-  GET_zonal_stats(stac_items, "...secondary_id", radius, bands, approx_stats, spatial_stats, type = type)
+  zonal_stats <- GET_zonal_stats(stac_items, "...secondary_id", radius, bands, approx_stats, spatial_stats, type = type)
+
+  # Not all SEs have zonal stats, if e.g. they got filtered out by date issues
+  # So make sure there is a row for each SE, with band and spatial_stat the same, with value NA, date NA
+  se_with_secondary_id <- se %>%
+    dplyr::select(...id) %>%
+    dplyr::left_join(stac_items %>%
+      dplyr::select(...id, ...secondary_id), by = "...id") %>%
+    dplyr::mutate(...secondary_id = dplyr::coalesce(...secondary_id, ...id))
+
+
+
+  zonal_stats %>%
+    dplyr::mutate(
+      ...secondary_id = forcats::fct_expand(...secondary_id, se_with_secondary_id[["...secondary_id"]]),
+      band = forcats::fct_expand(band)
+    ) %>%
+    tidyr::complete(...secondary_id, band) %>%
+    dplyr::mutate(dplyr::across(c(...secondary_id), as.character)) %>%
+    dplyr::right_join(se_with_secondary_id, by = "...secondary_id") %>%
+    dplyr::left_join(se %>% dplyr::bind_rows(),
+      by = "...id"
+    ) %>%
+    dplyr::left_join(stac_items %>% select(-names(se), -...join), by = "...secondary_id") %>%
+    dplyr::select(-...secondary_id)
 }
 
 create_empty_zonal_stats <- function(se, spatial_stats) {
