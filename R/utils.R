@@ -134,7 +134,7 @@ get_covariate_id <- function(x) {
 
   # If no ID, error
   if (is.na(covariate_id)) {
-    stop(x, " is not a valid covariate title or ID.", call. = FALSE)
+    stop(x, " is not a valid covariate title or ID. Run `list_covariates()` to see covariates.", call. = FALSE)
   }
 
   covariate_id
