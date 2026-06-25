@@ -317,15 +317,24 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
         dplyr::mutate(...join = TRUE) %>%
         dplyr::left_join(cog_assets %>%
           dplyr::mutate(...join = TRUE), by = "...join") %>%
-        dplyr::filter(...end_date >= date) %>%
-        dplyr::group_by(...id) %>%
-        dplyr::filter(date == max(date)) %>%
-        dplyr::ungroup() %>%
-        dplyr::mutate(
-          ...secondary_id = glue::glue("{...id}__{date}")
-        )
+        dplyr::filter(...end_date >= date)
+
+      if (nrow(stac_items) == 0) {
+        res <- create_empty_zonal_stats(se, spatial_stats)
+
+        return(res)
+      } else {
+        stac_items <- stac_items %>%
+          dplyr::group_by(...id) %>%
+          dplyr::filter(date == max(date)) %>%
+          dplyr::ungroup() %>%
+          dplyr::mutate(
+            ...secondary_id = glue::glue("{...id}__{date}")
+          )
+      }
     }
   } else {
+
     # Multiple SEs here, so get items for each
     # Set up zonal_stats requests by getting relevant STAC items for each sample event
     stac_items <- se %>%
@@ -360,7 +369,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
 
 create_empty_zonal_stats <- function(se, spatial_stats) {
   se %>%
-    dplyr::select(...id) %>%
+    dplyr::distinct(...id) %>%
     dplyr::bind_cols(
       dplyr::tibble(
         start_date = NA,

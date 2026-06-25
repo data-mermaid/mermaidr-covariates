@@ -59,16 +59,31 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
   if (length(bands) > 1) {
     browser()
   }
+
   # Format the results of each call
   res %>%
     purrr::imap(
       \(res, date) {
         # If not a 200, return empty df
         if (res[["status_code"]] != 200) {
-          return(
-            dplyr::tibble(band = NA_character_)
-          )
+          res <- vector("list", length = length(bands))
+          res <- purrr::map(res,
+                     \(x) {
+                       x <- vector("list", length = length(spatial_stats))
+                       x <- purrr::map(x, \(x) NA)
+                       names(x) <- spatial_stats
+
+                       dplyr::as_tibble(x)
+                     })
+
+          names(res) <- paste0("band_", unlist(bands))
+
+          res <- res %>%
+            dplyr::bind_rows(.id = "band")
+
+          return(res)
         }
+
         res %>%
           httr2::resp_body_json() %>%
           purrr::map_dfr(\(x) {
