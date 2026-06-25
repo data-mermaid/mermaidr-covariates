@@ -160,7 +160,7 @@ test_that("Parellelization produces results identical to prior method", {
 
   # Summary
   summary_covariates_to_test_parallelization_against <- readRDS(
-      test_path("summary_covariates_to_test_parallelization_against.rds")
+    test_path("summary_covariates_to_test_parallelization_against.rds")
   ) %>%
     dplyr::arrange(project_id, site, sample_date)
 

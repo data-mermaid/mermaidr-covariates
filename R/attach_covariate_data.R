@@ -153,7 +153,6 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
 }
 
 join_se_to_parquet <- function(se, url, columns) {
-
   # Set up connection, create a table called "temp" with the data from the parquet file
   conn <- create_parquet_table(url)
 
@@ -173,11 +172,11 @@ join_se_to_parquet <- function(se, url, columns) {
   duckspatial::ddbs_write_table(conn, se_sf, "points", quiet = TRUE)
 
   res <- duckspatial::ddbs_join(
-      conn  = conn,
-      x     = "points", # se
-      y     = "temp", # parquet
-      join  = "intersects"
-    )
+    conn  = conn,
+    x     = "points", # se
+    y     = "temp", # parquet
+    join  = "intersects"
+  )
 
   # If relevant, select specific columns
   if (!is.null(columns)) {

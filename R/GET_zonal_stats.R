@@ -1,7 +1,6 @@
 GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
                             approx_stats = FALSE, spatial_stats = "mean",
                             type = "raster") {
-
   endpoint_url <- switch(type,
     "raster" = zonal_stats_raster_url,
     "vector" = zonal_stats_vector_url
@@ -67,14 +66,16 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
         # If not a 200, return empty df
         if (res[["status_code"]] != 200) {
           res <- vector("list", length = length(bands))
-          res <- purrr::map(res,
-                     \(x) {
-                       x <- vector("list", length = length(spatial_stats))
-                       x <- purrr::map(x, \(x) NA)
-                       names(x) <- spatial_stats
+          res <- purrr::map(
+            res,
+            \(x) {
+              x <- vector("list", length = length(spatial_stats))
+              x <- purrr::map(x, \(x) NA)
+              names(x) <- spatial_stats
 
-                       dplyr::as_tibble(x)
-                     })
+              dplyr::as_tibble(x)
+            }
+          )
 
           names(res) <- paste0("band_", unlist(bands))
 

@@ -118,7 +118,6 @@ get_all_asset_types <- function(item) {
 }
 
 get_collection_type <- function(collection) {
-
   collection <- get_covariate_id(collection)
 
   # Look at the first item

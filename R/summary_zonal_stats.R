@@ -25,7 +25,6 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
                                          dataset = NULL,
                                          columns = NULL,
                                          .progress = TRUE) {
-
   original_names <- names(se)
 
   if (nrow(se) == 0) {

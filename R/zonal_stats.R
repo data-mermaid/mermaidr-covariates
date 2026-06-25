@@ -334,7 +334,6 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
       }
     }
   } else {
-
     # Multiple SEs here, so get items for each
     # Set up zonal_stats requests by getting relevant STAC items for each sample event
     stac_items <- se %>%
