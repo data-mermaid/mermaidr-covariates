@@ -105,7 +105,7 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
       start_date = start_date,
       end_date = end_date
     ) %>%
-    dplyr::select(...join_id, covariate, start_date, end_date, n_dates, column, temporal_stat, spatial_stat, value) %>%
+    dplyr::select(...join_id, covariate, start_date, end_date, n_dates, band, temporal_stat, spatial_stat, value) %>%
     tidyr::nest(covariates = -...join_id)
 
   # Re-attach to existing df, even if it was not distinct

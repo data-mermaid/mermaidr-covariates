@@ -66,7 +66,7 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
         # If not a 200, return empty df
         if (res[["status_code"]] != 200) {
           return(
-            dplyr::tibble(column = NA_character_)
+            dplyr::tibble(band = NA_character_)
           )
         }
         res %>%
@@ -74,12 +74,12 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
           purrr::map_dfr(\(x) {
             x <- purrr::map(x, \(x) if (is.null(x)) NA else x)
             dplyr::as_tibble(x)
-          }, .id = "column")
+          }, .id = "band")
       }
     ) %>%
     purrr::list_rbind(names_to = id_col) %>%
-    # If any blanks, fill the column col -- if > 1 col, the browser above will catch it, and we will see
-    tidyr::fill(column, .direction = "updown") %>%
+    # If any blanks, fill the band col -- if > 1 col, the browser above will catch it, and we will see
+    tidyr::fill(band, .direction = "updown") %>%
     dplyr::left_join(stac_items %>% dplyr::bind_rows(),
       by = id_col
     ) %>%

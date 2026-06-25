@@ -261,7 +261,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, b
       values_to = "value"
     ) %>%
     # reorganize covariates columns
-    dplyr::select(...id, covariate, dplyr::any_of(c("start_date", "end_date")), n_dates, date, column, spatial_stat, value) %>%
+    dplyr::select(...id, covariate, dplyr::any_of(c("start_date", "end_date")), n_dates, date, band, spatial_stat, value) %>%
     dplyr::distinct() %>%
     tidyr::nest(covariates = -...id, .by = "...id") # Nest covariates
 }
