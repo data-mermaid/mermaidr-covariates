@@ -39,8 +39,10 @@ get_zonal_statistics <- function(se, covariate,
   }
 
   # Check inputs -- returns the dataset type, its bands/columns, and URL
-  covariate_info <- check_inputs_zonal_stats(covariate, dataset, bands, n_days, radius,
-                                         spatial_stats)
+  covariate_info <- check_inputs_zonal_stats(
+    covariate, dataset, bands, n_days, radius,
+    spatial_stats
+  )
 
   browser()
 
@@ -112,7 +114,6 @@ get_zonal_statistics <- function(se, covariate,
 
 check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
                                      n_days = NULL, radius = 0, spatial_stats = NULL) {
-
   items <- get_collection_items(covariate)
 
   # Use first item for checks
@@ -131,9 +132,8 @@ check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
 
   # If there are multiple cog assets, they need to supply `dataset`
   if (length(cog_assets) > 1) {
-
     if (is.null(dataset)) {
-      usethis::ui_stop( "This covariate has multiple datasets to get zonal statistics for. Please specify using the `dataset` argument. Options are: {comma_sep_quoted(cog_assets)}.")
+      usethis::ui_stop("This covariate has multiple datasets to get zonal statistics for. Please specify using the `dataset` argument. Options are: {comma_sep_quoted(cog_assets)}.")
     }
 
     # If they have supplied `dataset`, it needs to match one of the cog assets
@@ -159,21 +159,21 @@ check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
   }
 
   if (nrow(asset_bands) == 1) {
-  # If there is only 1 asset, default to 1 -- even if they have not supplied
+    # If there is only 1 asset, default to 1 -- even if they have not supplied
     bands <- 1
     bands_labels <- NULL
   } else {
-  # If there are multiple, they must supply -- they can supply multiple, but need to be specific
-  # They can supply by name or by number
+    # If there are multiple, they must supply -- they can supply multiple, but need to be specific
+    # They can supply by name or by number
     if (is.null(bands)) {
       usethis::ui_stop(
         "Please specify which band(s) to use in `bands`.{bands_name_err}\nOptions: \n{bands_err}."
       )
     } else {
-    # Confirm that all bands are valid ones
+      # Confirm that all bands are valid ones
       bands <- unlist(bands)
       selected_bands <- asset_bands %>%
-        dplyr::filter(band %in% bands| name %in% bands)
+        dplyr::filter(band %in% bands | name %in% bands)
 
       if (nrow(selected_bands) != length(bands)) {
         usethis::ui_stop("Invalid band(s) given in `bands`.{bands_name_err}\nOptions: \n{bands_err}")
@@ -209,9 +209,11 @@ check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
   # covariate_interval
   # bands (as list)
   # bands_labels (df with labels, if relevant)
-  list(covariate_interval = covariate_interval,
-       bands = as.list(bands),
-       bands_labels = bands_labels)
+  list(
+    covariate_interval = covariate_interval,
+    bands = as.list(bands),
+    bands_labels = bands_labels
+  )
 }
 
 
@@ -484,7 +486,6 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
     dplyr::left_join(stac_items %>%
       dplyr::select(...id, ...secondary_id), by = "...id") %>%
     dplyr::mutate(...secondary_id = dplyr::coalesce(...secondary_id, ...id))
-
 
 
   zonal_stats %>%

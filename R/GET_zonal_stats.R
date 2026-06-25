@@ -94,6 +94,6 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
       }
     ) %>%
     purrr::list_rbind(names_to = id_col)
-    # If any blanks, fill the band col -- if > 1 col, the browser above will catch it, and we will see
-    # tidyr::fill(band, .direction = "updown") %>%
+  # If any blanks, fill the band col -- if > 1 col, the browser above will catch it, and we will see
+  # tidyr::fill(band, .direction = "updown") %>%
 }
