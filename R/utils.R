@@ -71,7 +71,7 @@ add_id_for_joining <- function(df, date_col) {
     dplyr::select(-...date_temp)
 }
 
-split_for_chunking <- function(df, covariate_interval, n_days) {
+split_for_chunking <- function(se, covariate_interval, n_days) {
 
   split_by_chunk <- covariate_interval %in% c("once", "periodic")
   if (!split_by_chunk) {
@@ -84,11 +84,11 @@ split_for_chunking <- function(df, covariate_interval, n_days) {
   if (split_by_chunk) {
     se_per_chunk <- ceiling(chunk_size / n_days)
 
-    df %>%
+    se %>%
       dplyr::mutate(...chunk = (dplyr::row_number() - 1) %/% se_per_chunk) %>%
       split(.$...chunk)
   } else {
-    df %>%
+    se %>%
       split(.$...id)
   }
 }

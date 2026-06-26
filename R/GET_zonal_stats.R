@@ -1,4 +1,4 @@
-GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
+GET_zonal_stats <- function(stac_items, radius = 1000, bands = list(1),
                             approx_stats = FALSE, spatial_stats = "mean",
                             type = "raster") {
   endpoint_url <- switch(type,
@@ -33,11 +33,19 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
       )
   }
 
-  stac_items <- stac_items %>%
-    split(.[[id_col]])
+  stac_items_count <- stac_items %>%
+    dplyr::add_count(...secondary_id) %>%
+    dplyr::filter(n > 1)
+
+  if (nrow(stac_items_count) > 0) {
+    browser()
+  }
+
+  stac_items_list <- stac_items %>%
+    split(.[["...secondary_id"]])
 
   requests <- purrr::map(
-    stac_items,
+    stac_items_list,
     \(x) {
       request_base %>%
         httr2::req_body_json_modify(
@@ -53,38 +61,19 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
 
   res <- httr2::req_perform_parallel(requests, progress = FALSE)
 
-  names(res) <- names(stac_items)
+  names(res) <- names(stac_items_list)
 
   if (length(bands) > 1) {
     browser()
   }
 
-  # Format the results of each call
-  res %>%
+  # Format the results of each call -- if not a 200, then just remove the result. will complete band/stat/etc later
+  res <- res %>%
     purrr::imap(
       \(res, date) {
-        # If not a 200, return empty df
         if (res[["status_code"]] != 200) {
-          res <- vector("list", length = length(bands))
-          res <- purrr::map(
-            res,
-            \(x) {
-              x <- vector("list", length = length(spatial_stats))
-              x <- purrr::map(x, \(x) NA)
-              names(x) <- spatial_stats
-
-              dplyr::as_tibble(x)
-            }
-          )
-
-          names(res) <- paste0("band_", unlist(bands))
-
-          res <- res %>%
-            dplyr::bind_rows(.id = "band")
-
-          return(res)
+          return(dplyr::tibble(band = NA))
         }
-
         res %>%
           httr2::resp_body_json() %>%
           purrr::map_dfr(\(x) {
@@ -93,7 +82,14 @@ GET_zonal_stats <- function(stac_items, id_col, radius = 1000, bands = list(1),
           }, .id = "band")
       }
     ) %>%
-    purrr::list_rbind(names_to = id_col)
-  # If any blanks, fill the band col -- if > 1 col, the browser above will catch it, and we will see
-  # tidyr::fill(band, .direction = "updown") %>%
+    purrr::list_rbind(names_to = "...secondary_id")
+
+  # Add ...id back on
+  stac_items %>%
+    dplyr::left_join(res, by = "...secondary_id") %>%
+    # If there is not any data because the API did NOT return anything (NOT that it returned an NA), set date to NA
+    dplyr::mutate(
+      date = ifelse(is.na(band), NA, date),
+      date = as.Date(date)
+    )
 }
