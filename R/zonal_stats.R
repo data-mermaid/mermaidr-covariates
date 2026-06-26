@@ -71,46 +71,7 @@ get_zonal_statistics <- function(se, covariate,
     ) %>%
     dplyr::select(-...id)
 
-  # Only keep zonal stats that are actually relevant for SE, not all combined intervals
-  # Also updating start_date and end_date
-
-  # Only do this if daily, otherwise just return SE
-  covariate_interval <- get_covariate_interval(covariate_id)
-
-  if (covariate_interval != "daily") {
-    return(se)
-  }
-
-  covariates_cols <- se %>%
-    dplyr::pull(covariates) %>%
-    purrr::pluck(1) %>%
-    names()
-
-  se_flag_relevant <- se %>%
-    dplyr::rename_with(\(x) "...date_temp", dplyr::all_of(date_col)) %>%
-    dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
-    tidyr::unnest(covariates) %>%
-    dplyr::mutate(
-      ...start_date = ...date_temp - (n_days - 1),
-      ...end_date = ...date_temp,
-      ...date_relevant = (date >= ...start_date & date <= ...end_date) | (is.na(date))
-    )
-
-  se_relevant <- se_flag_relevant %>%
-    dplyr::filter(...date_relevant) %>%
-    dplyr::select(-...date_relevant, -...start_date, -...end_date) %>%
-    dplyr::group_by(project, site, latitude, longitude, ...date_temp) %>%
-    # Recalculate based on relevant dates
-    dplyr::mutate(
-      n_dates = dplyr::n_distinct(date, na.rm = TRUE),
-      start_date = min(date),
-      end_date = max(date)
-    ) %>%
-    dplyr::ungroup()
-
-  se_relevant %>%
-    tidyr::nest(covariates = dplyr::all_of(covariates_cols)) %>%
-    dplyr::rename_with(\(x) date_col, ...date_temp)
+  keep_relevant_zonal_stats(se, covariate_info[["covariate_interval"]])
 }
 
 check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
@@ -500,4 +461,46 @@ create_empty_zonal_stats <- function(se, spatial_stats, interval = TRUE) {
 
   zonal_stats %>%
     tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
+}
+
+keep_relevant_zonal_stats <- function(se, covariate_interval) {
+  # Only keep zonal stats that are actually relevant for SE, not all combined intervals
+  # Also updating start_date and end_date
+
+  # Only do this if daily, otherwise just return SE
+
+  if (covariate_interval %in% c("once", "periodic")) {
+    return(se)
+  }
+
+  covariates_cols <- se %>%
+    dplyr::pull(covariates) %>%
+    purrr::pluck(1) %>%
+    names()
+
+  se_flag_relevant <- se %>%
+    dplyr::rename_with(\(x) "...date_temp", dplyr::all_of(date_col)) %>%
+    dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
+    tidyr::unnest(covariates) %>%
+    dplyr::mutate(
+      ...start_date = ...date_temp - (n_days - 1),
+      ...end_date = ...date_temp,
+      ...date_relevant = (date >= ...start_date & date <= ...end_date) | (is.na(date))
+    )
+
+  se_relevant <- se_flag_relevant %>%
+    dplyr::filter(...date_relevant) %>%
+    dplyr::select(-...date_relevant, -...start_date, -...end_date) %>%
+    dplyr::group_by(project, site, latitude, longitude, ...date_temp) %>%
+    # Recalculate based on relevant dates
+    dplyr::mutate(
+      n_dates = dplyr::n_distinct(date, na.rm = TRUE),
+      start_date = min(date),
+      end_date = max(date)
+    ) %>%
+    dplyr::ungroup()
+
+  se_relevant %>%
+    tidyr::nest(covariates = dplyr::all_of(covariates_cols)) %>%
+    dplyr::rename_with(\(x) date_col, ...date_temp)
 }
