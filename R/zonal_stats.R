@@ -24,8 +24,6 @@ get_zonal_statistics <- function(se, covariate,
                                  spatial_stats = c("min", "max", "mean"),
                                  date_col = "sample_date",
                                  .progress = TRUE) {
-  chunk_size <- 100
-
   if (nrow(se) == 0) {
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
@@ -46,6 +44,7 @@ get_zonal_statistics <- function(se, covariate,
 
   browser()
 
+  # TODO -> remove this once get_summary_zonal_statistics() becomes summarise_zonal_statistics()
   if (!"...id" %in% names(se)) {
     # Don't need to do this if get_summary_zonal_statistics() called get_zonal_
     # Already done there
@@ -57,7 +56,7 @@ get_zonal_statistics <- function(se, covariate,
   }
 
   # Get zonal stats for all SEs
-  zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name,
+  zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name, covariate_info[["covariate_interval"]],
     n_days = n_days, radius = radius, bands = bands, date_col = date_col,
     spatial_stats = spatial_stats, type = type, .progress = .progress
   )
@@ -331,10 +330,12 @@ get_items_for_zonal_stats <- function(df, covariate_id, n_days = 365) {
   )
 }
 
-get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, bands,
+get_zonal_stats <- function(ses, covariate_id, covariate_name, covariate_interval,
+                            n_days, radius, bands,
                             date_col, spatial_stats, type, .progress = TRUE) {
+  # Split SEs up into list that can be processed iteratively
   se_list <- ses %>%
-    split_for_chunking(covariate_id, n_days)
+    split_for_chunking(covariate_interval, n_days)
 
   zonal_stats <- se_list %>%
     purrr::map(
@@ -342,6 +343,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, b
       get_zonal_stats_chunked(
         se,
         covariate_id,
+        covariate_interval,
         n_days,
         radius = radius,
         bands = bands,
@@ -380,7 +382,7 @@ get_zonal_stats <- function(ses, covariate_id, covariate_name, n_days, radius, b
     tidyr::nest(covariates = -...id, .by = "...id")
 }
 
-get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000,
+get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, n_days = 30, radius = 1000,
                                     bands = list(1), approx_stats = FALSE,
                                     spatial_stats = c(
                                       "min", "max", "mean", "count", "sum", "std",
@@ -388,8 +390,6 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
                                       "range", "nodata", "area", "freq_hist"
                                     ),
                                     type) {
-  covariate_interval <- get_covariate_interval(covariate_id)
-
   if (covariate_interval != "daily") {
     # Rather than getting items each time, just get all of the items, then attach the relevant one
     # TODO -- this doesn't even need to happen in chunks, could just happen at top level
@@ -420,31 +420,25 @@ get_zonal_stats_chunked <- function(se, covariate_id, n_days = 30, radius = 1000
 
     if (covariate_interval == "once") {
       stac_items <- se %>%
-        dplyr::mutate(...join = TRUE) %>%
-        dplyr::left_join(cog_assets %>%
-          dplyr::mutate(...join = TRUE), by = "...join") %>%
+        dplyr::bind_cols(cog_assets) %>%
         dplyr::mutate(
           ...secondary_id = glue::glue("{...id}__{date}")
         )
     } else {
       stac_items <- se %>%
-        dplyr::mutate(...join = TRUE) %>%
-        dplyr::left_join(cog_assets %>%
-          dplyr::mutate(...join = TRUE), by = "...join") %>%
-        dplyr::filter(...end_date >= date)
+        dplyr::left_join(
+          cog_assets,
+          dplyr::join_by(dplyr::closest(...end_date >= date))
+        ) %>%
+        dplyr::mutate(
+          ...secondary_id = glue::glue("{...id}__{date}")
+        )
 
-      if (nrow(stac_items) == 0) {
+      if (all(is.na(stac_item[["date"]]))) {
+        browser()
         res <- create_empty_zonal_stats(se, spatial_stats)
 
         return(res)
-      } else {
-        stac_items <- stac_items %>%
-          dplyr::group_by(...id) %>%
-          dplyr::filter(date == max(date)) %>%
-          dplyr::ungroup() %>%
-          dplyr::mutate(
-            ...secondary_id = glue::glue("{...id}__{date}")
-          )
       }
     }
   } else {
