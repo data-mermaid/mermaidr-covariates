@@ -63,10 +63,6 @@ GET_zonal_stats <- function(stac_items, radius = 1000, bands = list(1),
 
   names(res) <- names(stac_items_list)
 
-  if (length(bands) > 1) {
-    browser()
-  }
-
   # Format the results of each call -- if not a 200, then just remove the result. will complete band/stat/etc later
   res <- res %>%
     purrr::imap(

@@ -59,7 +59,8 @@ get_zonal_statistics <- function(se, covariate,
 
   # Get zonal stats for all SEs
   zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name, covariate_info[["covariate_interval"]],
-    n_days = n_days, radius = radius, bands = covariate_info[["bands"]], date_col = date_col,
+    n_days = n_days, radius = radius, bands = covariate_info[["bands"]],
+    bands_labels = covariate_info[["bands_labels"]], date_col = date_col,
     spatial_stats = spatial_stats, type = type, .progress = .progress
   )
 
@@ -117,11 +118,23 @@ check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
     bands_name_err <- " You may specify by band number or by name."
   } else {
     bands_err <- paste0(asset_bands[["band"]], collapse = ", ")
-    bands_name_err <- NULL
+    bands_name_err <- ""
   }
 
   if (nrow(asset_bands) == 1) {
     # If there is only 1 asset, default to 1 -- even if they have not supplied
+    # If they DID supply, and it is WRONG, need to error
+
+    if (!is.null(bands)) {
+      # Confirm that all bands are valid ones
+      bands <- unlist(bands)
+      selected_bands <- asset_bands %>%
+        dplyr::filter(band %in% bands | name %in% bands)
+
+      if (nrow(selected_bands) != length(bands)) {
+        usethis::ui_stop("Invalid band(s) given in `bands`.{bands_name_err}\nOptions: {bands_err}")
+      }
+    }
     bands <- 1
     bands_labels <- NULL
   } else {
@@ -140,6 +153,9 @@ check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
       if (nrow(selected_bands) != length(bands)) {
         usethis::ui_stop("Invalid band(s) given in `bands`.{bands_name_err}\nOptions: \n{bands_err}")
       }
+
+      # Ensure `bands` are the numbers, not the names
+      bands <- selected_bands[["band"]]
 
       # Prep band info for return: `bands` as a list, `bands_labels` as a df
       bands <- as.list(bands)
@@ -200,7 +216,7 @@ get_items_for_zonal_stats_periodic <- function(se, covariate_id, covariate_inter
   cog_assets <- items[["features"]] %>%
     purrr::map_dfr(\(x) {
       dplyr::tibble(
-        date = as.Date(x[["properties"]][["datetime"]]),
+        date = as.Date(dplyr::coalesce(x[["properties"]][["datetime"]], x[["properties"]][["end_datetime"]])),
         url = x[["assets"]][[get_cog_assets(x)]][["href"]]
       )
     })
@@ -268,7 +284,6 @@ get_items_for_zonal_stats_daily <- function(se, covariate_id, n_days = 365) {
   item_dates <- relevant_items %>%
     purrr::map_chr(\(x) {
       properties <- x[["properties"]]
-
       if ("datetime" %in% names(properties)) {
         properties[["datetime"]]
       } else {
@@ -305,7 +320,7 @@ get_items_for_zonal_stats_daily <- function(se, covariate_id, n_days = 365) {
 }
 
 get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval,
-                            n_days, radius, bands,
+                            n_days, radius, bands, bands_labels,
                             date_col, spatial_stats, type, .progress = TRUE) {
   # Potentially get the STAC items up front
   get_stac_items_now <- covariate_interval %in% c("once", "periodic")
@@ -355,11 +370,9 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
       dplyr::select(-dplyr::any_of(c("start_date", "end_date")))
   }
 
-  zonal_stats %>%
+  zonal_stats <- zonal_stats %>%
     dplyr::mutate(
-      covariate = covariate_name,
       band = stringr::str_remove(band, "band_")
-      # TODO, add band_name if there is one
     ) %>%
     # reorganize to have a column `spatial_stat` and `value`, instead of a column for each stat
     tidyr::pivot_longer(
@@ -369,16 +382,29 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
     ) %>%
     dplyr::distinct() %>%
     dplyr::mutate(
-      band = forcats::fct_expand(as.character(unlist(bands))),
+      band = forcats::fct_expand(band, as.character(unlist(bands))),
       spatial_stat = forcats::fct_expand(spatial_stats)
     ) %>%
-    tidyr::complete(...id, band, spatial_stat, ) %>%
+    tidyr::complete(...id, band, spatial_stat) %>%
+    # Remove NA bands, they were "completed" but now not relevant
+    dplyr::filter(!is.na(band)) %>%
     dplyr::mutate(
+      band = as.character(band), # Make character first so that it doesn't become FACTOR level, i.e. automatically 1, 2, ..., even if band = 4, 5
       band = as.numeric(band),
-      spatial_stat = as.character(spatial_stat)
+      spatial_stat = as.character(spatial_stat),
+      covariate = covariate_name
     ) %>%
     # reorganize covariates columns
-    dplyr::select(...id, covariate, dplyr::any_of(c("start_date", "end_date", "n_dates")), date, band, spatial_stat, value) %>%
+    dplyr::select(...id, covariate, dplyr::any_of(c("start_date", "end_date", "n_dates")), date, band, spatial_stat, value)
+
+  if (!is.null(bands_labels)) {
+    zonal_stats <- zonal_stats %>%
+      dplyr::left_join(bands_labels, by = "band") %>%
+      dplyr::relocate(name, .after = "band") %>%
+      dplyr::rename(band_name = name)
+  }
+
+  zonal_stats %>%
     tidyr::nest(covariates = -...id, .by = "...id")
 }
 
