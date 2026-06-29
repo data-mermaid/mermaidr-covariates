@@ -170,7 +170,7 @@ check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
   }
 
   # Check that they have supplied sample_date if the covariate is date-dependent
-  # TODO: no done
+  # TODO: not done
   covariate_interval <- get_covariate_interval(covariate)
 
   # Check they have supplied n_days if the covariate is not once or periodic
