@@ -72,7 +72,7 @@ get_zonal_statistics <- function(se, covariate,
     ) %>%
     dplyr::select(-...id)
 
-  keep_relevant_zonal_stats(se, covariate_info[["covariate_interval"]])
+  keep_relevant_zonal_stats(se, covariate_info[["covariate_interval"]], n_days, date_col)
 }
 
 check_inputs_zonal_stats <- function(covariate, dataset = NULL, bands = NULL,
@@ -262,55 +262,42 @@ get_items_for_zonal_stats_daily <- function(se, covariate_id, n_days = 365) {
     rstac::get_request()
 
   if (relevant_items[["numberReturned"]] == 0) {
-    browser()
-    # TODO -> still return WITH SE information
-    return(
-      dplyr::tibble(
-        start_date = NA,
-        end_date = NA,
-        date = NA,
-        url = NA
-      )
+    items <- dplyr::tibble(date = NA, url = NA)
+  } else {
+    relevant_items <- relevant_items[["features"]]
+
+    # Get the dates of items, to have start/end date
+    item_dates <- relevant_items %>%
+      purrr::map_chr(\(x) {
+        properties <- x[["properties"]]
+        if ("datetime" %in% names(properties)) {
+          properties[["datetime"]]
+        } else {
+          browser()
+        }
+      })
+
+    item_dates <- as.Date(item_dates)
+    start_date <- min(item_dates)
+    end_date <- max(item_dates)
+
+    # Get URL of each item's relevant asset (cog type)
+    zonal_stats_urls <- relevant_items %>%
+      purrr::map_chr(\(x) {
+        assets <- x[["assets"]]
+        cog_asset <- get_cog_assets(x)
+        if (length(cog_asset) != 1) {
+          browser()
+        } else {
+          assets[[cog_asset]][["href"]]
+        }
+      })
+
+    items <- dplyr::tibble(
+      date = item_dates,
+      url = zonal_stats_urls
     )
   }
-
-  relevant_items <- relevant_items[["features"]]
-
-  if (length(relevant_items) == 0) {
-    return(NULL)
-  }
-
-  # Get the dates of items, to have start/end date
-  item_dates <- relevant_items %>%
-    purrr::map_chr(\(x) {
-      properties <- x[["properties"]]
-      if ("datetime" %in% names(properties)) {
-        properties[["datetime"]]
-      } else {
-        browser()
-      }
-    })
-
-  item_dates <- as.Date(item_dates)
-  start_date <- min(item_dates)
-  end_date <- max(item_dates)
-
-  # Get URL of each item's relevant asset (cog type)
-  zonal_stats_urls <- relevant_items %>%
-    purrr::map_chr(\(x) {
-      assets <- x[["assets"]]
-      cog_asset <- get_cog_assets(x)
-      if (length(cog_asset) != 1) {
-        browser()
-      } else {
-        assets[[cog_asset]][["href"]]
-      }
-    })
-
-  items <- dplyr::tibble(
-    date = item_dates,
-    url = zonal_stats_urls
-  )
 
   se %>%
     dplyr::select(...id, latitude, longitude) %>%
@@ -330,7 +317,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
   }
 
   # If there are no items, then zonal_stats is empty
-  if (all(is.na(se[["date"]]))) {
+  if (all(is.na(se[["date"]])) & get_stac_items_now) {
     zonal_stats <- create_empty_zonal_stats(se, spatial_stats)
   } else {
     # Split SEs up into list that can be processed iteratively
@@ -359,7 +346,6 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
 
   # Add n_dates, and keep start_date/end_date if !get_stac_items_now
   if (!get_stac_items_now) {
-    browser()
     zonal_stats <- zonal_stats %>%
       dplyr::group_by(...id) %>%
       # TODO, not necessary when annual/periodic
@@ -443,27 +429,19 @@ get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, n_days
   # Not all SEs have zonal stats, if e.g. they got filtered out by date issues
   # So make sure there is a row for each SE, with band and spatial_stat the same, with value NA, date NA
 
-  if (length(unique(se[["...secondary_id"]])) != length(unique(zonal_stats[["...secondary_id"]]))) {
-    browser()
-  }
+  if (covariate_interval %in% c("annual", "periodic")) {
+    if (length(unique(se[["...secondary_id"]])) != length(unique(zonal_stats[["...secondary_id"]]))) {
+      browser()
+    }
 
-  se %>%
-    dplyr::select(...id, ...secondary_id) %>%
-    dplyr::left_join(zonal_stats, by = c("...id", "...secondary_id"))
-  #
-  #   zonal_stats %>%
-  #     dplyr::mutate(
-  #       ...secondary_id = forcats::fct_expand(...secondary_id, se_with_secondary_id[["...secondary_id"]]),
-  #       band = forcats::fct_expand(band)
-  #     ) %>%
-  #     tidyr::complete(...secondary_id, band) %>%
-  #     dplyr::mutate(dplyr::across(c(...secondary_id), as.character)) %>%
-  #     dplyr::right_join(se_with_secondary_id, by = "...secondary_id") %>%
-  #     dplyr::left_join(se %>% dplyr::bind_rows(),
-  #       by = "...id"
-  #     ) %>%
-  #     dplyr::left_join(stac_items %>% select(-names(se), -...join), by = "...secondary_id") %>%
-  #     dplyr::select(-...secondary_id)
+    se %>%
+      dplyr::select(...id, ...secondary_id) %>%
+      dplyr::left_join(zonal_stats, by = c("...id", "...secondary_id"))
+  } else {
+    se %>%
+      dplyr::select(...id) %>%
+      dplyr::left_join(zonal_stats, by = "...id")
+  }
 }
 
 create_empty_zonal_stats <- function(se, spatial_stats, interval = TRUE) {
@@ -489,7 +467,7 @@ create_empty_zonal_stats <- function(se, spatial_stats, interval = TRUE) {
     tidyr::pivot_wider(names_from = spatial_stat, values_from = value)
 }
 
-keep_relevant_zonal_stats <- function(se, covariate_interval) {
+keep_relevant_zonal_stats <- function(se, covariate_interval, n_days, date_col) {
   # Only keep zonal stats that are actually relevant for SE, not all combined intervals
   # Also updating start_date and end_date
 
