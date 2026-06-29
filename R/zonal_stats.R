@@ -344,18 +344,6 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
       dplyr::bind_rows()
   }
 
-  # Add n_dates, and keep start_date/end_date if !get_stac_items_now
-  if (!get_stac_items_now) {
-    zonal_stats <- zonal_stats %>%
-      dplyr::group_by(...id) %>%
-      # TODO, not necessary when annual/periodic
-      dplyr::mutate(n_dates = dplyr::n_distinct(date, na.rm = TRUE)) %>%
-      dplyr::ungroup()
-  } else {
-    zonal_stats <- zonal_stats %>%
-      dplyr::select(-dplyr::any_of(c("start_date", "end_date")))
-  }
-
   zonal_stats <- zonal_stats %>%
     dplyr::mutate(
       band = stringr::str_remove(band, "band_")
@@ -381,7 +369,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
       covariate = covariate_name
     ) %>%
     # reorganize covariates columns
-    dplyr::select(...id, covariate, dplyr::any_of(c("start_date", "end_date", "n_dates")), date, band, spatial_stat, value)
+    dplyr::select(...id, covariate, date, band, spatial_stat, value)
 
   if (!is.null(bands_labels)) {
     zonal_stats <- zonal_stats %>%
@@ -494,15 +482,7 @@ keep_relevant_zonal_stats <- function(se, covariate_interval, n_days, date_col) 
 
   se_relevant <- se_flag_relevant %>%
     dplyr::filter(...date_relevant) %>%
-    dplyr::select(-...date_relevant, -...start_date, -...end_date) %>%
-    dplyr::group_by(project, site, latitude, longitude, ...date_temp) %>%
-    # Recalculate based on relevant dates
-    dplyr::mutate(
-      n_dates = dplyr::n_distinct(date, na.rm = TRUE),
-      start_date = min(date),
-      end_date = max(date)
-    ) %>%
-    dplyr::ungroup()
+    dplyr::select(-...date_relevant, -...start_date, -...end_date)
 
   se_relevant %>%
     tidyr::nest(covariates = dplyr::all_of(covariates_cols)) %>%
