@@ -21,7 +21,7 @@ get_zonal_statistics <- function(se, covariate,
                                  bands = NULL,
                                  n_days = NULL,
                                  radius = 0,
-                                 spatial_stats = c("min", "max", "mean"),
+                                 spatial_stats = "mean",
                                  date_col = "sample_date",
                                  .progress = TRUE) {
   if (nrow(se) == 0) {
@@ -42,16 +42,10 @@ get_zonal_statistics <- function(se, covariate,
     spatial_stats
   )
 
-  # TODO -> remove this once get_summary_zonal_statistics() becomes summarise_zonal_statistics()
-  if (!"...id" %in% names(se)) {
-    # Don't need to do this if get_summary_zonal_statistics() called get_zonal_
-    # Already done there
-
-    # Add an ID for iterating over (splitting by lat/long/sample date,
-    # accounting for overlapping sample dates to reduce duplicating API calls)
-    se <- se %>%
-      add_id_for_iteration(date_col, n_days)
-  }
+  # Add an ID for iterating over (splitting by lat/long/sample date,
+  # accounting for overlapping sample dates to reduce duplicating API calls)
+  se <- se %>%
+    add_id_for_iteration(date_col, n_days)
 
   # Rounding SEs lat/long to 5 digits -- otherwise, causes ID issues when not really important
   se <- se %>%
@@ -228,10 +222,13 @@ get_items_for_zonal_stats_periodic <- function(se, covariate_id, covariate_inter
         ...secondary_id = glue::glue("{...id}__{date}")
       )
   } else {
+      if ("...end_date" %in% names(se)) {
+          browser()
+      }
     stac_items <- se %>%
       dplyr::left_join(
         cog_assets,
-        dplyr::join_by(closest(...end_date >= date))
+        dplyr::join_by(closest(...date_temp >= date))
       ) %>%
       dplyr::mutate(
         ...secondary_id = glue::glue("{...id}__{date}")
@@ -462,7 +459,8 @@ keep_relevant_zonal_stats <- function(se, covariate_interval, n_days, date_col) 
   # Only do this if daily, otherwise just return SE
 
   if (covariate_interval %in% c("once", "periodic")) {
-    return(se)
+    return(se %>%
+      dplyr::select(-...date_temp))
   }
 
   covariates_cols <- se %>%

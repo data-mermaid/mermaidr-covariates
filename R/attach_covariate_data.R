@@ -119,7 +119,7 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
     if (!valid_band) {
       tibble_string <- paste(capture.output(print(bands_cols)), collapse = "\n")
       usethis::ui_stop(
-        "Band \"{col}\" is not a valid band.\nOptions (You may specify by band number or by name): \n{tibble_string}"
+        "Band \"{col}\" is not a valid band.\nOptions (You may specify by band number OR by name): \n{tibble_string}"
       )
     }
   } else if (asset_type == "parquet" & !is.null(col)) {
