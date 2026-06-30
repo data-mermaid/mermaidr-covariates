@@ -11,14 +11,14 @@
 summarise_zonal_statistics <- function(zonal_statistics,
                                        temporal_stats = c("min", "max", "mean"),
                                        .progress = TRUE) {
-  # Check that zonal_statistics contains the `covariates` column and it is in the correct format
+  # Check that zonal_statistics contains the `zonal_statistics` column and it is in the correct format
   valid_format <- identical(zonal_statistics %>%
-    dplyr::select(dplyr::any_of("covariates")) %>%
+    dplyr::select(dplyr::any_of("zonal_statistics")) %>%
     dplyr::select(dplyr::where(is.list)) %>%
-    names(), "covariates")
+    names(), "zonal_statistics")
 
   if (!valid_format) {
-    usethis::ui_stop("Input must be the result from `get_zonal_statistics()`, with column `covariates`.")
+    usethis::ui_stop("Input must be the result from `get_zonal_statistics()`, with column `zonal_statistics`.")
   }
 
   # Add row number to identify after unnesting
@@ -26,8 +26,8 @@ summarise_zonal_statistics <- function(zonal_statistics,
     dplyr::mutate(...summary_id = dplyr::row_number())
 
   zonal_stats <- zonal_statistics %>%
-    dplyr::select(...summary_id, covariates) %>%
-    tidyr::unnest(covariates)
+    dplyr::select(...summary_id, zonal_statistics) %>%
+    tidyr::unnest(zonal_statistics)
 
   # Set up to group by non-stat columns
   id_cols <- zonal_stats %>%
@@ -99,11 +99,11 @@ summarise_zonal_statistics <- function(zonal_statistics,
   # Reshape zonal stats into the following format:
   # covariate, start_date, n_days, end_date, band, band_name (if relevant), temporal_stat, spatial_stat, value
   # covariate will just be covariate name
-  # Put into a df-column called covariates
+  # Put into a df-column called summary_zonal_statistics
 
   zonal_stats_df <- zonal_stats_summary %>%
     dplyr::select(...summary_id, covariate, start_date, end_date, n_dates, band, dplyr::any_of("band_name"), spatial_stat, temporal_stat, value) %>%
-    tidyr::nest(covariates = -...summary_id)
+    tidyr::nest(summary_zonal_statistics = -...summary_id)
 
   # Check that there is a row for every original row
   if (nrow(zonal_stats_df) != nrow(zonal_statistics)) {
@@ -115,10 +115,9 @@ summarise_zonal_statistics <- function(zonal_statistics,
     dplyr::select(-...summary_id) %>%
     names()
 
-  # Re-attach to existing df, even if it was not distinct
+  # Re-attach to existing df
   zonal_statistics %>%
-    dplyr::select(-covariates) %>%
     dplyr::left_join(zonal_stats_df, by = "...summary_id") %>%
     dplyr::arrange(...summary_id) %>%
-    dplyr::select(dplyr::all_of(original_names), covariates)
+    dplyr::select(dplyr::all_of(original_names), summary_zonal_statistics)
 }

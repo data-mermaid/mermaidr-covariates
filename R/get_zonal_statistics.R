@@ -379,7 +379,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
   }
 
   zonal_stats %>%
-    tidyr::nest(covariates = -...id, .by = "...id")
+    tidyr::nest(zonal_statistics = -...id, .by = "...id")
 }
 
 get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, n_days = 30, radius = 1000,
@@ -466,14 +466,14 @@ keep_relevant_zonal_stats <- function(se, covariate_interval, n_days, date_col) 
   }
 
   covariates_cols <- se %>%
-    dplyr::pull(covariates) %>%
+    dplyr::pull(zonal_statistics) %>%
     purrr::pluck(1) %>%
     names()
 
   se_flag_relevant <- se %>%
     dplyr::rename_with(\(x) "...date_temp", dplyr::all_of(date_col)) %>%
     dplyr::mutate(...date_temp = as.Date(...date_temp)) %>%
-    tidyr::unnest(covariates) %>%
+    tidyr::unnest(zonal_statistics) %>%
     dplyr::mutate(
       ...start_date = ...date_temp - (n_days - 1),
       ...end_date = ...date_temp,
@@ -485,6 +485,6 @@ keep_relevant_zonal_stats <- function(se, covariate_interval, n_days, date_col) 
     dplyr::select(-...date_relevant, -...start_date, -...end_date)
 
   se_relevant %>%
-    tidyr::nest(covariates = dplyr::all_of(covariates_cols)) %>%
+    tidyr::nest(zonal_statistics = dplyr::all_of(covariates_cols)) %>%
     dplyr::rename_with(\(x) date_col, ...date_temp)
 }
