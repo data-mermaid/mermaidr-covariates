@@ -105,9 +105,9 @@ get_x_assets <- function(item, common_asset_names, type) {
 }
 
 get_covariate_cog_datasets <- function(covariate) {
-    covariate <- get_covariate_id(covariate)
+  covariate <- get_covariate_id(covariate)
 
-    get_cog_assets(get_collection_items(covariate)[[1]])
+  get_cog_assets(get_collection_items(covariate)[[1]])
 }
 
 get_cog_assets <- function(item) {

@@ -222,9 +222,9 @@ get_items_for_zonal_stats_periodic <- function(se, covariate_id, covariate_inter
         ...secondary_id = glue::glue("{...id}__{date}")
       )
   } else {
-      if ("...end_date" %in% names(se)) {
-          browser()
-      }
+    if ("...end_date" %in% names(se)) {
+      browser()
+    }
     stac_items <- se %>%
       dplyr::left_join(
         cog_assets,
