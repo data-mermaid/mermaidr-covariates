@@ -4,10 +4,10 @@ library(tidyr)
 
 se_full <- mermaid_get_summary_sampleevents()
 
-# covariate <- "50 Reefs+ prioritization"
+covariate <- "50 Reefs+ prioritization"
 # covariate <- "ACA Benthic Habitat"
 # covariate <- "ACA Reef Extent"
-covariate <- "Daily Sea Surface Temperature"
+# covariate <- "Daily Sea Surface Temperature"
 # covariate <- "GPW Global Sediment Exposure"
 # covariate <- "GPW Global Sediment Load"
 # covariate <- "GPW Land Use and Land Cover"
@@ -23,10 +23,13 @@ if (covariate == "Daily Sea Surface Temperature") {
 
 res_full <- se %>%
   mutate(...row = row_number()) %>%
-  # head(10) %>%
+  head(10) %>%
   # slice(c(1,6276)) %>%
   # head(1000) %>%
   get_zonal_statistics(covariate, spatial_stats = "mean", n_days = 5, bands = 1)
+
+res_full %>%
+    summarise_zonal_statistics()
 
 res_full %>%
   select(covariates) %>%

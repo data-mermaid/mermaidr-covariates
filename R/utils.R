@@ -72,7 +72,6 @@ add_id_for_joining <- function(df, date_col) {
 }
 
 split_for_chunking <- function(se, covariate_interval, n_days) {
-
   split_by_chunk <- covariate_interval %in% c("once", "periodic")
   if (!split_by_chunk) {
     split_by_chunk <- (covariate_interval == "daily" & n_days < chunk_size)
