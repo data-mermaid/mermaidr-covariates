@@ -17,6 +17,7 @@ Imports:
     DBI,
     dplyr (>= 1.1.0),
     duckspatial,
+    forcats,
     glue,
     httr2,
     lubridate,
@@ -24,10 +25,12 @@ Imports:
     purrr,
     rlang,
     rstac,
+    sf,
     stringr,
-    tidyr
+    tidyr,
+    usethis
 Remotes: data-mermaid/mermaidr
-RoxygenNote: 7.3.3
+RoxygenNote: 8.0.0
 URL: https://data-mermaid.github.io/mermaidr-covariates/
 Suggests: 
     knitr,

@@ -61,7 +61,7 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
 
   if (length(asset_types) > 1 & is.null(dataset)) {
     usethis::ui_stop("Covariate \"{covariate}\" contains more than one dataset. Please specify which to use in `dataset`.
-      Options: {assets_names}.")
+      Options: {comma_sep_quoted(names(asset_types))}.")
   }
 
   if (length(asset_types) == 1) {
@@ -185,7 +185,7 @@ join_se_to_parquet <- function(se, url, columns) {
     dplyr::select(-dplyr::any_of("bbox")) # If bbox is present, remove it
 
   # Disconnect db connection
-  duckdb::dbDisconnect(conn)
+  DBI::dbDisconnect(conn)
 
   # If there is no data returned (i.e., nothing joined), then the df is 0 rows
   # Need to return the SEs still, even if there is no data

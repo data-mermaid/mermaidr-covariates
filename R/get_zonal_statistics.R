@@ -231,7 +231,7 @@ get_items_for_zonal_stats_periodic <- function(se, covariate_id, covariate_inter
     stac_items <- se %>%
       dplyr::left_join(
         cog_assets,
-        dplyr::join_by(dplyr::closest(...end_date >= date))
+        dplyr::join_by(closest(...end_date >= date))
       ) %>%
       dplyr::mutate(
         ...secondary_id = glue::glue("{...id}__{date}")

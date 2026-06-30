@@ -182,5 +182,5 @@ get_asset_bands_or_columns <- function(asset) {
   )
 
   bands_or_cols %>%
-    purrr:::list_rbind(names_to = id_col)
+    purrr::list_rbind(names_to = id_col)
 }

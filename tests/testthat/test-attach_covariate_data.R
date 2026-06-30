@@ -1,4 +1,8 @@
 test_that("attach_covariate_data only returns `columns` cols if not NULL, all cols otherwise", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   se <- mermaidr::mermaid_get_summary_sampleevents(limit = 1)
 
   col_named <- attach_covariate_data(se, "meow_boundaries", columns = "REALM")

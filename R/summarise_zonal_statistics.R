@@ -9,8 +9,7 @@
 #'
 #' @export
 summarise_zonal_statistics <- function(zonal_statistics,
-                                       temporal_stats = c("min", "max", "mean"),
-                                       .progress = TRUE) {
+                                       temporal_stats = c("min", "max", "mean")) {
   # Check that zonal_statistics contains the `zonal_statistics` column and it is in the correct format
   valid_format <- identical(zonal_statistics %>%
     dplyr::select(dplyr::any_of("zonal_statistics")) %>%
@@ -45,7 +44,7 @@ summarise_zonal_statistics <- function(zonal_statistics,
     dplyr::summarise(
       start_date = min(date),
       end_date = max(date),
-      n_dates = n_distinct(date),
+      n_dates = dplyr::n_distinct(date),
       .groups = "drop"
     )
 
@@ -112,7 +111,7 @@ summarise_zonal_statistics <- function(zonal_statistics,
     names()
 
   if (one_per_group) {
-      usethis::ui_warn("Note: there is only one data point to summarise for each sample event, band, and temporal statistic -- the results before and after summarising are identical.")
+    usethis::ui_warn("Note: there is only one data point to summarise for each sample event, band, and temporal statistic -- the results before and after summarising are identical.")
   }
 
   # Re-attach to existing df

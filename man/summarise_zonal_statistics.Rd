@@ -6,8 +6,7 @@
 \usage{
 summarise_zonal_statistics(
   zonal_statistics,
-  temporal_stats = c("min", "max", "mean"),
-  .progress = TRUE
+  temporal_stats = c("min", "max", "mean")
 )
 }
 \arguments{

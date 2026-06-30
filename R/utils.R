@@ -162,6 +162,6 @@ get_covariate_interval <- function(covariate) {
 }
 
 comma_sep_quoted <- function(x) {
-  paste0(names(x), collapse = "\", \"")
+  x <- paste0(x, collapse = "\", \"")
   glue::glue('"{x}"')
 }
