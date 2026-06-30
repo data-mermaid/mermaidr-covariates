@@ -1,68 +1,71 @@
-#' Get summary zonal statistics
+#' Summarise zonal statistics
 #'
-#' Get zonal statistics. Unlike \code{get_zonal_statistics}, this summarises the
-#' data for *all `n_days`* prior to the sample event date, using `spatial_stats`
-#' to determine how to spatially summarise the data, and `temporal_stats` to
-#' summarise the resulting data over time.
+#' Summarise zonal statistics. Using the results from  \code{get_zonal_statistics},
+#' this summarises the data for *all `n_days`* prior to the sample event date, using
+#' `temporal_stats` to summarise the resulting data over time.
 #'
-#' @param se Sample events from \code{mermaidr}
-#' @param covariate Covariate to get statistics for. Both covariate title or ID are permitted.
-#' @param n_days Number of days to get statistics for. Includes the sample date
-#'  itself, and days prior to it -- e.g., 365 days would include the sample date
-#'  and the 364 days prior. Defaults to 365.
-#' @param radius Radius around site location, in metres. Defaults to 1000.
-#' @param spatial_stats Spatial statistics -- used to summarise all data around the site location, according to the \code{radius} set.
+#' @param zonal_statistics Sample events with zonal statistics, from \code{get_zonal_statistics}.
 #' @param temporal_stats Temporal statistics -- used to summarise the data over time.
-#' @param date_col Date back from (using \code{n_days}). Defaults to "sample_date".
-#' @param .progress Whether to show progress bar and time remaining. Defaults to TRUE.
 #'
 #' @export
-get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
-                                         radius = 1000,
-                                         spatial_stats = c("min", "max", "mean"),
-                                         temporal_stats = c("min", "max", "mean"),
-                                         date_col = "sample_date",
-                                         dataset = NULL,
-                                         columns = NULL,
-                                         .progress = TRUE) {
-  original_names <- names(se)
+summarise_zonal_statistics <- function(zonal_statistics,
+                                       temporal_stats = c("min", "max", "mean"),
+                                       .progress = TRUE) {
+  # Check that zonal_statistics contains the `covariates` column and it is in the correct format
+  valid_format <- identical(zonal_statistics %>%
+    dplyr::select(dplyr::any_of("covariates")) %>%
+    dplyr::select(dplyr::where(is.list)) %>%
+    names(), "covariates")
 
-  if (nrow(se) == 0) {
-    stop("No sample events to get zonal statistics for.", .call = FALSE)
+  if (!valid_format) {
+    usethis::ui_stop("Input must be the result from `get_zonal_statistics()`, with column `covariates`.")
   }
 
-  covariate_id <- get_covariate_id(covariate)
+  # Add row number to identify after unnesting
+  zonal_statistics <- zonal_statistics %>%
+    dplyr::mutate(...summary_id = dplyr::row_number())
 
-  if (covariate_id == covariate) {
-    covariate_name <- get_covariate_name_from_id(covariate_id)
-  } else {
-    covariate_name <- covariate
-  }
-
-  # Add an ID for iterating over (splitting by lat/long/sample date,
-  # accounting for overlapping sample dates to reduce duplicating API calls)
-  se <- se %>%
-    add_id_for_iteration(date_col, n_days)
-
-  # Get (non-summary) zonal statistics
-  zonal_stats <- get_zonal_statistics(se, covariate,
-    n_days = n_days,
-    radius = radius, spatial_stats = spatial_stats,
-    date_col = date_col,
-    .progress = .progress
-  )
-
-  zonal_stats <- zonal_stats %>%
-    add_id_for_joining(date_col) %>% # Add joining ID on
-    # just keep ID and covariates -> do not need lat/long/date, join back on later
-    dplyr::select(...join_id, covariates) %>%
-    # Unnest covariates, remove date
-    tidyr::unnest(covariates) %>%
-    dplyr::select(-date)
+  zonal_stats <- zonal_statistics %>%
+    dplyr::select(...summary_id, covariates) %>%
+    tidyr::unnest(covariates)
 
   # Set up to group by non-stat columns
   id_cols <- zonal_stats %>%
-    dplyr::select(-dplyr::any_of("value")) %>%
+    dplyr::select(-value, -date) %>%
+    names()
+
+  # Check whether there is only 1 row per group -- then there is no summarising needed, return message along with summarised df
+  one_per_group <- identical(zonal_stats %>%
+    dplyr::add_count(dplyr::across(dplyr::all_of(id_cols)), name = "...group_n") %>% dplyr::pull(...group_n) %>% unique(), 1L)
+
+  if (one_per_group) {
+    browser()
+  }
+
+  # Calculate min_date, max_date, n_dates, EXCLUDING any dates where value is NA
+  zonal_stats_dates <- zonal_stats %>%
+    dplyr::filter(!is.na(value)) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(id_cols))) %>%
+    dplyr::summarise(
+      start_date = min(date),
+      end_date = max(date),
+      n_dates = n_distinct(date),
+      .groups = "drop"
+    )
+
+  # Add back on to zonal_stats, making n_dates 0 if there are none
+  # Remove "date"
+  zonal_stats <- zonal_stats %>%
+    dplyr::select(-date) %>%
+    dplyr::left_join(zonal_stats_dates, by = dplyr::join_by(
+      ...summary_id, covariate, band,
+      spatial_stat
+    )) %>%
+    dplyr::mutate(n_dates = dplyr::coalesce(n_dates, 0))
+
+  # Re-determine ID cols
+  id_cols <- zonal_stats %>%
+    dplyr::select(-value) %>%
     names()
 
   # Apply summary function to each of the cols
@@ -91,25 +94,31 @@ get_summary_zonal_statistics <- function(se, covariate, n_days = 365,
     }) %>%
     dplyr::bind_rows()
 
+  # Calculate
+
   # Reshape zonal stats into the following format:
-  # covariate, start_date, n_days, end_date, column, temporal_stat, spatial_stat, value
+  # covariate, start_date, n_days, end_date, band, band_name (if relevant), temporal_stat, spatial_stat, value
   # covariate will just be covariate name
   # Put into a df-column called covariates
 
   zonal_stats_df <- zonal_stats_summary %>%
-    dplyr::right_join(se %>%
-      add_id_for_joining(date_col), by = "...join_id") %>%
-    dplyr::mutate(
-      covariate = covariate_name,
-      start_date = start_date,
-      end_date = end_date
-    ) %>%
-    dplyr::select(...join_id, covariate, start_date, end_date, n_dates, band, temporal_stat, spatial_stat, value) %>%
-    tidyr::nest(covariates = -...join_id)
+    dplyr::select(...summary_id, covariate, start_date, end_date, n_dates, band, dplyr::any_of("band_name"), spatial_stat, temporal_stat, value) %>%
+    tidyr::nest(covariates = -...summary_id)
+
+  # Check that there is a row for every original row
+  if (nrow(zonal_stats_df) != nrow(zonal_statistics)) {
+    browser()
+  }
+
+  # Join back on to original zonal_statistics
+  original_names <- zonal_statistics %>%
+    dplyr::select(-...summary_id) %>%
+    names()
 
   # Re-attach to existing df, even if it was not distinct
-  se %>%
-    add_id_for_joining(date_col) %>%
-    dplyr::left_join(zonal_stats_df, by = "...join_id") %>%
+  zonal_statistics %>%
+    dplyr::select(-covariates) %>%
+    dplyr::left_join(zonal_stats_df, by = "...summary_id") %>%
+    dplyr::arrange(...summary_id) %>%
     dplyr::select(dplyr::all_of(original_names), covariates)
 }
