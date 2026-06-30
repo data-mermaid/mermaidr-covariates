@@ -34,11 +34,13 @@ summarise_zonal_statistics <- function(zonal_statistics,
     dplyr::select(-value, -date) %>%
     names()
 
-  # browser()
-
   # Check whether there is only 1 row per group -- then there is no summarising needed, return message along with summarised df
   one_per_group <- identical(zonal_stats %>%
     dplyr::add_count(dplyr::across(dplyr::all_of(id_cols)), name = "...group_n") %>% dplyr::pull(...group_n) %>% unique(), 1L)
+
+  if (one_per_group) {
+    browser()
+  }
 
   # Calculate min_date, max_date, n_dates, EXCLUDING any dates where value is NA
   zonal_stats_dates <- zonal_stats %>%
@@ -112,10 +114,6 @@ summarise_zonal_statistics <- function(zonal_statistics,
   original_names <- zonal_statistics %>%
     dplyr::select(-...summary_id) %>%
     names()
-
-  if (one_per_group) {
-      usethis::ui_warn("Note: there is only one data point to summarise for each sample event, band, and temporal statistic -- the results before and after summarising are identical.")
-  }
 
   # Re-attach to existing df, even if it was not distinct
   zonal_statistics %>%
