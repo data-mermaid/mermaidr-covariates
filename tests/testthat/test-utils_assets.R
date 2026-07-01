@@ -69,7 +69,7 @@ test_that("check_inputs_covariate_data errors when an invalid col/band is given"
     check_inputs_covariate_data(get_collection_items("gpw_sediment_exposure"),
       covariate = "gpw_sediment_exposure", dataset = "cog", col = 45
     ),
-    "may specify by band number or by name"
+    "may specify by band number OR by name"
   )
 
   expect_error(

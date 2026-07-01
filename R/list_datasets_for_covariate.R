@@ -1,8 +1,8 @@
-list_datasets_for_covariate <- function(title) {
+list_datasets_for_covariate <- function(covariate) {
   # Use this name, because list_covariate_datasets() is too easily confused with list_covariates()
   # Covert covariate title to ID, then run get_colelction_bands_and_columns()
 
-  covariate_id <- get_covariate_id(title)
+  covariate_id <- get_covariate_id(covariate)
 
   get_collection_bands_and_columns(covariate_id)
 }

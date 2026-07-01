@@ -39,24 +39,28 @@ summarise_zonal_statistics <- function(zonal_statistics,
 
   # Calculate min_date, max_date, n_dates, EXCLUDING any dates where value is NA
   zonal_stats_dates <- zonal_stats %>%
-    dplyr::filter(!is.na(value)) %>%
-    dplyr::group_by(dplyr::across(dplyr::all_of(id_cols))) %>%
-    dplyr::summarise(
-      start_date = min(date),
-      end_date = max(date),
-      n_dates = dplyr::n_distinct(date),
-      .groups = "drop"
-    )
+    dplyr::filter(!is.na(value))
 
-  # Add back on to zonal_stats, making n_dates 0 if there are none
-  # Remove "date"
-  zonal_stats <- zonal_stats %>%
-    dplyr::select(-date) %>%
-    dplyr::left_join(zonal_stats_dates, by = dplyr::join_by(
-      ...summary_id, covariate, band,
-      spatial_stat
-    )) %>%
-    dplyr::mutate(n_dates = dplyr::coalesce(n_dates, 0))
+  if (nrow(zonal_stats_dates) != 0) {
+    zonal_stats_dates <- zonal_stats_dates %>%
+      dplyr::group_by(dplyr::across(dplyr::all_of(id_cols))) %>%
+      dplyr::summarise(
+        start_date = min(date),
+        end_date = max(date),
+        n_dates = dplyr::n_distinct(date),
+        .groups = "drop"
+      )
+
+    # Add back on to zonal_stats, making n_dates 0 if there are none
+    # Remove "date"
+    zonal_stats <- zonal_stats %>%
+      dplyr::select(-date) %>%
+      dplyr::left_join(zonal_stats_dates, by = id_cols) %>%
+      dplyr::mutate(n_dates = dplyr::coalesce(n_dates, 0))
+  } else {
+    zonal_stats <- zonal_stats %>%
+      dplyr::mutate(start_date = NA, end_date = NA, n_dates = 0)
+  }
 
   # Re-determine ID cols
   id_cols <- zonal_stats %>%
@@ -89,20 +93,17 @@ summarise_zonal_statistics <- function(zonal_statistics,
     }) %>%
     dplyr::bind_rows()
 
-  # Calculate
-
   # Reshape zonal stats into the following format:
   # covariate, start_date, n_days, end_date, band, band_name (if relevant), temporal_stat, spatial_stat, value
   # covariate will just be covariate name
   # Put into a df-column called summary_zonal_statistics
-
   zonal_stats_df <- zonal_stats_summary %>%
     dplyr::select(...summary_id, covariate, start_date, end_date, n_dates, band, dplyr::any_of("band_name"), spatial_stat, temporal_stat, value) %>%
     tidyr::nest(summary_zonal_statistics = -...summary_id)
 
   # Check that there is a row for every original row
   if (nrow(zonal_stats_df) != nrow(zonal_statistics)) {
-      usethis::ui_stop("Unexpected error, please report: mismatch between summary zonal statistics and original data")
+    usethis::ui_stop("Unexpected error, please report: mismatch between summary zonal statistics and original data")
   }
 
   # Join back on to original zonal_statistics
