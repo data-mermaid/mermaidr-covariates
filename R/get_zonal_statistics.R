@@ -1,27 +1,27 @@
 #' Get zonal statistics
 #'
-#' Get zonal statistics. For *each* of the `n_days` prior to the sample event date,
-#' returns summarised values of covariate data for `radius` metres around each site
-#' location, using `spatial_stats` to determine how to spatially summarise the data.
+#' Get zonal statistics. Using \code{spatial_stats} to spatially summarise covariates data, for each relevant date prior to the sample event date. For example, for a daily covariate like Daily Sea Surface Temperature, the function returns SST for *each* of the \code{n_days} prior to the sample event date. If the covariate is periodic, e.g. occurring every 5 years, it returns the most recent value. If the covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns that data.
 #'
 #' @param se Sample events from \code{mermaidr}
-#' @param covariate Covariate to get statistics for. Both covariate title or ID are permitted.
+#' @param covariate Covariate to get statistics for. Both covariate title or ID are permitted. Run \code{\link{list_covariates}} to see available covariates.
+#' @param dataset Dataset within the covariate. Not required in most cases, when there is only one dataset. Run \code{\link{list_datasets_for_covariate}} to see datasets and bands.
+#' @param bands Bands within the dataset. Not required in most cases, when there is only one band. When required, can be numeric or named band. Run \code{\link{list_datasets_for_covariate}} to see datasets and bands.
 #' @param n_days Number of days to get statistics for. Includes the sample date
 #'  itself, and days prior to it -- e.g., 365 days would include the sample date
-#'  and the 364 days prior. Defaults to 365.
-#' @param radius Radius around site location, in metres. Defaults to 1000.
+#'  and the 364 days prior. Only relevant for covariates that are daily; otherwise ignored.
+#' @param radius Radius around site location, in metres. Defaults to 0 (just the site location itself).
 #' @param spatial_stats Spatial statistics -- used to summarise all data around
-#' the site location, according to the \code{radius} set.
-#' @param date_col Date back from (using \code{n_days}). Defaults to "sample_date".
+#' the site location, according to the \code{radius} set. If \code{radius} is 0, then \code{spatial_stats} is not relevant; it is just the value itself.
+#' @param date_col Sample date column -- used for date-dependent covariates (e.g. daily or periodic). Defaults to "sample_date".
 #' @param .progress Whether to show progress bar and time remaining. Defaults to TRUE.
 #'
 #' @export
 get_zonal_statistics <- function(se, covariate,
+                                 spatial_stats = "mean",
+                                 radius = 0,
+                                 n_days = NULL,
                                  dataset = NULL,
                                  bands = NULL,
-                                 n_days = NULL,
-                                 radius = 0,
-                                 spatial_stats = "mean",
                                  date_col = "sample_date",
                                  .progress = TRUE) {
   if (nrow(se) == 0) {

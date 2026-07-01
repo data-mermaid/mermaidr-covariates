@@ -1,3 +1,13 @@
+#' Attach covariate data
+#'
+#' Attach covariate data. Not date dependent -- only attach based on sample event location.
+#'
+#' @param se Sample events from \code{mermaidr}
+#' @param covariate Covariate to attach. Both covariate title or ID are permitted. Run \code{list_covariates()} to see available covariates.
+#' @param dataset Dataset within the covariate. Not required when there is only one dataset. Run \code{\link{list_datasets_for_covariate}} to see datasets and columns.
+#' @param columns Columns within the dataset. When NULL (the default), returns all columns. Run \code{\link{list_datasets_for_covariate}} to see datasets and bands.
+#'
+#' @export
 attach_covariate_data <- function(se, covariate, dataset = NULL, columns = NULL, date_col = "sample_date") {
   covariate_id <- get_covariate_id(covariate)
 
@@ -7,8 +17,6 @@ attach_covariate_data <- function(se, covariate, dataset = NULL, columns = NULL,
 
   # Check inputs -- returns the dataset type, its bands/columns, and URL
   asset_info <- check_inputs_covariate_data(items, covariate_id, dataset, columns, date_col)
-
-  # Ensure data is parquet
 
   # Do spatial join with DuckDB, select relevant columns (all, if columns = NULL)
   se %>%
@@ -31,6 +39,17 @@ get_collection_items <- function(x, simplify = TRUE) {
 }
 
 check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = NULL, date_col = "sample_date") {
+  # Check the covariate contains parquet data
+  parquet_assets <- get_parquet_assets(items[[1]])
+
+  # If there are NO parquet assets, they may need to use get_zonal_statistics() -- message with that instead
+  if (identical(parquet_assets, NA_character_)) {
+    cog_assets <- get_cog_assets(items[[1]])
+    if (!identical(cog_assets, NA_character_)) {
+      usethis::ui_stop("You cannot attach this covariate. Use `get_zonal_statistics()` instead.")
+    }
+  }
+
   # If the covariate contains more than one item, they need to give date information
   if (length(items) > 1 & is.null(date_col)) {
     usethis::ui_stop("Covariate \"{covariate}\" is date-dependent. Please supply a date column in `date_col`.")
