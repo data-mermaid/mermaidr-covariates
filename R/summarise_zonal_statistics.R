@@ -102,7 +102,7 @@ summarise_zonal_statistics <- function(zonal_statistics,
 
   # Check that there is a row for every original row
   if (nrow(zonal_stats_df) != nrow(zonal_statistics)) {
-    browser()
+      usethis::ui_stop("Unexpected error, please report: mismatch between summary zonal statistics and original data")
   }
 
   # Join back on to original zonal_statistics

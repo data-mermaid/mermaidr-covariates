@@ -52,7 +52,7 @@ get_zonal_statistics <- function(se, covariate,
     dplyr::mutate(dplyr::across(c(latitude, longitude), \(x) round(x, 5)))
 
   # Get zonal stats for all SEs
-  zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name, covariate_info[["covariate_interval"]],
+  zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name, dataset, covariate_info[["covariate_interval"]],
     n_days = n_days, radius = radius, bands = covariate_info[["bands"]],
     bands_labels = covariate_info[["bands_labels"]], date_col = date_col,
     spatial_stats = spatial_stats, type = type, .progress = .progress
@@ -222,9 +222,6 @@ get_items_for_zonal_stats_periodic <- function(se, covariate_id, covariate_inter
         ...secondary_id = glue::glue("{...id}__{date}")
       )
   } else {
-    if ("...end_date" %in% names(se)) {
-      browser()
-    }
     stac_items <- se %>%
       dplyr::left_join(
         cog_assets,
@@ -238,7 +235,7 @@ get_items_for_zonal_stats_periodic <- function(se, covariate_id, covariate_inter
   stac_items
 }
 
-get_items_for_zonal_stats_daily <- function(se, covariate_id, n_days = 365) {
+get_items_for_zonal_stats_daily <- function(se, covariate_id, dataset, n_days = 365) {
   # Since intervals are combined, we can no longer just go back n_days from sample_date
   df <- se %>%
     dplyr::distinct(...start_date, ...end_date)
@@ -270,7 +267,7 @@ get_items_for_zonal_stats_daily <- function(se, covariate_id, n_days = 365) {
         if ("datetime" %in% names(properties)) {
           properties[["datetime"]]
         } else {
-          browser()
+          usethis::ui_stop("Unexpected error, please report: no datetime attached to STAC asset")
         }
       })
 
@@ -284,7 +281,9 @@ get_items_for_zonal_stats_daily <- function(se, covariate_id, n_days = 365) {
         assets <- x[["assets"]]
         cog_asset <- get_cog_assets(x)
         if (length(cog_asset) != 1) {
-          browser()
+          if (!is.null(dataset)) {
+            assets[[dataset]][["href"]]
+          }
         } else {
           assets[[cog_asset]][["href"]]
         }
@@ -303,7 +302,8 @@ get_items_for_zonal_stats_daily <- function(se, covariate_id, n_days = 365) {
     dplyr::distinct()
 }
 
-get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval,
+get_zonal_stats <- function(se, covariate_id, covariate_name,
+                            dataset, covariate_interval,
                             n_days, radius, bands, bands_labels,
                             date_col, spatial_stats, type, .progress = TRUE) {
   # Potentially get the STAC items up front
@@ -315,7 +315,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
 
   # If there are no items, then zonal_stats is empty
   if (all(is.na(se[["date"]])) & get_stac_items_now) {
-    zonal_stats <- create_empty_zonal_stats(se, spatial_stats)
+    zonal_stats <- create_empty_zonal_stats(se, spatial_stats, interval = FALSE)
   } else {
     # Split SEs up into list that can be processed iteratively
     se_list <- se %>%
@@ -328,6 +328,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
           se,
           covariate_id,
           covariate_interval,
+          dataset,
           n_days,
           radius = radius,
           bands = bands,
@@ -379,7 +380,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name, covariate_interval
     tidyr::nest(zonal_statistics = -...id, .by = "...id")
 }
 
-get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, n_days = 30, radius = 1000,
+get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, dataset, n_days = 30, radius = 1000,
                                     bands = list(1), approx_stats = FALSE,
                                     spatial_stats = c(
                                       "min", "max", "mean", "count", "sum", "std",
@@ -393,7 +394,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, n_days
     # Set up zonal_stats requests by getting relevant STAC items for each sample event
     stac_items <- se %>%
       split(.$...id) %>%
-      purrr::map_dfr(\(x) get_items_for_zonal_stats_daily(x, covariate_id, n_days = n_days))
+      purrr::map_dfr(\(x) get_items_for_zonal_stats_daily(x, covariate_id, dataset, n_days = n_days))
   } else {
     # Otherwise, `se` already has the covariate info attached
     stac_items <- se %>%
@@ -416,7 +417,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, n_days
 
   if (covariate_interval %in% c("annual", "periodic")) {
     if (length(unique(se[["...secondary_id"]])) != length(unique(zonal_stats[["...secondary_id"]]))) {
-      browser()
+      usethis::ui_stop("Unexpected error, please report: SE secondary IDs do not match zonal stats'.")
     }
 
     se %>%

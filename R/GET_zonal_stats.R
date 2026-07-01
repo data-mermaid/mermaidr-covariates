@@ -38,7 +38,7 @@ GET_zonal_stats <- function(stac_items, radius = 1000, bands = list(1),
     dplyr::filter(n > 1)
 
   if (nrow(stac_items_count) > 0) {
-    browser()
+    usethis::ui_stop("Unexpected error, please report: no STAC items for sample events")
   }
 
   stac_items_list <- stac_items %>%
