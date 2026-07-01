@@ -116,7 +116,7 @@ not the start/end date based on the date_col and n_days", {
     )
 
   covariates_summary <- covariates %>%
-      summarise_zonal_statistics("mean")
+    summarise_zonal_statistics("mean")
 
   zonal_statistics <- covariates_summary[["zonal_statistics"]][[1]]
   summary_zonal_statistics <- covariates_summary[["summary_zonal_statistics"]][[1]]

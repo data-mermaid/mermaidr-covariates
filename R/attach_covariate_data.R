@@ -6,6 +6,7 @@
 #' @param covariate Covariate to attach. Both covariate title or ID are permitted. Run \code{list_covariates()} to see available covariates.
 #' @param dataset Dataset within the covariate. Not required when there is only one dataset. Run \code{\link{list_datasets_for_covariate}} to see datasets and columns.
 #' @param columns Columns within the dataset. When NULL (the default), returns all columns. Run \code{\link{list_datasets_for_covariate}} to see datasets and bands.
+#' @param date_col Date column in data. Defaults to "sample_date".
 #'
 #' @export
 attach_covariate_data <- function(se, covariate, dataset = NULL, columns = NULL, date_col = "sample_date") {

@@ -1,3 +1,8 @@
+#' List datasets and bands or columns for a covariate
+#'
+#' @param covariate Covariate
+#'
+#' @export
 list_datasets_for_covariate <- function(covariate) {
   # Use this name, because list_covariate_datasets() is too easily confused with list_covariates()
   # Covert covariate title to ID, then run get_colelction_bands_and_columns()

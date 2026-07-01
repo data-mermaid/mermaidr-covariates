@@ -111,9 +111,9 @@ get_covariate_cog_datasets <- function(covariate) {
 }
 
 get_covariate_parquet_datasets <- function(covariate) {
-    covariate <- get_covariate_id(covariate)
+  covariate <- get_covariate_id(covariate)
 
-    get_parquet_assets(get_collection_items(covariate)[[1]])
+  get_parquet_assets(get_collection_items(covariate)[[1]])
 }
 
 get_cog_assets <- function(item) {

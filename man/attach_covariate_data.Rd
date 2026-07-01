@@ -20,6 +20,8 @@ attach_covariate_data(
 \item{dataset}{Dataset within the covariate. Not required when there is only one dataset. Run \code{\link{list_datasets_for_covariate}} to see datasets and columns.}
 
 \item{columns}{Columns within the dataset. When NULL (the default), returns all columns. Run \code{\link{list_datasets_for_covariate}} to see datasets and bands.}
+
+\item{date_col}{Date column in data. Defaults to "sample_date".}
 }
 \description{
 Attach covariate data. Not date dependent -- only attach based on sample event location.

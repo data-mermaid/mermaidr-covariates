@@ -176,6 +176,10 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
 })
 
 test_that("new test scenarios...", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   cog_covariates <- c(
     "50 Reefs+ prioritization",
     "ACA Benthic Habitat",

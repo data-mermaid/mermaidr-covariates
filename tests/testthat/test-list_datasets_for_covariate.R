@@ -1,4 +1,8 @@
 test_that("list_datasets_for_covariate returns a list with the cols or bands in a tibble", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   covariates <- list_covariates()
 
   purrr::walk(

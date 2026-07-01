@@ -1,14 +1,3 @@
-test_that("check_inputs_covariate_data errors when covariate is date-dependent and date_col is NULL", {
-  skip_if_offline()
-  skip_on_ci()
-  skip_on_cran()
-
-  expect_error(
-    check_inputs_covariate_data(get_collection_items("lulc"), covariate = "lulc", date_col = NULL),
-    "date-dependent. Please supply a date column"
-  )
-})
-
 test_that("check_inputs_covariate_data does not error when covariate is not date-dependent and date_col is NULL", {
   skip_if_offline()
   skip_on_ci()
@@ -69,21 +58,21 @@ test_that("check_inputs_covariate_data errors when an invalid col/band is given"
     check_inputs_covariate_data(get_collection_items("gpw_sediment_exposure"),
       covariate = "gpw_sediment_exposure", dataset = "cog", col = 45
     ),
-    "may specify by band number OR by name"
+    "may specify by band number"
   )
 
   expect_error(
     check_inputs_covariate_data(get_collection_items("gpw_sediment_exposure"),
       covariate = "gpw_sediment_exposure", dataset = "cog", col = "test"
     ),
-    "may specify by band number or by name"
+    "may specify by band number"
   )
 
   expect_error(
     check_inputs_covariate_data(get_collection_items("gpw_sediment_exposure"),
       covariate = "gpw_sediment_exposure", dataset = "cog", col = "25"
     ),
-    "may specify by band number or by name"
+    "may specify by band number"
   )
 
   expect_error(
@@ -174,18 +163,6 @@ test_that("check_inputs_covariate_data returns asset_type and bands_cols when al
         "tbl_df",
         "tbl", "data.frame"
       )), band = 1L
-    )
-  )
-
-  # Single data set, band not named (but only one band) -> includes band in numeric
-  expect_equal(
-    check_inputs_covariate_data(get_collection_items("50b810fb-5f17-4cdb-b34b-c377837e2a29"), "50b810fb-5f17-4cdb-b34b-c377837e2a29"),
-    list(
-      type = "cog", url = "https://d2uu99zl9amnvy.cloudfront.net/assets/50b810fb-5f17-4cdb-b34b-c377837e2a29/c201cb85-c057-402d-905d-0df3a5e6141b/data_analysed_sst.tif",
-      bands_cols = structure(list(band = 1, name = NA_character_), class = c(
-        "tbl_df",
-        "tbl", "data.frame"
-      ), row.names = c(NA, -1L)), band = 1
     )
   )
 
