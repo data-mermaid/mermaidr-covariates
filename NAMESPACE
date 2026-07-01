@@ -3,6 +3,7 @@
 S3method(print,covariate)
 export("%>%")
 export(attach_covariate_data)
+export(covariate_helper)
 export(get_zonal_statistics)
 export(list_covariates)
 export(search_covariates)
