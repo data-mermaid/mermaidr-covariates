@@ -207,6 +207,7 @@ test_that("new test scenarios...", {
   purrr::walk(
     cog_covariates,
     \(covariate) {
+      covariate <- get_covariate_id(covariate)
       cog_assets <- get_covariate_cog_datasets(covariate)
 
       bands <- get_collection_bands_and_columns(covariate)[[cog_assets]]
@@ -302,6 +303,7 @@ test_that("new test scenarios...", {
       "GPW Land Use and Land Cover"
     ),
     \(covariate) {
+      covariate <- get_covariate_id(covariate)
       interval <- get_covariate_interval(covariate)
 
       if (interval %in% c("once", "periodic")) {

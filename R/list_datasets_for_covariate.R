@@ -15,8 +15,6 @@ list_datasets_for_covariate <- function(covariate) {
 get_collection_bands_and_columns <- function(collection) {
   # Look through all assets -- determine if each is cog or parquet, then get either bands or columns
 
-  collection <- get_covariate_id(collection)
-
   # Look at the first item
   item <- rstac::stac(stac_url) %>%
     rstac::collections(collection) %>%

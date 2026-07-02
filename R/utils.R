@@ -137,8 +137,6 @@ get_covariate_interval <- function(covariate) {
   # This does NOT work, because it doesn't tell us if the data is annual, every 5 years, etc
   # Maybe add two years, then deal with ~ 600 instead
 
-  covariate <- get_covariate_id(covariate)
-
   items <- get_collection_items(covariate, simplify = FALSE)
 
   n_items <- items[["numberMatched"]]

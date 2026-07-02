@@ -25,8 +25,6 @@ attach_covariate_data <- function(se, covariate, dataset = NULL, columns = NULL,
 }
 
 get_collection_items <- function(x, simplify = TRUE) {
-  x <- get_covariate_id(x)
-
   items <- rstac::stac(stac_url) %>%
     rstac::collections(collection_id = x) %>%
     rstac::items() %>%

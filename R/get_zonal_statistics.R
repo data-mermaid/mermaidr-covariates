@@ -28,13 +28,8 @@ get_zonal_statistics <- function(se, covariate,
     stop("No sample events to get zonal statistics for.", .call = FALSE)
   }
 
-  covariate_id <- get_covariate_id(covariate)
-
-  if (covariate_id == covariate) {
-    covariate_name <- get_covariate_name_from_id(covariate_id)
-  } else {
-    covariate_name <- covariate
-  }
+  covariate <- get_covariate_id(covariate)
+  covariate_name <- get_covariate_name_from_id(covariate)
 
   # Check inputs -- returns the dataset type, its bands/columns, and URL
   covariate_info <- check_inputs_zonal_stats(
@@ -52,7 +47,7 @@ get_zonal_statistics <- function(se, covariate,
     dplyr::mutate(dplyr::across(c(latitude, longitude), \(x) round(x, 5)))
 
   # Get zonal stats for all SEs
-  zonal_stats <- get_zonal_stats(se, covariate_id, covariate_name, dataset, covariate_info[["covariate_interval"]],
+  zonal_stats <- get_zonal_stats(se, covariate, covariate_name, dataset, covariate_info[["covariate_interval"]],
     n_days = n_days, radius = radius, bands = covariate_info[["bands"]],
     bands_labels = covariate_info[["bands_labels"]], date_col = date_col,
     spatial_stats = spatial_stats, type = type, .progress = .progress

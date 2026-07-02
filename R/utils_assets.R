@@ -105,14 +105,10 @@ get_x_assets <- function(item, common_asset_names, type) {
 }
 
 get_covariate_cog_datasets <- function(covariate) {
-  covariate <- get_covariate_id(covariate)
-
   get_cog_assets(get_collection_items(covariate)[[1]])
 }
 
 get_covariate_parquet_datasets <- function(covariate) {
-  covariate <- get_covariate_id(covariate)
-
   get_parquet_assets(get_collection_items(covariate)[[1]])
 }
 
@@ -130,7 +126,6 @@ get_all_asset_types <- function(item) {
 }
 
 get_collection_type <- function(collection) {
-  collection <- get_covariate_id(collection)
 
   # Look at the first item
   item <- rstac::stac(stac_url) %>%
