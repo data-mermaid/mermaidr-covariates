@@ -10,11 +10,17 @@
 #' # covariate_helper("Daily Sea Surface Temperature")
 #' # covariate_helper("GPW MEOW Realms")
 covariate_helper <- function(covariate) {
-  covariate_id <- get_covariate_id(covariate)
-  covariate_name <- get_covariate_name_from_id(covariate_id)
+  covariate <- get_covariate_id(covariate)
+  covariate_name <- get_covariate_name_from_id(covariate)
 
   type <- get_collection_type(covariate)
-  datasets <- list_datasets_for_covariate(covariate_id)
+
+  format_msg <- ifelse(length(type) == 1,
+    glue::glue("Covariate contains *{type}* data."),
+    glue::glue("Covariate contains both *{type}* data.")
+  )
+
+  datasets <- list_datasets_for_covariate(covariate)
 
   fxn <- get_fxn_from_type(type)
 
@@ -31,8 +37,8 @@ covariate_helper <- function(covariate) {
     type,
     \(type) {
       relevant_datasets <- switch(type,
-        "raster" = get_covariate_cog_datasets(covariate_id),
-        "vector" = get_covariate_parquet_datasets(covariate_id)
+        "raster" = get_covariate_cog_datasets(covariate),
+        "vector" = get_covariate_parquet_datasets(covariate)
       )
 
       datasets_msg <- ifelse(length(relevant_datasets) == 1,
@@ -93,7 +99,7 @@ covariate_helper <- function(covariate) {
       paste0(collapse = "\n")
   }
 
-  msg <- glue::glue("{fxn_msg}\n{datasets_bands_cols_msg}")
+  msg <- glue::glue("{format_msg} {fxn_msg}\n{datasets_bands_cols_msg}")
 
   usethis::ui_info(msg)
 

@@ -24,5 +24,5 @@ attach_covariate_data(
 \item{date_col}{Date column in data. Defaults to "sample_date".}
 }
 \description{
-Attach covariate data. Not date dependent -- only attach based on sample event location.
+Attach covariate data that is in a vector format. Not date dependent -- only attach based on sample event location.
 }

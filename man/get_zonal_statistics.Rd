@@ -39,5 +39,5 @@ and the 364 days prior. Only relevant for covariates that are daily; otherwise i
 \item{.progress}{Whether to show progress bar and time remaining. Defaults to TRUE.}
 }
 \description{
-Get zonal statistics. Using \code{spatial_stats} to spatially summarise covariates data, for each relevant date prior to the sample event date. For example, for a daily covariate like Daily Sea Surface Temperature, the function returns SST for *each* of the \code{n_days} prior to the sample event date. If the covariate is periodic, e.g. occurring every 5 years, it returns the most recent value. If the covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns that data.
+Get zonal statistics for covariate data that is in a raster format.. Using \code{spatial_stats} to spatially summarise covariates data, for each relevant date prior to the sample event date. For example, for a daily covariate like Daily Sea Surface Temperature, the function returns SST for *each* of the \code{n_days} prior to the sample event date. If the covariate is periodic, e.g. occurring every 5 years, it returns the most recent value. If the covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns that data.
 }

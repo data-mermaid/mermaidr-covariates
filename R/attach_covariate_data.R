@@ -1,6 +1,6 @@
 #' Attach covariate data
 #'
-#' Attach covariate data. Not date dependent -- only attach based on sample event location.
+#' Attach covariate data that is in a vector format. Not date dependent -- only attach based on sample event location.
 #'
 #' @param se Sample events from \code{mermaidr}
 #' @param covariate Covariate to attach. Both covariate title or ID are permitted. Run \code{list_covariates()} to see available covariates.
