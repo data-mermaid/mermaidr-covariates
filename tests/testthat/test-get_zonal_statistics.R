@@ -251,7 +251,6 @@ test_that("new test scenarios...", {
             "Invalid band"
           )
 
-
           # Multiple bands, name
           zs <- get_zonal_statistics(se, covariate, band = bands[1:2, ][["name"]], n_days = n_days)
           expect_named(zs, c(names(se), "zonal_statistics"))
@@ -271,7 +270,6 @@ test_that("new test scenarios...", {
           expect_true(all(zs_unnest[["band_name"]] %in% bands[1:2, ][["name"]]))
           expect_true(all(zs_unnest[["band"]] %in% c(1, 2)))
         }
-
 
         # Multiple bands, number
         zs <- get_zonal_statistics(se, covariate, band = c(1, 2), n_days = n_days)
@@ -356,5 +354,156 @@ test_that("new test scenarios...", {
           all()
       )
     }
+  )
+})
+
+test_that("For periodic covariates, get_zonal_statistics() gets the MOST RECENT data only", {
+  se <- tibble::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NT1", -17.3741, 179.4217, "2017-09-09",
+    "NF2", -17.37898, 179.41577, "2013-05-13",
+    "NAOBT1", -17.622, 178.831, "2019-05-23",
+    "DawaC6", -17.6759, 178.61905, "2019-10-16",
+    "ME6", -17.31758, 178.16589, "2025-11-05"
+  )
+
+  covariate <- "gpw_sediment_load"
+  bands <- 1:3
+
+  zs <- se %>%
+    get_zonal_statistics(covariate, radius = 100, bands = bands)
+
+  expect_equal(
+    zs %>%
+      dplyr::pull(zonal_statistics) %>%
+      purrr::map_dbl(nrow) %>%
+      unique(),
+    length(bands)
+  )
+
+  expect_equal(
+    zs %>%
+      dplyr::pull(zonal_statistics) %>%
+      purrr::map("band") %>%
+      unlist() %>%
+      unique(),
+    bands
+  )
+
+  item_dates <- get_collection_items(covariate) %>%
+    purrr::map_dfr(\(x) {
+      dplyr::tibble(item_date = as.Date(x$properties$datetime))
+    })
+
+  expect_true(zs %>%
+    dplyr::select(sample_date, zonal_statistics) %>%
+    dplyr::mutate(sample_date = as.Date(sample_date)) %>%
+    tidyr::unnest(zonal_statistics) %>%
+    dplyr::left_join(item_dates, by = dplyr::join_by(closest(sample_date >= item_date))) %>%
+    dplyr::mutate(date_match = date == item_date) %>%
+    dplyr::pull(date_match) %>%
+    unique())
+
+  # If the data is before the first item, do not return anything
+  se <- se %>%
+    dplyr::mutate(sample_date = ifelse(site == "NT1", "1999-01-01", sample_date))
+
+  zs <- se %>%
+    get_zonal_statistics(covariate, radius = 100, bands = bands)
+
+  no_data_se <- zs %>%
+    dplyr::filter(site == "NT1") %>%
+    tidyr::unnest(zonal_statistics)
+
+  expect_true(nrow(no_data_se) == 9)
+  expect_true(all(is.na(no_data_se[["date"]])))
+  expect_true(all(is.na(no_data_se[["value"]])))
+  expect_equal(no_data_se[["band"]], bands)
+
+  se <- se %>%
+    dplyr::filter(site == "NT1")
+
+  zs <- se %>%
+    get_zonal_statistics(covariate, radius = 100, bands = bands)
+
+  no_data_se <- zs %>%
+    tidyr::unnest(zonal_statistics)
+
+  expect_true(nrow(no_data_se) == 9)
+  expect_true(all(is.na(no_data_se[["date"]])))
+  expect_true(all(is.na(no_data_se[["value"]])))
+  expect_equal(no_data_se[["band"]], bands)
+})
+
+test_that("For 'once' covariates, get_zonal_statistics() gets one single data point, even if data is before the covariate date", {
+  covariate <- "fifty_reefs_prioritization"
+  bands <- 1
+
+  se <- tibble::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NT1", -17.3741, 179.4217, "2017-09-09",
+    "NF2", -17.37898, 179.41577, "2013-05-13",
+    "NAOBT1", -17.622, 178.831, "2019-05-23",
+    "DawaC6", -17.6759, 178.61905, "2019-10-16",
+    "ME6", -17.31758, 178.16589, "2025-11-05"
+  )
+
+  zs <- se %>%
+    get_zonal_statistics(covariate, radius = 100, bands = bands)
+
+  expect_equal(
+    zs %>%
+      dplyr::pull(zonal_statistics) %>%
+      purrr::map_dbl(nrow) %>%
+      unique(),
+    length(bands)
+  )
+
+  expect_equal(
+    zs %>%
+      dplyr::pull(zonal_statistics) %>%
+      purrr::map("band") %>%
+      unlist() %>%
+      unique(),
+    bands
+  )
+
+  item_dates <- get_collection_items(covariate) %>%
+    purrr::map_dfr(\(x) {
+      dplyr::tibble(item_date = as.Date(x$properties$datetime))
+    })
+
+  expect_equal(
+    zs %>%
+      dplyr::select(zonal_statistics) %>%
+      tidyr::unnest(zonal_statistics) %>%
+      dplyr::pull(date) %>%
+      unique(),
+    item_dates[["item_date"]]
+  )
+})
+
+test_that("For 'daily' covariates, get_zonal_statistics() gets data for n_days (at most, less is possible if no data)", {
+  covariate <- "Daily Sea Surface Temperature"
+  n_days <- 5
+
+  se <- tibble::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NT1", -17.3741, 179.4217, "2017-09-09",
+    "NF2", -17.37898, 179.41577, "2013-05-13",
+    "NAOBT1", -17.622, 178.831, "2019-05-23",
+    "DawaC6", -17.6759, 178.61905, "2019-10-16",
+    "ME6", -17.31758, 178.16589, "2025-11-05"
+  )
+
+  zs <- se %>%
+    get_zonal_statistics(covariate, radius = 100, n_days = n_days)
+
+  expect_equal(
+    zs %>%
+      dplyr::pull(zonal_statistics) %>%
+      purrr::map_dbl(nrow) %>%
+      unique(),
+    n_days
   )
 })

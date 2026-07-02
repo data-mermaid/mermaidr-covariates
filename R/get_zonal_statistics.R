@@ -308,6 +308,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name,
     se <- get_items_for_zonal_stats_periodic(se, covariate_id, covariate_interval)
   }
 
+
   # If there are no items, then zonal_stats is empty
   if (all(is.na(se[["date"]])) & get_stac_items_now) {
     zonal_stats <- create_empty_zonal_stats(se, spatial_stats, interval = FALSE)
@@ -338,6 +339,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name,
   }
 
   zonal_stats <- zonal_stats %>%
+      dplyr::distinct() %>%
     dplyr::mutate(
       band = stringr::str_remove(band, "band_")
     ) %>%
@@ -383,6 +385,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, datase
                                       "range", "nodata", "area", "freq_hist"
                                     ),
                                     type) {
+
   # If covariate_interval is daily, we need to get the stac items for each chunk
 
   if (covariate_interval == "daily") {

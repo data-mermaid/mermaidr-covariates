@@ -1,5 +1,7 @@
 ---
 output: github_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -38,6 +40,8 @@ remotes::install_github("data-mermaid/mermaidr-covariates")
 
 ## Usage
 
+### `mermaidr` data
+
 Through `mermaidrcovariates`, you can easily add covariates to the aggregated data from your coral reef surveys, which is already entered in MERMAID. To do this, first load the `mermaidrcovariates` and `mermaid` packages, and access the sample events for a given project. For this example, we will work with hard coral cover data, available from the Benthic PIT method. 
 
 ```{r get-sample-events}
@@ -57,40 +61,120 @@ se <- se %>%
   select(site, sample_date, latitude, longitude, hard_coral_cover = percent_cover_benthic_category_avg_hard_coral)
 ```
 
+### Covariates
+
 You can use the [Prescient browser](https://mermaid.prescient.earth/) to find which covariates are available. To see this programatically, we use the `list_covariates()` function:
 
 ```{r list-covariates}
-list_covariates()
+covariates <- list_covariates()
+covariates
 ```
 
-For this example, we will look at maximum "Daily Sea Surface Temperature" (SST). We can access this data by using the function `get_summary_zonal_statistics()`, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n_days` days prior, within the given `radius`, and *spatially* aggregates it according to the specified `spatial_stats`. Then, the function *temporally* aggregates it according to the specified `temporal_stats`.
+Covariates may contain raster data, vector data, or both. There are different functions for accessing raster or vector data.
 
-For example, to get the **maximum** SST over the 20 days prior to (and including) the sample event, using the *mean* SST within 100m of the sites:
+The table below summarises which function to use for the different covariates available on Prescient:
 
-```{r get-summary-zonal-stats}
-max_sst <- se %>%
-  get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean", temporal_stats = "max")
+```{r covariates-fxn-summary, echo = FALSE}
+covariates <- list_covariates()
+
+covariates_type <- covariates %>%
+  filter(!str_starts(title, "GPW")) %>%
+  select(Covariate = title, id) %>%
+  rowwise() %>%
+  mutate(Type = mermaidrcovariates:::get_collection_type(id)) %>%
+  ungroup()
+
+covariates_type %>%
+  mutate(
+    `get_zonal_statistics()` = ifelse(str_detect(Type, "raster"), "✅", ""),
+    `attach_covariate_data()` = ifelse(str_detect(Type, "vector"), "✅", "")
+  ) %>%
+  select(-id) %>%
+  knitr::kable()
 ```
 
-The covariates are returned in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
+You can also use the function `covariate_helper()` which will give you information on the data type and which function to use, as well as any other specifications that might be needed.
+
+### Raster data
+
+For example, we will look at "Daily Sea Surface Temperature" (SST). Running the helper function tells us to use `get_zonal_statistics()`, and that we do not need to specify the dataset or band, since there are only one of each.
+
+```{r daily-sst-helper}
+covariate_helper("Daily Sea Surface Temperature")
+```
+
+If we want the maximum SST at each site over the past 30 days, we first get the *daily* SST using `get_zonal_statistics()`, specifying `n_days = 30`. We will request all data within a `radius` of 1000 metres from the site, and that the function *spatially* aggregates that data for each of the 30 days.
+
+```{r daily-sst}
+daily_sst <- get_zonal_statistics(se,
+  covariate = "Daily Sea Surface Temperature",
+  spatial_stats = "mean", radius = 1000, n_days = 30
+)
+
+daily_sst
+```
+
+You can see that the results for each sample event contains 30 rows -- one value for each of the 30 days we requested.
+
+To expand the zonal statistics, we use `unnest()`, and are able to see that we have the mean value for each date:
 
 ```{r output-width, echo = FALSE}
 options(dplyr.width = Inf)
 ```
 
-```{r summary-zonal-stats-unnest}
+```{r daily-zonal-stats-unnest}
+daily_sst %>%
+  select(site, sample_date, zonal_statistics) %>%
+  unnest(zonal_statistics)
+```
+
+Since we would like the *maximum* SST for each site over those 30 days, we then use `aggregate_zonal_statistics()`, specifying that the *temporal* summary statistic should be max:
+
+```{r summary-zonal-stats}
+max_sst <- daily_sst %>%
+  summarise_zonal_statistics("max")
+
+max_sst
+```
+
+We retain the original `zonal_statistics` column, which contains the daily values, but now also have a `summary_zonal_statistics` column, which contains only *one* row for each sample event. 
+
+We expand it and see a summary of the start and end date of the data used for each sample event, as well as the spatial and temporal statistics used to summarise, and the actual value: 
+
+```{r summary-zonal-stats-expanded}
 max_sst %>%
-  unnest(covariates)
+  select(site, sample_date, summary_zonal_statistics) %>%
+  unnest(summary_zonal_statistics)
 ```
 
-If we don't want the data aggregated over time -- for example, if we just want the value of a covariate the day of the sample event, or if we want to have the individual dates attached to the covariate data -- we use the non-summary version of the function, `get_zonal_statistics()`. In this case, we omit `temporal_stats` and just get the mean SST within 100m of the sites, for all 20 days:
+### Vector data
 
-```{r get-zonal-stats}
-sst_by_day <- se %>%
-  get_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean")
+If we want to attach vector data, such as Country Boundaries, we use `attach_vector_data()`. Again, the `covariate_helper()` function is useful for determining what to do here:
 
-sst_by_day %>%
-  unnest(covariates)
+```{r covariate-helper-countries}
+covariate_helper("Country Boundaries")
 ```
 
-Here, instead of having the data aggregated over time, there is one row for each date, along with the value on that date.
+This tells us which function to use, and that we do not need to specify the dataset for the covariate. It also tells us that, by default, all of the columns in the vector data will be returned, but that we can limit to specific columns.
+
+We attach the covariate data:
+
+```{r country-all-cols}
+se_country_all_cols <- se %>%
+  attach_covariate_data("Country Boundaries")
+
+se_country_all_cols
+```
+
+In this case, it is *not* a format that needs to be expanded -- the columns are immediately available.
+
+If we only want one column (e.g. the country name), then we can specify that in the function:
+
+```{r country-only}
+se_country <- se %>%
+  attach_covariate_data("Country Boundaries", columns = "TERRITORY1")
+```
+
+TODO:
+Most of the raster ones are date dependent
+Vector ones are not, explain this

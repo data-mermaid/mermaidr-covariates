@@ -24,11 +24,10 @@ add_id_for_iteration <- function(df, date_col, n_days) {
       ...date_temp = as.Date(...date_temp)
     )
 
-  # If n_days = NULL, then there is no date information used
-  # Just iterate by lat/long
+  # If n_days = NULL, then just use the single sample date, not an interval
   if (is.null(n_days)) {
     df <- df %>%
-      dplyr::mutate(...id = glue::glue("{latitude}_{longitude}"))
+      dplyr::mutate(...id = glue::glue("{latitude}_{longitude}_{...date_temp}"))
 
     return(df)
   }
