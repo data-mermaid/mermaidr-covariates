@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">mermaidrcovariates</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,12 +38,12 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.2" id="mermaidrcovariates-012">mermaidrcovariates 0.1.2<a class="anchor" aria-label="anchor" href="#mermaidrcovariates-012"></a></h2>
 <ul><li>Add <code><a href="../reference/search_covariates.html">search_covariates()</a></code> to search by title or description</li>
-<li>Add <code>date_col</code> to <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> and <code><a href="../reference/get_summary_zonal_statistics.html">get_summary_zonal_statistics()</a></code>, which allows for using a column other than <code>"sample_date"</code>.</li>
+<li>Add <code>date_col</code> to <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> and <code>get_summary_zonal_statistics()</code>, which allows for using a column other than <code>"sample_date"</code>.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.1" id="mermaidrcovariates-011">mermaidrcovariates 0.1.1<a class="anchor" aria-label="anchor" href="#mermaidrcovariates-011"></a></h2>
-<ul><li>Fix bug with calculating <code>n_dates</code> returned from <code><a href="../reference/get_summary_zonal_statistics.html">get_summary_zonal_statistics()</a></code>.</li>
-<li>Fix bug where <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> and <code><a href="../reference/get_summary_zonal_statistics.html">get_summary_zonal_statistics()</a></code> were stripping columns from <code>se</code> in returned data.</li>
+<ul><li>Fix bug with calculating <code>n_dates</code> returned from <code>get_summary_zonal_statistics()</code>.</li>
+<li>Fix bug where <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> and <code>get_summary_zonal_statistics()</code> were stripping columns from <code>se</code> in returned data.</li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="mermaidrcovariates-010">mermaidrcovariates 0.1.0<a class="anchor" aria-label="anchor" href="#mermaidrcovariates-010"></a></h2>
@@ -54,9 +54,9 @@
 <li>
 <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> returns <code>n_dates</code> in <code>covariates</code> column, gets stats for <code>n_days - 1</code> prior to sample date and sample date.</li>
 <li>
-<code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> now returns zonal statistics for <em>each</em> of the <code>n_days</code>, while <code><a href="../reference/get_summary_zonal_statistics.html">get_summary_zonal_statistics()</a></code> summarises the zonal statistics over time.</li>
+<code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> now returns zonal statistics for <em>each</em> of the <code>n_days</code>, while <code>get_summary_zonal_statistics()</code> summarises the zonal statistics over time.</li>
 <li>
-<code><a href="../reference/get_summary_zonal_statistics.html">get_summary_zonal_statistics()</a></code> requires both <code>spatial_stats</code> – how to summarise spatially – and <code>temporal_stats</code> – how to summarise over time. It returns both of these columns under <code>covariates</code>, along with <code>value</code>.</li>
+<code>get_summary_zonal_statistics()</code> requires both <code>spatial_stats</code> – how to summarise spatially – and <code>temporal_stats</code> – how to summarise over time. It returns both of these columns under <code>covariates</code>, along with <code>value</code>.</li>
 <li>
 <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> requires only <code>spatial_stats</code>. It returns this column under <code>covariates</code>, along with <code>value</code>.</li>
 <li>The argument <code>buffer</code> has been renamed to <code>radius</code>.</li>

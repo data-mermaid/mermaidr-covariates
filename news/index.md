@@ -7,19 +7,17 @@
   to search by title or description
 - Add `date_col` to
   [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
-  and
-  [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md),
-  which allows for using a column other than `"sample_date"`.
+  and `get_summary_zonal_statistics()`, which allows for using a column
+  other than `"sample_date"`.
 
 ## mermaidrcovariates 0.1.1
 
 - Fix bug with calculating `n_dates` returned from
-  [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md).
+  `get_summary_zonal_statistics()`.
 - Fix bug where
   [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
-  and
-  [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md)
-  were stripping columns from `se` in returned data.
+  and `get_summary_zonal_statistics()` were stripping columns from `se`
+  in returned data.
 
 ## mermaidrcovariates 0.1.0
 
@@ -34,12 +32,12 @@
   prior to sample date and sample date.
 - [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
   now returns zonal statistics for *each* of the `n_days`, while
-  [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md)
-  summarises the zonal statistics over time.
-- [`get_summary_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_summary_zonal_statistics.md)
-  requires both `spatial_stats` – how to summarise spatially – and
-  `temporal_stats` – how to summarise over time. It returns both of
-  these columns under `covariates`, along with `value`.
+  `get_summary_zonal_statistics()` summarises the zonal statistics over
+  time.
+- `get_summary_zonal_statistics()` requires both `spatial_stats` – how
+  to summarise spatially – and `temporal_stats` – how to summarise over
+  time. It returns both of these columns under `covariates`, along with
+  `value`.
 - [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
   requires only `spatial_stats`. It returns this column under
   `covariates`, along with `value`.
