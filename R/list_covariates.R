@@ -22,7 +22,7 @@ list_covariates <- function(as_data_frame = TRUE) {
     res,
     \(x) {
       x$type <- NULL
-      x$links <- NULL # TODO
+      x$links <- NULL
       x$stac_version <- NULL
       x$stac_extensions <- NULL
       x$summaries <- NULL

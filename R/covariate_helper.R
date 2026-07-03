@@ -32,7 +32,6 @@ covariate_helper <- function(covariate) {
     type <- c("raster", "vector")
   }
 
-  # TODO -- add "function" prefix if > 1, e.g. "for function XXX...."
   datasets_bands_cols_msg <- purrr::map(
     type,
     \(type) {
