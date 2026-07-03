@@ -4,6 +4,7 @@
 # mermaidrcovariates
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The goal of `mermaidrcovariates` is to easily access covariates data and
@@ -33,8 +34,8 @@ Through `mermaidrcovariates`, you can easily add covariates to the
 aggregated data from your coral reef surveys, which is already entered
 in MERMAID. To do this, first load the `mermaidrcovariates` and
 `mermaid` packages, and access the sample events for a given project.
-For this example, we will work with hard coral cover data, available
-from the Benthic PIT method.
+For this example, we will work with sample events available from the
+Benthic PIT method.
 
 ``` r
 library(mermaidrcovariates)
@@ -46,14 +47,13 @@ se <- mermaid_search_my_projects("Great Sea Reef 2019") %>%
 
 To get covariates, we need each sample event’s date as well as its
 latitude and longitude. We will keep these columns along with the site
-name and average hard coral cover, using the `tidyverse` package for
-data manipulation.
+name, using the `tidyverse` package for data manipulation.
 
 ``` r
 library(tidyverse)
 
 se <- se %>%
-  select(site, sample_date, latitude, longitude, hard_coral_cover = percent_cover_benthic_category_avg_hard_coral)
+  select(site, sample_date, latitude, longitude)
 ```
 
 ### Covariates
@@ -94,18 +94,18 @@ different functions for accessing raster or vector data.
 The table below summarises which function to use for the different
 covariates available on Prescient:
 
-| Covariate                                           | Type   | get_zonal_statistics() | attach_covariate_data() |
-|:----------------------------------------------------|:-------|:-----------------------|:------------------------|
-| 50 Reefs+ prioritization                            | raster | ✅                     |                         |
-| ACA Benthic Habitat                                 | raster | ✅                     |                         |
-| ACA Reef Extent                                     | raster | ✅                     |                         |
-| Country Boundaries                                  | vector |                        | ✅                      |
-| Daily Sea Surface Temperature                       | raster | ✅                     |                         |
-| Human population within 5km (coastal population)    | vector |                        | ✅                      |
-| Marine Ecoregions of the World                      | vector |                        | ✅                      |
-| Market gravity (fishing pressure)                   | vector |                        | ✅                      |
-| Number of ports within 5km (industrial development) | vector |                        | ✅                      |
-| Tourism index                                       | vector |                        | ✅                      |
+| Covariate | Type | get_zonal_statistics() | attach_covariate_data() |
+|:---|:---|:---|:---|
+| 50 Reefs+ prioritization | raster | ✅ |  |
+| ACA Benthic Habitat | raster | ✅ |  |
+| ACA Reef Extent | raster | ✅ |  |
+| Country Boundaries | vector |  | ✅ |
+| Daily Sea Surface Temperature | raster | ✅ |  |
+| Human population within 5km (coastal population) | vector |  | ✅ |
+| Marine Ecoregions of the World | vector |  | ✅ |
+| Market gravity (fishing pressure) | vector |  | ✅ |
+| Number of ports within 5km (industrial development) | vector |  | ✅ |
+| Tourism index | vector |  | ✅ |
 
 You can also use the function `covariate_helper()` which will give you
 information on the data type and which function to use, as well as any
@@ -138,19 +138,19 @@ daily_sst <- get_zonal_statistics(se,
 )
 
 daily_sst
-#> # A tibble: 10 × 6
-#>    site  sample_date latitude longitude hard_coral_cover zonal_statistics 
-#>    <chr> <date>         <dbl>     <dbl>            <dbl> <list>           
-#>  1 LW04  2019-09-25     -17.6      177.             11.7 <tibble [30 × 5]>
-#>  2 BA09  2019-09-26     -17.4      178.             12.3 <tibble [30 × 5]>
-#>  3 BA16  2019-09-27     -17.2      178.             10.7 <tibble [30 × 5]>
-#>  4 BA15  2019-09-27     -17.2      178.             25   <tibble [30 × 5]>
-#>  5 BA11  2019-09-27     -17.3      178.             23   <tibble [30 × 5]>
-#>  6 YA02  2019-09-30     -17.0      177.             26.3 <tibble [30 × 5]>
-#>  7 YQ02  2019-10-03     -16.6      179.             59   <tibble [30 × 5]>
-#>  8 IP3.5 2019-10-04     -16.4      179.             52.3 <tibble [30 × 5]>
-#>  9 GS03  2019-10-08     -16.4      178.             52   <tibble [30 × 5]>
-#> 10 GS05  2019-10-08     -16.4      178.             40.3 <tibble [30 × 5]>
+#> # A tibble: 10 × 5
+#>    site  sample_date latitude longitude zonal_statistics 
+#>    <chr> <date>         <dbl>     <dbl> <list>           
+#>  1 LW04  2019-09-25     -17.6      177. <tibble [30 × 5]>
+#>  2 BA09  2019-09-26     -17.4      178. <tibble [30 × 5]>
+#>  3 BA16  2019-09-27     -17.2      178. <tibble [30 × 5]>
+#>  4 BA15  2019-09-27     -17.2      178. <tibble [30 × 5]>
+#>  5 BA11  2019-09-27     -17.3      178. <tibble [30 × 5]>
+#>  6 YA02  2019-09-30     -17.0      177. <tibble [30 × 5]>
+#>  7 YQ02  2019-10-03     -16.6      179. <tibble [30 × 5]>
+#>  8 IP3.5 2019-10-04     -16.4      179. <tibble [30 × 5]>
+#>  9 GS03  2019-10-08     -16.4      178. <tibble [30 × 5]>
+#> 10 GS05  2019-10-08     -16.4      178. <tibble [30 × 5]>
 ```
 
 You can see that the results for each sample event contains 30 rows –
@@ -200,19 +200,19 @@ max_sst <- daily_sst %>%
   summarise_zonal_statistics("max")
 
 max_sst
-#> # A tibble: 10 × 7
-#>    site  sample_date latitude longitude hard_coral_cover zonal_statistics 
-#>    <chr> <date>         <dbl>     <dbl>            <dbl> <list>           
-#>  1 LW04  2019-09-25     -17.6      177.             11.7 <tibble [30 × 5]>
-#>  2 BA09  2019-09-26     -17.4      178.             12.3 <tibble [30 × 5]>
-#>  3 BA16  2019-09-27     -17.2      178.             10.7 <tibble [30 × 5]>
-#>  4 BA15  2019-09-27     -17.2      178.             25   <tibble [30 × 5]>
-#>  5 BA11  2019-09-27     -17.3      178.             23   <tibble [30 × 5]>
-#>  6 YA02  2019-09-30     -17.0      177.             26.3 <tibble [30 × 5]>
-#>  7 YQ02  2019-10-03     -16.6      179.             59   <tibble [30 × 5]>
-#>  8 IP3.5 2019-10-04     -16.4      179.             52.3 <tibble [30 × 5]>
-#>  9 GS03  2019-10-08     -16.4      178.             52   <tibble [30 × 5]>
-#> 10 GS05  2019-10-08     -16.4      178.             40.3 <tibble [30 × 5]>
+#> # A tibble: 10 × 6
+#>    site  sample_date latitude longitude zonal_statistics 
+#>    <chr> <date>         <dbl>     <dbl> <list>           
+#>  1 LW04  2019-09-25     -17.6      177. <tibble [30 × 5]>
+#>  2 BA09  2019-09-26     -17.4      178. <tibble [30 × 5]>
+#>  3 BA16  2019-09-27     -17.2      178. <tibble [30 × 5]>
+#>  4 BA15  2019-09-27     -17.2      178. <tibble [30 × 5]>
+#>  5 BA11  2019-09-27     -17.3      178. <tibble [30 × 5]>
+#>  6 YA02  2019-09-30     -17.0      177. <tibble [30 × 5]>
+#>  7 YQ02  2019-10-03     -16.6      179. <tibble [30 × 5]>
+#>  8 IP3.5 2019-10-04     -16.4      179. <tibble [30 × 5]>
+#>  9 GS03  2019-10-08     -16.4      178. <tibble [30 × 5]>
+#> 10 GS05  2019-10-08     -16.4      178. <tibble [30 × 5]>
 #>    summary_zonal_statistics
 #>    <list>                  
 #>  1 <tibble [1 × 8]>        
@@ -274,6 +274,10 @@ useful for determining what to do here:
 
 ``` r
 covariate_helper("Country Boundaries")
+#> ℹ Covariate contains *vector* data. Use attach_covariates().
+#>   There is only one dataset, so you do not need to specify.
+#>   By default, all columns will be returned. You can limit to specific colunmns in `columns` argument.
+#>   Column options: "COUNTRY_ID", "TERRITORY1", "UN_TER1", "geom"
 ```
 
 This tells us which function to use, and that we do not need to specify
@@ -288,31 +292,19 @@ se_country_all_cols <- se %>%
   attach_covariate_data("Country Boundaries")
 
 se_country_all_cols
-#> # A tibble: 10 × 8
-#>    site  sample_date latitude longitude hard_coral_cover COUNTRY_ID TERRITORY1
-#>    <chr> <date>         <dbl>     <dbl>            <dbl>      <int> <chr>     
-#>  1 BA09  2019-09-26     -17.4      178.             12.3         54 Fiji      
-#>  2 BA16  2019-09-27     -17.2      178.             10.7         54 Fiji      
-#>  3 GS03  2019-10-08     -16.4      178.             52           54 Fiji      
-#>  4 BA15  2019-09-27     -17.2      178.             25           54 Fiji      
-#>  5 YA02  2019-09-30     -17.0      177.             26.3         54 Fiji      
-#>  6 LW04  2019-09-25     -17.6      177.             11.7         54 Fiji      
-#>  7 IP3.5 2019-10-04     -16.4      179.             52.3         54 Fiji      
-#>  8 BA11  2019-09-27     -17.3      178.             23           54 Fiji      
-#>  9 GS05  2019-10-08     -16.4      178.             40.3         54 Fiji      
-#> 10 YQ02  2019-10-03     -16.6      179.             59           54 Fiji      
-#>    UN_TER1
-#>      <dbl>
-#>  1     242
-#>  2     242
-#>  3     242
-#>  4     242
-#>  5     242
-#>  6     242
-#>  7     242
-#>  8     242
-#>  9     242
-#> 10     242
+#> # A tibble: 10 × 7
+#>    site  sample_date latitude longitude COUNTRY_ID TERRITORY1 UN_TER1
+#>    <chr> <date>         <dbl>     <dbl>      <int> <chr>        <dbl>
+#>  1 BA09  2019-09-26     -17.4      178.         54 Fiji           242
+#>  2 BA16  2019-09-27     -17.2      178.         54 Fiji           242
+#>  3 GS03  2019-10-08     -16.4      178.         54 Fiji           242
+#>  4 BA15  2019-09-27     -17.2      178.         54 Fiji           242
+#>  5 YA02  2019-09-30     -17.0      177.         54 Fiji           242
+#>  6 LW04  2019-09-25     -17.6      177.         54 Fiji           242
+#>  7 IP3.5 2019-10-04     -16.4      179.         54 Fiji           242
+#>  8 BA11  2019-09-27     -17.3      178.         54 Fiji           242
+#>  9 GS05  2019-10-08     -16.4      178.         54 Fiji           242
+#> 10 YQ02  2019-10-03     -16.6      179.         54 Fiji           242
 ```
 
 In this case, it is *not* a format that needs to be expanded – the

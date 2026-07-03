@@ -63,57 +63,77 @@ list_covariates()
 
 ## Get maximum SST for previous year
 
-Focus on Sea Surface Temperature, and get the max for the 60 days prior to the survey data. Review the survey data:
+Focus on Sea Surface Temperature, and get the max for the 30 days prior to the survey data. Review the survey data:
 
 ```{r review-survey-data}
 gfcr_summary_sampleevents %>%
   distinct(project, site, latitude, longitude, sample_date)
 ```
 
-We can access SST data by using the function `get_summary_zonal_statistics()`, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n_days` days prior, within the given `radius`, and *spatially* aggregates it according to the specified `spatial_stat`. 
+We can access *daily* SST data by using the function `get_zonal_statistics()`, which takes the site latitude and longitude, as well as the survey date, to find the data at that site for `n_days` days prior, within the given `radius`, and *spatially* aggregates it according to the specified `spatial_stat`.
 
-For example, to get the **maximum** SST over the 0 days prior to (and including) the sample event, using the *mean* SST within 100m of the sites:
+For example, to get the daily SST for each of the 30 days prior to (and including) the sample event, using the *mean* SST within 100m of the sites:
 
 ```{r get-zonal-stats, eval = FALSE}
-max_sst <- gfcr_summary_sampleevents %>%
-  get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 60, radius = 100, spatial_stats = "mean", temporal_stats = "max")
+daily_sst <- gfcr_summary_sampleevents %>%
+  get_zonal_statistics("Daily Sea Surface Temperature", n_days = 30, radius = 100, spatial_stats = "mean")
 ```
 
 ```{r save-zonal-stats, echo = FALSE, eval = FALSE}
-saveRDS(max_sst, here::here("scratch", "max_sst.rds"))
+saveRDS(daily_sst, here::here("scratch", "daily_sst.rds"))
 ```
 
 ```{r read-zonal-stats, echo = FALSE}
-max_sst <- readRDS(here::here("scratch", "max_sst.rds"))
+daily_sst <- readRDS(here::here("scratch", "daily_sst.rds"))
 ```
 
-Look at the returned data, keeping only the project information, site, survey date, hard coral cover, and covariates.
+Look at the returned data, keeping only the project information, site, survey date, hard coral cover, and zonal_statistics
 
-```{r max-dhw-cols}
-max_sst <- max_sst %>%
-  select(site, sample_date, hard_coral_cover, covariates)
+```{r daily-sst-cols}
+daily_sst <- daily_sst %>%
+  select(site, sample_date, hard_coral_cover, zonal_statistics)
 
-max_sst
+daily_sst
 ```
 
-## Expand covariates
+## Expand zonal statistics
 
-The covariates are currently in a format that need to be expanded. Once they are, you can see they contain start and end date of the data used for the covariates, the band, and the summarised value.
+The zonal statistics are returned in a format that need to be expanded. Once they are, you can see they contain daily mean SST values:
 
 ```{r output-width, echo = FALSE}
 options(dplyr.width = Inf)
 ```
 
 ```{r unnest-covars}
-max_sst <- max_sst %>%
-  unnest(covariates)
+daily_sst %>%
+  unnest(zonal_statistics)
+```
+
+## Summarise zonal statistics
+
+To get the *maximum* SST over the 30 day period, we use `summarise_zonal_statistics()`, specifying that the temporal statistic is the max:
+
+```{r max-sst}
+max_sst <- daily_sst %>%
+  summarise_zonal_statistics("max")
 
 max_sst
 ```
 
+The original zonal statistics are returned along with the summarised zonal statistics, which we expand. Now, we only have one value for each sample event -- the maximum SST. This is returned along with the start and end date of the covariate data used, as well as the number of dates. This is useful information cases where the covariate data may not be available for all requested dates.
+
+```{r max-sst-expand}
+max_sst <- max_sst %>%
+  select(-zonal_statistics) %>%
+  unnest(summary_zonal_statistics)
+
+max_sst
+```
+
+
 # Visualize
 
-Finally, visualize coral cover against the maximum Sea Surface Temperature for the past 60 days.
+Finally, visualize coral cover against the maximum Sea Surface Temperature for the past 30 days.
 
 ```{r plot, dpi = 300, warning = FALSE}
 ggplot(
@@ -126,7 +146,7 @@ ggplot(
   geom_point(color = "darkblue", alpha = 0.6) +
   geom_smooth(method = "lm", color = "red", linetype = "dashed") +
   labs(
-    title = paste("Coral Cover vs. Max. SST (Previous 60 Days)"),
+    title = paste("Coral Cover vs. Max. SST (Previous 30 Days)"),
     x = "Maximum SST",
     y = "Hard Coral Cover (%)"
   ) +
