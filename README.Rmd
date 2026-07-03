@@ -173,4 +173,6 @@ If we only want one column (e.g. the country name), then we can specify that in 
 ```{r country-only}
 se_country <- se %>%
   attach_covariate_data("Country Boundaries", columns = "TERRITORY1")
+
+se_country
 ```
