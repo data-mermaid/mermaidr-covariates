@@ -1,3 +1,18 @@
+# mermaidr 1.0.0
+
+* Added `attach_covariate_data()` for accessing vector covariates
+* Added `covariate_helper()` for understanding which of `attach_covariate_data()` or `get_zonal_statistics()` to use
+* Added `list_datasets_for_covariate()` for listing datasets and bands/columns within a covariate
+* Improved parallelization
+
+Large rewrite of zonal statistics API:
+
+* Deprecated `get_summary_zonal_statistics()` in favour of using `get_zonal_statistics()` and then` summarise_zonal_statistics()`
+* Renamed `covariates` column in `get_zonal_statistics()` to `zonal_statistics`
+* Renamed `covariates` column from `summarise_zonal_statistics()` to `summary_zonal_statistics` -- original `zonal_statistics()` column is retained
+* Removed columns `start_date`, `end_date`, and `n_dates` from `get_zonal_statistics()` output -- only appear in output from `summarise_zonal_statistics()` 
+* Added support for multiple bands, specifying dataset
+
 # mermaidrcovariates 0.1.2
 
 * Add `search_covariates()` to search by title or description

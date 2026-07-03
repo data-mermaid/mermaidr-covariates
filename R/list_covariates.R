@@ -22,7 +22,7 @@ list_covariates <- function(as_data_frame = TRUE) {
     res,
     \(x) {
       x$type <- NULL
-      x$links <- NULL # TODO
+      x$links <- NULL
       x$stac_version <- NULL
       x$stac_extensions <- NULL
       x$summaries <- NULL
@@ -51,6 +51,17 @@ list_covariates <- function(as_data_frame = TRUE) {
       x
     }
   )
+
+  # Put non-Prescient covariates last, and alphebatize
+  covariates_order <- dplyr::tibble(title = purrr::map_chr(res, "title")) %>%
+    dplyr::mutate(
+      index = dplyr::row_number(),
+      group = ifelse(stringr::str_starts(title, "GPW"), 2, 1)
+    ) %>%
+    dplyr::arrange(group, title) %>%
+    dplyr::pull(index)
+
+  res <- res[covariates_order]
 
   # If as_data_frame = TRUE (the default), reformat
   if (as_data_frame) {
@@ -105,7 +116,8 @@ reshape_covariates_df <- function(covariates) {
         # purrr::compact() %>% # In case of any empty entries
         dplyr::as_tibble()
     }) %>%
-    dplyr::select(id, title, description, start_date, end_date, dplyr::everything())
+    dplyr::select(title, description, start_date, end_date, dplyr::everything()) %>%
+    dplyr::relocate(id, .after = dplyr::everything())
 }
 
 add_covariates_list_classes <- function(covariates) {

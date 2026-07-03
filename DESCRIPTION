@@ -1,7 +1,7 @@
 Package: mermaidrcovariates
 Type: Package
 Title: Access covariates for MERMAID data
-Version: 0.1.2
+Version: 1.0.0
 Authors@R:
     c(person(given = "Sharla",
            family = "Gelfand",
@@ -14,7 +14,10 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    dplyr,
+    DBI,
+    dplyr (>= 1.1.0),
+    duckspatial,
+    forcats,
     glue,
     httr2,
     lubridate,
@@ -22,10 +25,12 @@ Imports:
     purrr,
     rlang,
     rstac,
+    sf,
     stringr,
-    tidyr
+    tidyr,
+    usethis
 Remotes: data-mermaid/mermaidr
-RoxygenNote: 7.3.3
+RoxygenNote: 8.0.0
 URL: https://data-mermaid.github.io/mermaidr-covariates/
 Suggests: 
     knitr,
