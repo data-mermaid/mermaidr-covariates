@@ -9,7 +9,6 @@
 #' @param n_days Number of days to get statistics for. Includes the sample date
 #'  itself, and days prior to it -- e.g., 365 days would include the sample date
 #'  and the 364 days prior. Only relevant for covariates that are daily; otherwise ignored.
-#' @param radius Radius around site location, in metres. Defaults to 0 (just the site location itself).
 #' @param spatial_stats Spatial statistics -- used to summarise all data around
 #' the site location, according to the \code{radius} set. If \code{radius} is 0, then \code{spatial_stats} is not relevant; it is just the value itself.
 #' @param date_col Sample date column -- used for date-dependent covariates (e.g. daily or periodic). Defaults to "sample_date".
@@ -18,7 +17,7 @@
 #' @export
 get_zonal_statistics <- function(se, covariate,
                                  spatial_stats = "mean",
-                                 radius = 0,
+                                 radius = 100,
                                  n_days = NULL,
                                  dataset = NULL,
                                  bands = NULL,
@@ -289,7 +288,7 @@ get_items_for_zonal_stats_daily <- function(se, covariate_id, dataset, n_days = 
   }
 
   se %>%
-    dplyr::select(...id, latitude, longitude) %>%
+    dplyr::distinct(...id, latitude, longitude) %>%
     dplyr::bind_cols(items) %>%
     dplyr::mutate(...secondary_id = glue::glue("{...id}__{date}")) %>%
     dplyr::distinct()

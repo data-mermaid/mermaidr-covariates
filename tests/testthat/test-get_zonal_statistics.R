@@ -190,7 +190,7 @@ test_that("new test scenarios...", {
     "GPW Land Use and Land Cover"
   )
 
-  se <- tibble::tribble(
+  se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
     "C5", -17.060783, 179.0013, "2011-03-29",
     "Three Buoys shallow", 11.128612, 72.734578, "2016-05-06",
@@ -362,7 +362,7 @@ test_that("For periodic covariates, get_zonal_statistics() gets the MOST RECENT 
   skip_on_ci()
   skip_on_cran()
 
-  se <- tibble::tribble(
+  se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
     "NT1", -17.3741, 179.4217, "2017-09-09",
     "NF2", -17.37898, 179.41577, "2013-05-13",
@@ -447,7 +447,7 @@ test_that("For 'once' covariates, get_zonal_statistics() gets one single data po
   covariate <- "fifty_reefs_prioritization"
   bands <- 1
 
-  se <- tibble::tribble(
+  se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
     "NT1", -17.3741, 179.4217, "2017-09-09",
     "NF2", -17.37898, 179.41577, "2013-05-13",
@@ -499,7 +499,7 @@ test_that("For 'daily' covariates, get_zonal_statistics() gets data for n_days (
   covariate <- "Daily Sea Surface Temperature"
   n_days <- 5
 
-  se <- tibble::tribble(
+  se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
     "NT1", -17.3741, 179.4217, "2017-09-09",
     "NF2", -17.37898, 179.41577, "2013-05-13",
@@ -517,5 +517,31 @@ test_that("For 'daily' covariates, get_zonal_statistics() gets data for n_days (
       purrr::map_dbl(nrow) %>%
       unique(),
     n_days
+  )
+})
+
+test_that("get_zonal_statistics gives the same results when SEs have overlapping intervals as it would when the SEs are on their own, without overlapping", {
+  se <- dplyr::tribble(
+    ~site, ~sample_date, ~latitude, ~longitude,
+    "test", "2024-10-03", 29.364309, 34.961792,
+    "test", "2024-10-04", 29.364309, 34.961792,
+    "test", "2024-10-20", 29.364309, 34.961792,
+    "test", "2024-10-21", 29.364309, 34.961792,
+    "test", "2025-01-01", 29.364309, 34.961792
+  )
+
+  zs_together <- se %>%
+    get_zonal_statistics("Daily Sea Surface Temperature", n_days = 30, radius = 100, spatial_stats = "mean") %>%
+    dplyr::arrange(sample_date)
+
+  zs_separate <- se %>%
+    split(.$sample_date) %>%
+    purrr::map_dfr(\(x) x %>%
+      get_zonal_statistics("Daily Sea Surface Temperature", n_days = 30, radius = 100, spatial_stats = "mean")) %>%
+    dplyr::arrange(sample_date)
+
+  expect_identical(
+    zs_together,
+    zs_separate
   )
 })

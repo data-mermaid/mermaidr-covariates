@@ -11,6 +11,7 @@ Large rewrite of zonal statistics API:
 * Renamed `covariates` column in `get_zonal_statistics()` to `zonal_statistics`
 * Renamed `covariates` column from `summarise_zonal_statistics()` to `summary_zonal_statistics` -- original `zonal_statistics()` column is retained
 * Removed columns `start_date`, `end_date`, and `n_dates` from `get_zonal_statistics()` output -- only appear in output from `summarise_zonal_statistics()` 
+* Added support for multiple bands, specifying dataset
 
 # mermaidrcovariates 0.1.2
 
