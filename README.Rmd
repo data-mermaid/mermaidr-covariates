@@ -63,7 +63,7 @@ se <- se %>%
 
 ### Covariates
 
-You can use the [Prescient browser](https://mermaid.prescient.earth/) to find which covariates are available. To see this programatically, we use the `list_covariates()` function:
+You can use the [Prescient Browser](https://mermaid.prescient.earth/) to find which covariates are available. To see this programatically, we use the `list_covariates()` function:
 
 ```{r list-covariates}
 covariates <- list_covariates()
@@ -99,7 +99,7 @@ You can also use the function `covariate_helper()` which will give you informati
 
 For example, we will look at "Daily Sea Surface Temperature" (SST). Running the helper function tells us to use `get_zonal_statistics()`, and that we do not need to specify the dataset or band, since there are only one of each.
 
-```{r daily-sst-helper}
+```{r daily-sst-helper, message = TRUE}
 covariate_helper("Daily Sea Surface Temperature")
 ```
 
@@ -151,7 +151,7 @@ max_sst %>%
 
 If we want to attach vector data, such as Country Boundaries, we use `attach_vector_data()`. Again, the `covariate_helper()` function is useful for determining what to do here:
 
-```{r covariate-helper-countries}
+```{r covariate-helper-countries, message = TRUE}
 covariate_helper("Country Boundaries")
 ```
 
@@ -174,7 +174,3 @@ If we only want one column (e.g. the country name), then we can specify that in 
 se_country <- se %>%
   attach_covariate_data("Country Boundaries", columns = "TERRITORY1")
 ```
-
-TODO:
-Most of the raster ones are date dependent
-Vector ones are not, explain this
