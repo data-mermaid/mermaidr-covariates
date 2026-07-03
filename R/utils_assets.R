@@ -126,7 +126,6 @@ get_all_asset_types <- function(item) {
 }
 
 get_collection_type <- function(collection) {
-
   # Look at the first item
   item <- rstac::stac(stac_url) %>%
     rstac::collections(collection) %>%

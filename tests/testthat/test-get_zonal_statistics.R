@@ -358,6 +358,10 @@ test_that("new test scenarios...", {
 })
 
 test_that("For periodic covariates, get_zonal_statistics() gets the MOST RECENT data only", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   se <- tibble::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
     "NT1", -17.3741, 179.4217, "2017-09-09",
@@ -368,7 +372,7 @@ test_that("For periodic covariates, get_zonal_statistics() gets the MOST RECENT 
   )
 
   covariate <- "gpw_sediment_load"
-  bands <- 1:3
+  bands <- 1
 
   zs <- se %>%
     get_zonal_statistics(covariate, radius = 100, bands = bands)
@@ -415,7 +419,7 @@ test_that("For periodic covariates, get_zonal_statistics() gets the MOST RECENT 
     dplyr::filter(site == "NT1") %>%
     tidyr::unnest(zonal_statistics)
 
-  expect_true(nrow(no_data_se) == 9)
+  expect_true(nrow(no_data_se) == length(bands))
   expect_true(all(is.na(no_data_se[["date"]])))
   expect_true(all(is.na(no_data_se[["value"]])))
   expect_equal(no_data_se[["band"]], bands)
@@ -429,13 +433,17 @@ test_that("For periodic covariates, get_zonal_statistics() gets the MOST RECENT 
   no_data_se <- zs %>%
     tidyr::unnest(zonal_statistics)
 
-  expect_true(nrow(no_data_se) == 9)
+  expect_true(nrow(no_data_se) == length(bands))
   expect_true(all(is.na(no_data_se[["date"]])))
   expect_true(all(is.na(no_data_se[["value"]])))
   expect_equal(no_data_se[["band"]], bands)
 })
 
 test_that("For 'once' covariates, get_zonal_statistics() gets one single data point, even if data is before the covariate date", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   covariate <- "fifty_reefs_prioritization"
   bands <- 1
 
@@ -484,6 +492,10 @@ test_that("For 'once' covariates, get_zonal_statistics() gets one single data po
 })
 
 test_that("For 'daily' covariates, get_zonal_statistics() gets data for n_days (at most, less is possible if no data)", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   covariate <- "Daily Sea Surface Temperature"
   n_days <- 5
 

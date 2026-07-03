@@ -339,7 +339,7 @@ get_zonal_stats <- function(se, covariate_id, covariate_name,
   }
 
   zonal_stats <- zonal_stats %>%
-      dplyr::distinct() %>%
+    dplyr::distinct() %>%
     dplyr::mutate(
       band = stringr::str_remove(band, "band_")
     ) %>%
@@ -385,7 +385,6 @@ get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, datase
                                       "range", "nodata", "area", "freq_hist"
                                     ),
                                     type) {
-
   # If covariate_interval is daily, we need to get the stac items for each chunk
 
   if (covariate_interval == "daily") {
