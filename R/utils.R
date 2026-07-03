@@ -24,6 +24,14 @@ add_id_for_iteration <- function(df, date_col, n_days) {
       ...date_temp = as.Date(...date_temp)
     )
 
+  # If n_days = NULL, then just use the single sample date, not an interval
+  if (is.null(n_days)) {
+    df <- df %>%
+      dplyr::mutate(...id = glue::glue("{latitude}_{longitude}_{...date_temp}"))
+
+    return(df)
+  }
+
   # Deduplicate overlapping API calls
   # e.g. if they have two samples within a year (or whatever n_days is),
   # many of the items will be the same
@@ -52,34 +60,25 @@ add_id_for_iteration <- function(df, date_col, n_days) {
     dplyr::select(-...date_temp)
 }
 
-add_id_for_joining <- function(df, date_col) {
-  df %>%
-    dplyr::mutate(
-      ...date_temp = !!rlang::sym(date_col),
-      ...date_temp = as.Date(...date_temp),
-      ...join_id = glue::glue("{project}_{site}_{latitude}_{longitude}_{...date_temp}_{dplyr::row_number()}")
-    ) %>%
-    dplyr::select(-...date_temp)
-}
+split_for_chunking <- function(se, covariate_interval, n_days) {
+  split_by_chunk <- covariate_interval %in% c("once", "periodic")
+  if (!split_by_chunk) {
+    split_by_chunk <- (covariate_interval == "daily" & n_days < chunk_size)
+  } else {
+    n_days <- 1 # Need for setting SEs by chunk if it is just once
+  }
 
-split_for_chunking <- function(df, covariate_id, n_days) {
-  covariate_interval <- determine_covariate_interval(covariate_id)
-
-  if (covariate_interval == "daily" & n_days < chunk_size) {
+  # Potentially split not by ...id, if n_days is small
+  if (split_by_chunk) {
     se_per_chunk <- ceiling(chunk_size / n_days)
 
-    df %>%
+    se %>%
       dplyr::mutate(...chunk = (dplyr::row_number() - 1) %/% se_per_chunk) %>%
       split(.$...chunk)
   } else {
-    df %>%
+    se %>%
       split(.$...id)
   }
-}
-
-combine_from_chunking <- function(df) {
-    df %>%
-        dplyr::bind_rows()
 }
 
 lookup_collection <- function(x) {
@@ -121,40 +120,35 @@ get_covariate_id <- function(x) {
 
   # If no ID, error
   if (is.na(covariate_id)) {
-    stop(x, " is not a valid covariate title or ID.", call. = FALSE)
+    stop(x, " is not a valid covariate title or ID. Run `list_covariates()` to see covariates.", call. = FALSE)
   }
 
   covariate_id
 }
 
-determine_covariate_interval <- function(covariate_id) {
+get_covariate_interval <- function(covariate) {
   # Determine whether a covariate is:
   # daily
-  # monthly
-  # annually
+  # periodic (e.g. every year, every 5 years, etc)
   # once only
 
   # by looking at its start date, adding one year, then seeing how many items are returned
+  # This does NOT work, because it doesn't tell us if the data is annual, every 5 years, etc
+  # Maybe add two years, then deal with ~ 600 instead
 
-  covariates <- list_covariates()
+  items <- get_collection_items(covariate, simplify = FALSE)
 
-  start_date <- covariates %>%
-    dplyr::filter(id == covariate_id) %>%
-    dplyr::pull(start_date)
-
-  items <- rstac::stac(stac_url) %>%
-    rstac::stac_search(
-      collections = covariate_id,
-      datetime = start_end_to_interval(start_date, start_date + lubridate::years(1))
-    ) %>%
-    rstac::get_request()
-
-  n_items <- items$numberMatched
+  n_items <- items[["numberMatched"]]
 
   dplyr::case_when(
-    n_items < 2 ~ "annual/once",
-    n_items < 15 ~ "monthly",
-    n_items >= 15 & n_items <= 300 ~ "check",
+    n_items == 1 ~ "once",
+    n_items > 1 & n_items < 50 ~ "periodic",
+    n_items >= 50 & n_items <= 300 ~ "check",
     n_items > 300 ~ "daily"
   )
+}
+
+comma_sep_quoted <- function(x) {
+  x <- paste0(x, collapse = "\", \"")
+  glue::glue('"{x}"')
 }

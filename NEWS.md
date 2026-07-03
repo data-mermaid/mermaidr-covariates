@@ -1,3 +1,10 @@
+# mermaidr 1.0.0
+
+Large rewrite of API:
+
+* Deprecated get_summary_zonal_statistics() in favour of using get_zonal_statistics() and then summarise_zonal_statistics()
+* Renamed `covariates` column in get_zonal_statistics to `zonal_statistics`
+
 # mermaidrcovariates 0.1.2
 
 * Add `search_covariates()` to search by title or description

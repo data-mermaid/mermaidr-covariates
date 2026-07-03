@@ -4,7 +4,6 @@
 # mermaidrcovariates
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 The goal of `mermaidrcovariates` is to easily access covariates data and
@@ -27,6 +26,8 @@ remotes::install_github("data-mermaid/mermaidr-covariates")
 ```
 
 ## Usage
+
+### `mermaidr` data
 
 Through `mermaidrcovariates`, you can easily add covariates to the
 aggregated data from your coral reef surveys, which is already entered
@@ -55,120 +56,272 @@ se <- se %>%
   select(site, sample_date, latitude, longitude, hard_coral_cover = percent_cover_benthic_category_avg_hard_coral)
 ```
 
-You can use the [Prescient browser](https://mermaid.prescient.earth/) to
+### Covariates
+
+You can use the [Prescient Browser](https://mermaid.prescient.earth/) to
 find which covariates are available. To see this programatically, we use
 the `list_covariates()` function:
 
 ``` r
-list_covariates()
-#> # A tibble: 10 × 10
-#>    id         title description start_date end_date   license keywords providers
-#>    <chr>      <chr> <chr>       <date>     <date>     <chr>   <chr>    <list>   
-#>  1 10da4b11-… Huma… "This data… 2021-12-28 NA         propri… climate… <tibble> 
-#>  2 3e410700-… MEOW… "This data… 2012-01-01 2012-12-31 propri… <NA>     <tibble> 
-#>  3 50b810fb-… Dail… "Sea surfa… 1985-01-01 2026-01-13 CC0-1.0 climate… <tibble> 
-#>  4 640da5d3-… ACA … "Allen Cor… 2018-01-01 2022-12-31 CC-BY-… allen c… <tibble> 
-#>  5 aca_extent ACA … "ACA Reef … 2026-01-01 NA         CC0-1.0 aca, re… <tibble> 
-#>  6 countries  Coun… "Country B… 2026-01-01 NA         CC0-1.0 adminis… <tibble> 
-#>  7 daily_sst  Dail… "A collect… 1985-01-01 1985-01-03 CC0-1.0 climate… <tibble> 
-#>  8 disp_poin… Disp… "Dispersal… 2026-01-01 NA         CC0-1.0 dispers… <tibble> 
-#>  9 lulc       Land… "Land Use … 2000-01-01 2020-01-01 CC0-1.0 land co… <tibble> 
-#> 10 sediment_… Glob… "Global Se… 2000-01-01 2000-01-01 propri… sedimen… <tibble> 
-#> # ℹ 2 more variables: `sci:citation` <chr>, bbox <list>
+covariates <- list_covariates()
+covariates
+#> # A tibble: 17 × 11
+#>    title  description start_date end_date   license `sci:doi` keywords providers
+#>    <chr>  <chr>       <date>     <date>     <chr>   <chr>     <chr>    <list>   
+#>  1 50 Re… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… <tibble> 
+#>  2 ACA B… The Alan C… 2018-01-01 2021-01-01 propri… <NA>      ACA, Al… <tibble> 
+#>  3 ACA R… ACA reef e… 2026-01-01 2026-01-01 CC0 1.… <NA>      reef, r… <tibble> 
+#>  4 Count… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
+#>  5 Daily… Sea surfac… 1985-01-01 2026-01-13 CC0-1.0 <NA>      climate… <tibble> 
+#>  6 Human… Coastal po… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coastal… <tibble> 
+#>  7 Marin… A biogeogr… 2011-11-18 2011-11-18 CC-BY-… 10.1641/… biodive… <tibble> 
+#>  8 Marke… From econo… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+#>  9 Numbe… Port locat… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+#> 10 Touri… Intensive … 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+#> 11 GPW C… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
+#> 12 GPW D… Dispersal … 2026-01-01 2026-01-01 CC0 1.… <NA>      dispers… <tibble> 
+#> 13 GPW G… Global Sed… 2000-01-01 2020-01-01 propri… <NA>      exposur… <tibble> 
+#> 14 GPW G… Global sed… 2000-01-01 2020-01-01 CC0 1.… <NA>      gpw, se… <tibble> 
+#> 15 GPW L… Land Use a… 2000-01-01 2020-01-01 CC0-1.0 <NA>      land co… <tibble> 
+#> 16 GPW M… Marine Eco… 2026-01-01 2026-01-01 cc-by-… <NA>      biodive… <tibble> 
+#> 17 GPW W… Watersheds… 2026-01-01 2026-01-01 CC0 1.… <NA>      gpw, hy… <tibble> 
+#> # ℹ 3 more variables: `sci:citation` <chr>, bbox <list>, id <chr>
 ```
 
-For this example, we will look at maximum “Daily Sea Surface
-Temperature” (SST). We can access this data by using the function
-`get_summary_zonal_statistics()`, which takes the site latitude and
-longitude, as well as the survey date, to find the data at that site for
-`n_days` days prior, within the given `radius`, and *spatially*
-aggregates it according to the specified `spatial_stats`. Then, the
-function *temporally* aggregates it according to the specified
-`temporal_stats`.
+Covariates may contain raster data, vector data, or both. There are
+different functions for accessing raster or vector data.
 
-For example, to get the **maximum** SST over the 20 days prior to (and
-including) the sample event, using the *mean* SST within 100m of the
-sites:
+The table below summarises which function to use for the different
+covariates available on Prescient:
+
+| Covariate                                           | Type   | get_zonal_statistics() | attach_covariate_data() |
+|:----------------------------------------------------|:-------|:-----------------------|:------------------------|
+| 50 Reefs+ prioritization                            | raster | ✅                     |                         |
+| ACA Benthic Habitat                                 | raster | ✅                     |                         |
+| ACA Reef Extent                                     | raster | ✅                     |                         |
+| Country Boundaries                                  | vector |                        | ✅                      |
+| Daily Sea Surface Temperature                       | raster | ✅                     |                         |
+| Human population within 5km (coastal population)    | vector |                        | ✅                      |
+| Marine Ecoregions of the World                      | vector |                        | ✅                      |
+| Market gravity (fishing pressure)                   | vector |                        | ✅                      |
+| Number of ports within 5km (industrial development) | vector |                        | ✅                      |
+| Tourism index                                       | vector |                        | ✅                      |
+
+You can also use the function `covariate_helper()` which will give you
+information on the data type and which function to use, as well as any
+other specifications that might be needed.
+
+### Raster data
+
+For example, we will look at “Daily Sea Surface Temperature” (SST).
+Running the helper function tells us to use `get_zonal_statistics()`,
+and that we do not need to specify the dataset or band, since there are
+only one of each.
 
 ``` r
-max_sst <- se %>%
-  get_summary_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean", temporal_stats = "max")
+covariate_helper("Daily Sea Surface Temperature")
+#> ℹ Covariate contains *raster* data. Use get_zonal_statistics().
+#>   There is only one dataset, so you do not need to specify.
+#>   There is only one band of data, so you do not need to specify.
 ```
 
-The covariates are returned in a format that need to be expanded. Once
-they are, you can see they contain start and end date of the data used
-for the covariates, the band, and the summarised value.
+If we want the maximum SST at each site over the past 30 days, we first
+get the *daily* SST using `get_zonal_statistics()`, specifying
+`n_days = 30`. We will request all data within a `radius` of 1000 metres
+from the site, and that the function *spatially* aggregates that data
+for each of the 30 days.
+
+``` r
+daily_sst <- get_zonal_statistics(se,
+  covariate = "Daily Sea Surface Temperature",
+  spatial_stats = "mean", radius = 1000, n_days = 30
+)
+
+daily_sst
+#> # A tibble: 10 × 6
+#>    site  sample_date latitude longitude hard_coral_cover zonal_statistics 
+#>    <chr> <date>         <dbl>     <dbl>            <dbl> <list>           
+#>  1 LW04  2019-09-25     -17.6      177.             11.7 <tibble [30 × 5]>
+#>  2 BA09  2019-09-26     -17.4      178.             12.3 <tibble [30 × 5]>
+#>  3 BA16  2019-09-27     -17.2      178.             10.7 <tibble [30 × 5]>
+#>  4 BA15  2019-09-27     -17.2      178.             25   <tibble [30 × 5]>
+#>  5 BA11  2019-09-27     -17.3      178.             23   <tibble [30 × 5]>
+#>  6 YA02  2019-09-30     -17.0      177.             26.3 <tibble [30 × 5]>
+#>  7 YQ02  2019-10-03     -16.6      179.             59   <tibble [30 × 5]>
+#>  8 IP3.5 2019-10-04     -16.4      179.             52.3 <tibble [30 × 5]>
+#>  9 GS03  2019-10-08     -16.4      178.             52   <tibble [30 × 5]>
+#> 10 GS05  2019-10-08     -16.4      178.             40.3 <tibble [30 × 5]>
+```
+
+You can see that the results for each sample event contains 30 rows –
+one value for each of the 30 days we requested.
+
+To expand the zonal statistics, we use `unnest()`, and are able to see
+that we have the mean value for each date:
+
+``` r
+daily_sst %>%
+  select(site, sample_date, zonal_statistics) %>%
+  unnest(zonal_statistics)
+#> # A tibble: 300 × 7
+#>    site  sample_date covariate                     date        band spatial_stat
+#>    <chr> <date>      <chr>                         <date>     <dbl> <chr>       
+#>  1 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-25     1 mean        
+#>  2 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-24     1 mean        
+#>  3 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-23     1 mean        
+#>  4 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-22     1 mean        
+#>  5 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-21     1 mean        
+#>  6 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-20     1 mean        
+#>  7 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-19     1 mean        
+#>  8 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-18     1 mean        
+#>  9 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-17     1 mean        
+#> 10 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-16     1 mean        
+#>    value
+#>    <dbl>
+#>  1  26.5
+#>  2  26.5
+#>  3  26.5
+#>  4  26.7
+#>  5  27.0
+#>  6  26.9
+#>  7  26.8
+#>  8  26.7
+#>  9  26.7
+#> 10  26.8
+#> # ℹ 290 more rows
+```
+
+Since we would like the *maximum* SST for each site over those 30 days,
+we then use `aggregate_zonal_statistics()`, specifying that the
+*temporal* summary statistic should be max:
+
+``` r
+max_sst <- daily_sst %>%
+  summarise_zonal_statistics("max")
+
+max_sst
+#> # A tibble: 10 × 7
+#>    site  sample_date latitude longitude hard_coral_cover zonal_statistics 
+#>    <chr> <date>         <dbl>     <dbl>            <dbl> <list>           
+#>  1 LW04  2019-09-25     -17.6      177.             11.7 <tibble [30 × 5]>
+#>  2 BA09  2019-09-26     -17.4      178.             12.3 <tibble [30 × 5]>
+#>  3 BA16  2019-09-27     -17.2      178.             10.7 <tibble [30 × 5]>
+#>  4 BA15  2019-09-27     -17.2      178.             25   <tibble [30 × 5]>
+#>  5 BA11  2019-09-27     -17.3      178.             23   <tibble [30 × 5]>
+#>  6 YA02  2019-09-30     -17.0      177.             26.3 <tibble [30 × 5]>
+#>  7 YQ02  2019-10-03     -16.6      179.             59   <tibble [30 × 5]>
+#>  8 IP3.5 2019-10-04     -16.4      179.             52.3 <tibble [30 × 5]>
+#>  9 GS03  2019-10-08     -16.4      178.             52   <tibble [30 × 5]>
+#> 10 GS05  2019-10-08     -16.4      178.             40.3 <tibble [30 × 5]>
+#>    summary_zonal_statistics
+#>    <list>                  
+#>  1 <tibble [1 × 8]>        
+#>  2 <tibble [1 × 8]>        
+#>  3 <tibble [1 × 8]>        
+#>  4 <tibble [1 × 8]>        
+#>  5 <tibble [1 × 8]>        
+#>  6 <tibble [1 × 8]>        
+#>  7 <tibble [1 × 8]>        
+#>  8 <tibble [1 × 8]>        
+#>  9 <tibble [1 × 8]>        
+#> 10 <tibble [1 × 8]>
+```
+
+We retain the original `zonal_statistics` column, which contains the
+daily values, but now also have a `summary_zonal_statistics` column,
+which contains only *one* row for each sample event.
+
+We expand it and see a summary of the start and end date of the data
+used for each sample event, as well as the spatial and temporal
+statistics used to summarise, and the actual value:
 
 ``` r
 max_sst %>%
-  unnest(covariates)
-#> # A tibble: 10 × 12
-#>    site  latitude longitude sample_date covariate                     start_date
-#>    <chr>    <dbl>     <dbl> <date>      <chr>                         <date>    
-#>  1 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  2 BA11     -17.3      178. 2019-09-27  Daily Sea Surface Temperature 2019-09-18
-#>  3 BA15     -17.2      178. 2019-09-27  Daily Sea Surface Temperature 2019-09-18
-#>  4 BA16     -17.2      178. 2019-09-27  Daily Sea Surface Temperature 2019-09-18
-#>  5 GS03     -16.4      178. 2019-10-08  Daily Sea Surface Temperature 2019-09-29
-#>  6 GS05     -16.4      178. 2019-10-08  Daily Sea Surface Temperature 2019-09-29
-#>  7 IP3.5    -16.4      179. 2019-10-04  Daily Sea Surface Temperature 2019-09-25
-#>  8 LW04     -17.6      177. 2019-09-25  Daily Sea Surface Temperature 2019-09-16
-#>  9 YA02     -17.0      177. 2019-09-30  Daily Sea Surface Temperature 2019-09-21
-#> 10 YQ02     -16.6      179. 2019-10-03  Daily Sea Surface Temperature 2019-09-24
-#>    end_date   n_dates  band temporal_stat spatial_stat value
-#>    <date>       <int> <dbl> <chr>         <chr>        <dbl>
-#>  1 2019-09-26      23     1 max           mean          26.9
-#>  2 2019-09-27      23     1 max           mean          26.9
-#>  3 2019-09-27      23     1 max           mean          26.8
-#>  4 2019-09-27      23     1 max           mean          26.8
-#>  5 2019-10-08      23     1 max           mean          27.4
-#>  6 2019-10-08      23     1 max           mean          27.4
-#>  7 2019-10-04      23     1 max           mean          27.5
-#>  8 2019-09-25      23     1 max           mean          27.0
-#>  9 2019-09-30      23     1 max           mean          27.0
-#> 10 2019-10-03      23     1 max           mean          27.3
+  select(site, sample_date, summary_zonal_statistics) %>%
+  unnest(summary_zonal_statistics)
+#> # A tibble: 10 × 10
+#>    site  sample_date covariate                     start_date end_date   n_dates
+#>    <chr> <date>      <chr>                         <date>     <date>       <dbl>
+#>  1 LW04  2019-09-25  Daily Sea Surface Temperature 2019-08-27 2019-09-25      30
+#>  2 BA09  2019-09-26  Daily Sea Surface Temperature 2019-08-28 2019-09-26      30
+#>  3 BA16  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30
+#>  4 BA15  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30
+#>  5 BA11  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30
+#>  6 YA02  2019-09-30  Daily Sea Surface Temperature 2019-09-01 2019-09-30      30
+#>  7 YQ02  2019-10-03  Daily Sea Surface Temperature 2019-09-04 2019-10-03      30
+#>  8 IP3.5 2019-10-04  Daily Sea Surface Temperature 2019-09-05 2019-10-04      30
+#>  9 GS03  2019-10-08  Daily Sea Surface Temperature 2019-09-09 2019-10-08      30
+#> 10 GS05  2019-10-08  Daily Sea Surface Temperature 2019-09-09 2019-10-08      30
+#>     band spatial_stat temporal_stat value
+#>    <dbl> <chr>        <chr>         <dbl>
+#>  1     1 mean         max            27.2
+#>  2     1 mean         max            27.0
+#>  3     1 mean         max            27.0
+#>  4     1 mean         max            27.0
+#>  5     1 mean         max            27  
+#>  6     1 mean         max            27.0
+#>  7     1 mean         max            27.4
+#>  8     1 mean         max            27.7
+#>  9     1 mean         max            27.5
+#> 10     1 mean         max            27.4
 ```
 
-If we don’t want the data aggregated over time – for example, if we just
-want the value of a covariate the day of the sample event, or if we want
-to have the individual dates attached to the covariate data – we use the
-non-summary version of the function, `get_zonal_statistics()`. In this
-case, we omit `temporal_stats` and just get the mean SST within 100m of
-the sites, for all 20 days:
+### Vector data
+
+If we want to attach vector data, such as Country Boundaries, we use
+`attach_vector_data()`. Again, the `covariate_helper()` function is
+useful for determining what to do here:
 
 ``` r
-sst_by_day <- se %>%
-  get_zonal_statistics("Daily Sea Surface Temperature", n_days = 10, radius = 100, spatial_stats = "mean")
-
-sst_by_day %>%
-  unnest(covariates)
-#> # A tibble: 100 × 12
-#>    site  latitude longitude sample_date covariate                     start_date
-#>    <chr>    <dbl>     <dbl> <date>      <chr>                         <date>    
-#>  1 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  2 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  3 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  4 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  5 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  6 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  7 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  8 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>  9 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#> 10 BA09     -17.4      178. 2019-09-26  Daily Sea Surface Temperature 2019-09-17
-#>    end_date   n_dates date        band spatial_stat value
-#>    <date>       <int> <chr>      <dbl> <chr>        <dbl>
-#>  1 2019-09-26      23 2019-09-26     1 mean          26.1
-#>  2 2019-09-26      23 2019-09-25     1 mean          26.3
-#>  3 2019-09-26      23 2019-09-24     1 mean          26.3
-#>  4 2019-09-26      23 2019-09-23     1 mean          26.4
-#>  5 2019-09-26      23 2019-09-22     1 mean          26.6
-#>  6 2019-09-26      23 2019-09-21     1 mean          26.9
-#>  7 2019-09-26      23 2019-09-20     1 mean          26.7
-#>  8 2019-09-26      23 2019-09-19     1 mean          26.6
-#>  9 2019-09-26      23 2019-09-18     1 mean          26.5
-#> 10 2019-09-26      23 2019-09-17     1 mean          26.5
-#> # ℹ 90 more rows
+covariate_helper("Country Boundaries")
 ```
 
-Here, instead of having the data aggregated over time, there is one row
-for each date, along with the value on that date.
+This tells us which function to use, and that we do not need to specify
+the dataset for the covariate. It also tells us that, by default, all of
+the columns in the vector data will be returned, but that we can limit
+to specific columns.
+
+We attach the covariate data:
+
+``` r
+se_country_all_cols <- se %>%
+  attach_covariate_data("Country Boundaries")
+
+se_country_all_cols
+#> # A tibble: 10 × 8
+#>    site  sample_date latitude longitude hard_coral_cover COUNTRY_ID TERRITORY1
+#>    <chr> <date>         <dbl>     <dbl>            <dbl>      <int> <chr>     
+#>  1 BA09  2019-09-26     -17.4      178.             12.3         54 Fiji      
+#>  2 BA16  2019-09-27     -17.2      178.             10.7         54 Fiji      
+#>  3 GS03  2019-10-08     -16.4      178.             52           54 Fiji      
+#>  4 BA15  2019-09-27     -17.2      178.             25           54 Fiji      
+#>  5 YA02  2019-09-30     -17.0      177.             26.3         54 Fiji      
+#>  6 LW04  2019-09-25     -17.6      177.             11.7         54 Fiji      
+#>  7 IP3.5 2019-10-04     -16.4      179.             52.3         54 Fiji      
+#>  8 BA11  2019-09-27     -17.3      178.             23           54 Fiji      
+#>  9 GS05  2019-10-08     -16.4      178.             40.3         54 Fiji      
+#> 10 YQ02  2019-10-03     -16.6      179.             59           54 Fiji      
+#>    UN_TER1
+#>      <dbl>
+#>  1     242
+#>  2     242
+#>  3     242
+#>  4     242
+#>  5     242
+#>  6     242
+#>  7     242
+#>  8     242
+#>  9     242
+#> 10     242
+```
+
+In this case, it is *not* a format that needs to be expanded – the
+columns are immediately available.
+
+If we only want one column (e.g. the country name), then we can specify
+that in the function:
+
+``` r
+se_country <- se %>%
+  attach_covariate_data("Country Boundaries", columns = "TERRITORY1")
+```
