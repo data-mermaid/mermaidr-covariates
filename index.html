@@ -349,7 +349,22 @@
 <p>If we only want one column (e.g. the country name), then we can specify that in the function:</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">se_country</span> <span class="op">&lt;-</span> <span class="va">se</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="reference/attach_covariate_data.html">attach_covariate_data</a></span><span class="op">(</span><span class="st">"Country Boundaries"</span>, columns <span class="op">=</span> <span class="st">"TERRITORY1"</span><span class="op">)</span></span></code></pre></div>
+<span>  <span class="fu"><a href="reference/attach_covariate_data.html">attach_covariate_data</a></span><span class="op">(</span><span class="st">"Country Boundaries"</span>, columns <span class="op">=</span> <span class="st">"TERRITORY1"</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">se_country</span></span>
+<span><span class="co">#&gt; # A tibble: 10 × 5</span></span>
+<span><span class="co">#&gt;    site  sample_date latitude longitude TERRITORY1</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;date&gt;         &lt;dbl&gt;     &lt;dbl&gt; &lt;chr&gt;     </span></span>
+<span><span class="co">#&gt;  1 BA09  2019-09-26     -17.4      178. Fiji      </span></span>
+<span><span class="co">#&gt;  2 BA16  2019-09-27     -17.2      178. Fiji      </span></span>
+<span><span class="co">#&gt;  3 GS03  2019-10-08     -16.4      178. Fiji      </span></span>
+<span><span class="co">#&gt;  4 BA15  2019-09-27     -17.2      178. Fiji      </span></span>
+<span><span class="co">#&gt;  5 YA02  2019-09-30     -17.0      177. Fiji      </span></span>
+<span><span class="co">#&gt;  6 LW04  2019-09-25     -17.6      177. Fiji      </span></span>
+<span><span class="co">#&gt;  7 IP3.5 2019-10-04     -16.4      179. Fiji      </span></span>
+<span><span class="co">#&gt;  8 BA11  2019-09-27     -17.3      178. Fiji      </span></span>
+<span><span class="co">#&gt;  9 GS05  2019-10-08     -16.4      178. Fiji      </span></span>
+<span><span class="co">#&gt; 10 YQ02  2019-10-03     -16.6      179. Fiji</span></span></code></pre></div>
 </div>
 </div>
 </div>

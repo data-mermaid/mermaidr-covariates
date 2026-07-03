@@ -327,6 +327,21 @@ that in the function:
 
 se_country <- se %>%
   attach_covariate_data("Country Boundaries", columns = "TERRITORY1")
+
+se_country
+#> # A tibble: 10 × 5
+#>    site  sample_date latitude longitude TERRITORY1
+#>    <chr> <date>         <dbl>     <dbl> <chr>     
+#>  1 BA09  2019-09-26     -17.4      178. Fiji      
+#>  2 BA16  2019-09-27     -17.2      178. Fiji      
+#>  3 GS03  2019-10-08     -16.4      178. Fiji      
+#>  4 BA15  2019-09-27     -17.2      178. Fiji      
+#>  5 YA02  2019-09-30     -17.0      177. Fiji      
+#>  6 LW04  2019-09-25     -17.6      177. Fiji      
+#>  7 IP3.5 2019-10-04     -16.4      179. Fiji      
+#>  8 BA11  2019-09-27     -17.3      178. Fiji      
+#>  9 GS05  2019-10-08     -16.4      178. Fiji      
+#> 10 YQ02  2019-10-03     -16.6      179. Fiji
 ```
 
 # Package index
