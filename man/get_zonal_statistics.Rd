@@ -8,7 +8,7 @@ get_zonal_statistics(
   se,
   covariate,
   spatial_stats = "mean",
-  radius = 0,
+  radius = 100,
   n_days = NULL,
   dataset = NULL,
   bands = NULL,
@@ -23,8 +23,6 @@ get_zonal_statistics(
 
 \item{spatial_stats}{Spatial statistics -- used to summarise all data around
 the site location, according to the \code{radius} set. If \code{radius} is 0, then \code{spatial_stats} is not relevant; it is just the value itself.}
-
-\item{radius}{Radius around site location, in metres. Defaults to 0 (just the site location itself).}
 
 \item{n_days}{Number of days to get statistics for. Includes the sample date
 itself, and days prior to it -- e.g., 365 days would include the sample date
