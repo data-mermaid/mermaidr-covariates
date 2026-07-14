@@ -1,4 +1,4 @@
-# mermaidr 1.0.0
+# mermaidrcovariates 1.0.0
 
 * Added `attach_covariate_data()` for accessing vector covariates
 * Added `covariate_helper()` for understanding which of `attach_covariate_data()` or `get_zonal_statistics()` to use
