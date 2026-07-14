@@ -13,6 +13,7 @@
 #' the site location, according to the \code{radius} set. If \code{radius} is 0, then \code{spatial_stats} is not relevant; it is just the value itself.
 #' @param date_col Sample date column -- used for date-dependent covariates (e.g. daily or periodic). Defaults to "sample_date".
 #' @param .progress Whether to show progress bar and time remaining. Defaults to TRUE.
+#' @param radius Radius around site location, in metres. Defaults to 100.
 #'
 #' @export
 get_zonal_statistics <- function(se, covariate,

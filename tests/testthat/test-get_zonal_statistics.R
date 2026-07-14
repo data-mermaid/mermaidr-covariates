@@ -519,6 +519,10 @@ test_that("For 'daily' covariates, get_zonal_statistics() gets data for n_days (
 })
 
 test_that("get_zonal_statistics gives the same results when SEs have overlapping intervals as it would when the SEs are on their own, without overlapping", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   se <- dplyr::tribble(
     ~site, ~sample_date, ~latitude, ~longitude,
     "test", "2024-10-03", 29.364309, 34.961792,
