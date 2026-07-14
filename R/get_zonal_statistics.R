@@ -1,6 +1,6 @@
 #' Get zonal statistics
 #'
-#' Get zonal statistics for covariate data that is in a raster format.. Using \code{spatial_stats} to spatially summarise covariates data, for each relevant date prior to the sample event date. For example, for a daily covariate like Daily Sea Surface Temperature, the function returns SST for *each* of the \code{n_days} prior to the sample event date. If the covariate is periodic, e.g. occurring every 5 years, it returns the most recent value. If the covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns that data.
+#' Get zonal statistics for covariate data that is in a raster format.. Using \code{spatial_stats} to spatially summarise covariates data, for each relevant date prior to the sample event date. For example, for a daily covariate like "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)", the function returns SST for *each* of the \code{n_days} prior to the sample event date. If the covariate is periodic, e.g. occurring every 5 years, it returns the most recent value. If the covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns that data.
 #'
 #' @param se Sample events from \code{mermaidr}
 #' @param covariate Covariate to get statistics for. Both covariate title or ID are permitted. Run \code{\link{list_covariates}} to see available covariates.
@@ -419,7 +419,7 @@ get_zonal_stats_chunked <- function(se, covariate_id, covariate_interval, datase
       dplyr::left_join(zonal_stats, by = c("...id", "...secondary_id"))
   } else {
     se %>%
-      dplyr::select(...id) %>%
+      dplyr::distinct(...id) %>%
       dplyr::left_join(zonal_stats, by = "...id")
   }
 }

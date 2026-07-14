@@ -3,7 +3,10 @@ test_that("attach_covariate_data only returns `columns` cols if not NULL, all co
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_summary_sampleevents(limit = 1)
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+     "AA", -17.97855,   179.2251, "2008-11-25"
+    )
 
   col_named <- attach_covariate_data(se, "meow_boundaries", columns = "REALM")
 

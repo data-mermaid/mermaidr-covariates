@@ -65,27 +65,22 @@ the `list_covariates()` function:
 ``` r
 covariates <- list_covariates()
 covariates
-#> # A tibble: 17 × 11
+#> # A tibble: 22 × 14
 #>    title  description start_date end_date   license `sci:doi` keywords providers
 #>    <chr>  <chr>       <date>     <date>     <chr>   <chr>     <chr>    <list>   
 #>  1 50 Re… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… <tibble> 
 #>  2 ACA B… The Alan C… 2018-01-01 2021-01-01 propri… <NA>      ACA, Al… <tibble> 
 #>  3 ACA R… ACA reef e… 2026-01-01 2026-01-01 CC0 1.… <NA>      reef, r… <tibble> 
 #>  4 Count… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
-#>  5 Daily… Sea surfac… 1985-01-01 2026-01-13 CC0-1.0 <NA>      climate… <tibble> 
-#>  6 Human… Coastal po… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coastal… <tibble> 
-#>  7 Marin… A biogeogr… 2011-11-18 2011-11-18 CC-BY-… 10.1641/… biodive… <tibble> 
-#>  8 Marke… From econo… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
-#>  9 Numbe… Port locat… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
-#> 10 Touri… Intensive … 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
-#> 11 GPW C… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
-#> 12 GPW D… Dispersal … 2026-01-01 2026-01-01 CC0 1.… <NA>      dispers… <tibble> 
-#> 13 GPW G… Global Sed… 2000-01-01 2020-01-01 propri… <NA>      exposur… <tibble> 
-#> 14 GPW G… Global sed… 2000-01-01 2020-01-01 CC0 1.… <NA>      gpw, se… <tibble> 
-#> 15 GPW L… Land Use a… 2000-01-01 2020-01-01 CC0-1.0 <NA>      land co… <tibble> 
-#> 16 GPW M… Marine Eco… 2026-01-01 2026-01-01 cc-by-… <NA>      biodive… <tibble> 
-#> 17 GPW W… Watersheds… 2026-01-01 2026-01-01 CC0 1.… <NA>      gpw, hy… <tibble> 
-#> # ℹ 3 more variables: `sci:citation` <chr>, bbox <list>, id <chr>
+#>  5 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble> 
+#>  6 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble> 
+#>  7 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble> 
+#>  8 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble> 
+#>  9 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble> 
+#> 10 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble> 
+#> # ℹ 12 more rows
+#> # ℹ 6 more variables: `sci:citation` <chr>, bbox <list>, renders <named list>,
+#> #   version <chr>, item_assets <named list>, id <chr>
 ```
 
 Covariates may contain raster data, vector data, or both. There are
@@ -100,7 +95,9 @@ covariates available on Prescient:
 | ACA Benthic Habitat | raster | ✅ |  |
 | ACA Reef Extent | raster | ✅ |  |
 | Country Boundaries | vector |  | ✅ |
-| Daily Sea Surface Temperature | raster | ✅ |  |
+| Daily Global 5km Satellite Coral Bleaching Alert Area | raster | ✅ |  |
+| Daily Global 5km Satellite Coral Bleaching Degree Heating Week | raster | ✅ |  |
+| Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) | raster | ✅ |  |
 | Human population within 5km (coastal population) | vector |  | ✅ |
 | Marine Ecoregions of the World | vector |  | ✅ |
 | Market gravity (fishing pressure) | vector |  | ✅ |
@@ -113,13 +110,13 @@ other specifications that might be needed.
 
 ### Raster data
 
-For example, we will look at “Daily Sea Surface Temperature” (SST).
-Running the helper function tells us to use `get_zonal_statistics()`,
-and that we do not need to specify the dataset or band, since there are
-only one of each.
+For example, we will look at “Daily Global 5km Satellite Sea Surface
+Temperature (CoralTemp)” (SST). Running the helper function tells us to
+use `get_zonal_statistics()`, and that we do not need to specify the
+dataset or band, since there are only one of each.
 
 ``` r
-covariate_helper("Daily Sea Surface Temperature")
+covariate_helper("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)")
 #> ℹ Covariate contains *raster* data. Use get_zonal_statistics().
 #>   There is only one dataset, so you do not need to specify.
 #>   There is only one band of data, so you do not need to specify.
@@ -133,7 +130,7 @@ for each of the 30 days.
 
 ``` r
 daily_sst <- get_zonal_statistics(se,
-  covariate = "Daily Sea Surface Temperature",
+  covariate = "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
   spatial_stats = "mean", radius = 1000, n_days = 30
 )
 
@@ -164,30 +161,42 @@ daily_sst %>%
   select(site, sample_date, zonal_statistics) %>%
   unnest(zonal_statistics)
 #> # A tibble: 300 × 7
-#>    site  sample_date covariate                     date        band spatial_stat
-#>    <chr> <date>      <chr>                         <date>     <dbl> <chr>       
-#>  1 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-25     1 mean        
-#>  2 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-24     1 mean        
-#>  3 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-23     1 mean        
-#>  4 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-22     1 mean        
-#>  5 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-21     1 mean        
-#>  6 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-20     1 mean        
-#>  7 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-19     1 mean        
-#>  8 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-18     1 mean        
-#>  9 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-17     1 mean        
-#> 10 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-16     1 mean        
-#>    value
-#>    <dbl>
-#>  1  26.5
-#>  2  26.5
-#>  3  26.5
-#>  4  26.7
-#>  5  27.0
-#>  6  26.9
-#>  7  26.8
-#>  8  26.7
-#>  9  26.7
-#> 10  26.8
+#>    site  sample_date
+#>    <chr> <date>     
+#>  1 LW04  2019-09-25 
+#>  2 LW04  2019-09-25 
+#>  3 LW04  2019-09-25 
+#>  4 LW04  2019-09-25 
+#>  5 LW04  2019-09-25 
+#>  6 LW04  2019-09-25 
+#>  7 LW04  2019-09-25 
+#>  8 LW04  2019-09-25 
+#>  9 LW04  2019-09-25 
+#> 10 LW04  2019-09-25 
+#>    covariate                                                      date      
+#>    <chr>                                                          <date>    
+#>  1 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-25
+#>  2 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-24
+#>  3 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-23
+#>  4 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-22
+#>  5 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-21
+#>  6 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-20
+#>  7 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-19
+#>  8 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-18
+#>  9 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-17
+#> 10 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-16
+#>     band spatial_stat value
+#>    <dbl> <chr>        <dbl>
+#>  1     1 mean          26.5
+#>  2     1 mean          26.4
+#>  3     1 mean          26.5
+#>  4     1 mean          26.7
+#>  5     1 mean          27.0
+#>  6     1 mean          26.9
+#>  7     1 mean          26.8
+#>  8     1 mean          26.7
+#>  9     1 mean          26.7
+#> 10     1 mean          26.8
 #> # ℹ 290 more rows
 ```
 
@@ -240,30 +249,42 @@ max_sst %>%
   select(site, sample_date, summary_zonal_statistics) %>%
   unnest(summary_zonal_statistics)
 #> # A tibble: 10 × 10
-#>    site  sample_date covariate                     start_date end_date   n_dates
-#>    <chr> <date>      <chr>                         <date>     <date>       <dbl>
-#>  1 LW04  2019-09-25  Daily Sea Surface Temperature 2019-08-27 2019-09-25      30
-#>  2 BA09  2019-09-26  Daily Sea Surface Temperature 2019-08-28 2019-09-26      30
-#>  3 BA16  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30
-#>  4 BA15  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30
-#>  5 BA11  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30
-#>  6 YA02  2019-09-30  Daily Sea Surface Temperature 2019-09-01 2019-09-30      30
-#>  7 YQ02  2019-10-03  Daily Sea Surface Temperature 2019-09-04 2019-10-03      30
-#>  8 IP3.5 2019-10-04  Daily Sea Surface Temperature 2019-09-05 2019-10-04      30
-#>  9 GS03  2019-10-08  Daily Sea Surface Temperature 2019-09-09 2019-10-08      30
-#> 10 GS05  2019-10-08  Daily Sea Surface Temperature 2019-09-09 2019-10-08      30
-#>     band spatial_stat temporal_stat value
-#>    <dbl> <chr>        <chr>         <dbl>
-#>  1     1 mean         max            27.2
-#>  2     1 mean         max            27.0
-#>  3     1 mean         max            27.0
-#>  4     1 mean         max            27.0
-#>  5     1 mean         max            27  
-#>  6     1 mean         max            27.0
-#>  7     1 mean         max            27.4
-#>  8     1 mean         max            27.7
-#>  9     1 mean         max            27.5
-#> 10     1 mean         max            27.4
+#>    site  sample_date
+#>    <chr> <date>     
+#>  1 LW04  2019-09-25 
+#>  2 BA09  2019-09-26 
+#>  3 BA16  2019-09-27 
+#>  4 BA15  2019-09-27 
+#>  5 BA11  2019-09-27 
+#>  6 YA02  2019-09-30 
+#>  7 YQ02  2019-10-03 
+#>  8 IP3.5 2019-10-04 
+#>  9 GS03  2019-10-08 
+#> 10 GS05  2019-10-08 
+#>    covariate                                                      start_date
+#>    <chr>                                                          <date>    
+#>  1 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-27
+#>  2 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-28
+#>  3 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-29
+#>  4 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-29
+#>  5 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-29
+#>  6 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-01
+#>  7 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-04
+#>  8 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-05
+#>  9 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-09
+#> 10 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-09
+#>    end_date   n_dates  band spatial_stat temporal_stat value
+#>    <date>       <dbl> <dbl> <chr>        <chr>         <dbl>
+#>  1 2019-09-25      30     1 mean         max            27.2
+#>  2 2019-09-26      30     1 mean         max            27.0
+#>  3 2019-09-27      30     1 mean         max            27.0
+#>  4 2019-09-27      30     1 mean         max            27.0
+#>  5 2019-09-27      30     1 mean         max            27  
+#>  6 2019-09-30      30     1 mean         max            27.0
+#>  7 2019-10-03      30     1 mean         max            27.4
+#>  8 2019-10-04      30     1 mean         max            27.7
+#>  9 2019-10-08      30     1 mean         max            27.5
+#> 10 2019-10-08      30     1 mean         max            27.4
 ```
 
 ### Vector data

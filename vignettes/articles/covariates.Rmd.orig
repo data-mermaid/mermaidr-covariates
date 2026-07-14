@@ -25,7 +25,7 @@ library(tidyverse)
 
 The first step is to get coral cover data for GFCR projects from MERMAID. The following gets summary sample events, and then filters for projects whose tags contain "GFCR", and projects that have hard coral cover data.
 
-```{r sample-data}
+```{r sample-data, eval = FALSE}
 summary_sampleevents <- mermaid_get_summary_sampleevents()
 
 gfcr_summary_sampleevents <- summary_sampleevents %>%
@@ -34,6 +34,14 @@ gfcr_summary_sampleevents <- summary_sampleevents %>%
   rename(hard_coral_cover = `benthicpit_percent_cover_benthic_category_avg_Hard coral`)
 
 gfcr_summary_sampleevents
+```
+
+```{r save-sample-data, echo = FALSE, eval = FALSE}
+saveRDS(gfcr_summary_sampleevents, here::here("scratch", "gfcr_summary_sampleevents.rds"))
+```
+
+```{r read-sample-data, echo = FALSE}
+gfcr_summary_sampleevents <- readRDS(here::here("scratch", "gfcr_summary_sampleevents.rds"))
 ```
 
 ## Summary of hard coral cover for projects
@@ -76,7 +84,7 @@ For example, to get the daily SST for each of the 30 days prior to (and includin
 
 ```{r get-zonal-stats, eval = FALSE}
 daily_sst <- gfcr_summary_sampleevents %>%
-  get_zonal_statistics("Daily Sea Surface Temperature", n_days = 30, radius = 100, spatial_stats = "mean")
+  get_zonal_statistics("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)", n_days = 30, radius = 100, spatial_stats = "mean")
 ```
 
 ```{r save-zonal-stats, echo = FALSE, eval = FALSE}
