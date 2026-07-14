@@ -13,6 +13,6 @@ covariate_helper(covariate)
 Tells you what function to use to get covariates data! Also returns information on datasets, bands or columns, and more.
 }
 \examples{
-# covariate_helper("Daily Sea Surface Temperature")
+# covariate_helper("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)")
 # covariate_helper("GPW MEOW Realms")
 }

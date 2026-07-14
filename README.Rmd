@@ -80,6 +80,7 @@ covariates <- list_covariates()
 covariates_type <- covariates %>%
   filter(!str_starts(title, "GPW")) %>%
   select(Covariate = title, id) %>%
+  distinct() %>%
   rowwise() %>%
   mutate(Type = mermaidrcovariates:::get_collection_type(id)) %>%
   ungroup()
@@ -97,17 +98,17 @@ You can also use the function `covariate_helper()` which will give you informati
 
 ### Raster data
 
-For example, we will look at "Daily Sea Surface Temperature" (SST). Running the helper function tells us to use `get_zonal_statistics()`, and that we do not need to specify the dataset or band, since there are only one of each.
+For example, we will look at "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)" (SST). Running the helper function tells us to use `get_zonal_statistics()`, and that we do not need to specify the dataset or band, since there are only one of each.
 
 ```{r daily-sst-helper, message = TRUE}
-covariate_helper("Daily Sea Surface Temperature")
+covariate_helper("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)")
 ```
 
 If we want the maximum SST at each site over the past 30 days, we first get the *daily* SST using `get_zonal_statistics()`, specifying `n_days = 30`. We will request all data within a `radius` of 1000 metres from the site, and that the function *spatially* aggregates that data for each of the 30 days.
 
 ```{r daily-sst}
 daily_sst <- get_zonal_statistics(se,
-  covariate = "Daily Sea Surface Temperature",
+  covariate = "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
   spatial_stats = "mean", radius = 1000, n_days = 30
 )
 
