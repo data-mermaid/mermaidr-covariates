@@ -18,6 +18,6 @@ covariate_helper(covariate)
 ## Examples
 
 ``` r
-# covariate_helper("Daily Sea Surface Temperature")
+# covariate_helper("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)")
 # covariate_helper("GPW MEOW Realms")
 ```

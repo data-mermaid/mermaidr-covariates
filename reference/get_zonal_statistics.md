@@ -3,11 +3,12 @@
 Get zonal statistics for covariate data that is in a raster format..
 Using `spatial_stats` to spatially summarise covariates data, for each
 relevant date prior to the sample event date. For example, for a daily
-covariate like Daily Sea Surface Temperature, the function returns SST
-for \*each\* of the `n_days` prior to the sample event date. If the
-covariate is periodic, e.g. occurring every 5 years, it returns the most
-recent value. If the covariate only occurs once (e.g. 50 Reefs+
-prioritization), it returns that data.
+covariate like "Daily Global 5km Satellite Sea Surface Temperature
+(CoralTemp)", the function returns SST for \*each\* of the `n_days`
+prior to the sample event date. If the covariate is periodic, e.g.
+occurring every 5 years, it returns the most recent value. If the
+covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns
+that data.
 
 ## Usage
 
@@ -43,6 +44,10 @@ get_zonal_statistics(
   Spatial statistics – used to summarise all data around the site
   location, according to the `radius` set. If `radius` is 0, then
   `spatial_stats` is not relevant; it is just the value itself.
+
+- radius:
+
+  Radius around site location, in metres. Defaults to 100.
 
 - n_days:
 

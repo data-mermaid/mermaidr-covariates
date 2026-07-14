@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mermaidrcovariates</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -95,30 +95,31 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/list_covariates.html">list_covariates</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">covariates</span></span>
-<span><span class="co">#&gt; # A tibble: 17 × 11</span></span>
+<span><span class="co">#&gt; # A tibble: 22 × 14</span></span>
 <span><span class="co">#&gt;    title  description start_date end_date   license `sci:doi` keywords providers</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;  &lt;chr&gt;       &lt;date&gt;     &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;    &lt;list&gt;   </span></span>
 <span><span class="co">#&gt;  1 50 Re… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… &lt;tibble&gt; </span></span>
 <span><span class="co">#&gt;  2 ACA B… The Alan C… 2018-01-01 2021-01-01 propri… &lt;NA&gt;      ACA, Al… &lt;tibble&gt; </span></span>
 <span><span class="co">#&gt;  3 ACA R… ACA reef e… 2026-01-01 2026-01-01 CC0 1.… &lt;NA&gt;      reef, r… &lt;tibble&gt; </span></span>
 <span><span class="co">#&gt;  4 Count… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  5 Daily… Sea surfac… 1985-01-01 2026-01-13 CC0-1.0 &lt;NA&gt;      climate… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  6 Human… Coastal po… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coastal… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  7 Marin… A biogeogr… 2011-11-18 2011-11-18 CC-BY-… 10.1641/… biodive… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  8 Marke… From econo… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  9 Numbe… Port locat… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 10 Touri… Intensive … 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 11 GPW C… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 12 GPW D… Dispersal … 2026-01-01 2026-01-01 CC0 1.… &lt;NA&gt;      dispers… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 13 GPW G… Global Sed… 2000-01-01 2020-01-01 propri… &lt;NA&gt;      exposur… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 14 GPW G… Global sed… 2000-01-01 2020-01-01 CC0 1.… &lt;NA&gt;      gpw, se… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 15 GPW L… Land Use a… 2000-01-01 2020-01-01 CC0-1.0 &lt;NA&gt;      land co… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 16 GPW M… Marine Eco… 2026-01-01 2026-01-01 cc-by-… &lt;NA&gt;      biodive… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 17 GPW W… Watersheds… 2026-01-01 2026-01-01 CC0 1.… &lt;NA&gt;      gpw, hy… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; # ℹ 3 more variables: `sci:citation` &lt;chr&gt;, bbox &lt;list&gt;, id &lt;chr&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt;  5 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt;  6 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt;  7 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt;  8 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt;  9 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 10 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; # ℹ 12 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 6 more variables: `sci:citation` &lt;chr&gt;, bbox &lt;list&gt;, renders &lt;named list&gt;,</span></span>
+<span><span class="co">#&gt; #   version &lt;chr&gt;, item_assets &lt;named list&gt;, id &lt;chr&gt;</span></span></code></pre></div>
 <p>Covariates may contain raster data, vector data, or both. There are different functions for accessing raster or vector data.</p>
 <p>The table below summarises which function to use for the different covariates available on Prescient:</p>
 <table class="table">
+<colgroup>
+<col width="25%">
+<col width="25%">
+<col width="25%">
+<col width="25%">
+</colgroup>
 <thead><tr>
 <th align="left">Covariate</th>
 <th align="left">Type</th>
@@ -151,7 +152,19 @@
 <td align="left">✅</td>
 </tr>
 <tr>
-<td align="left">Daily Sea Surface Temperature</td>
+<td align="left">Daily Global 5km Satellite Coral Bleaching Alert Area</td>
+<td align="left">raster</td>
+<td align="left">✅</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">Daily Global 5km Satellite Coral Bleaching Degree Heating Week</td>
+<td align="left">raster</td>
+<td align="left">✅</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)</td>
 <td align="left">raster</td>
 <td align="left">✅</td>
 <td align="left"></td>
@@ -193,16 +206,16 @@
 <div class="section level3">
 <h3 id="raster-data">Raster data<a class="anchor" aria-label="anchor" href="#raster-data"></a>
 </h3>
-<p>For example, we will look at “Daily Sea Surface Temperature” (SST). Running the helper function tells us to use <code><a href="reference/get_zonal_statistics.html">get_zonal_statistics()</a></code>, and that we do not need to specify the dataset or band, since there are only one of each.</p>
+<p>For example, we will look at “Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)” (SST). Running the helper function tells us to use <code><a href="reference/get_zonal_statistics.html">get_zonal_statistics()</a></code>, and that we do not need to specify the dataset or band, since there are only one of each.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="reference/covariate_helper.html">covariate_helper</a></span><span class="op">(</span><span class="st">"Daily Sea Surface Temperature"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="reference/covariate_helper.html">covariate_helper</a></span><span class="op">(</span><span class="st">"Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ℹ Covariate contains *raster* data. Use get_zonal_statistics().</span></span>
 <span><span class="co">#&gt;   There is only one dataset, so you do not need to specify.</span></span>
 <span><span class="co">#&gt;   There is only one band of data, so you do not need to specify.</span></span></code></pre></div>
 <p>If we want the maximum SST at each site over the past 30 days, we first get the <em>daily</em> SST using <code><a href="reference/get_zonal_statistics.html">get_zonal_statistics()</a></code>, specifying <code>n_days = 30</code>. We will request all data within a <code>radius</code> of 1000 metres from the site, and that the function <em>spatially</em> aggregates that data for each of the 30 days.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">daily_sst</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/get_zonal_statistics.html">get_zonal_statistics</a></span><span class="op">(</span><span class="va">se</span>,</span>
-<span>  covariate <span class="op">=</span> <span class="st">"Daily Sea Surface Temperature"</span>,</span>
+<span>  covariate <span class="op">=</span> <span class="st">"Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)"</span>,</span>
 <span>  spatial_stats <span class="op">=</span> <span class="st">"mean"</span>, radius <span class="op">=</span> <span class="fl">1000</span>, n_days <span class="op">=</span> <span class="fl">30</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -227,30 +240,42 @@
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">site</span>, <span class="va">sample_date</span>, <span class="va">zonal_statistics</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">unnest</span><span class="op">(</span><span class="va">zonal_statistics</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 300 × 7</span></span>
-<span><span class="co">#&gt;    site  sample_date covariate                     date        band spatial_stat</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt; &lt;date&gt;      &lt;chr&gt;                         &lt;date&gt;     &lt;dbl&gt; &lt;chr&gt;       </span></span>
-<span><span class="co">#&gt;  1 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-25     1 mean        </span></span>
-<span><span class="co">#&gt;  2 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-24     1 mean        </span></span>
-<span><span class="co">#&gt;  3 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-23     1 mean        </span></span>
-<span><span class="co">#&gt;  4 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-22     1 mean        </span></span>
-<span><span class="co">#&gt;  5 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-21     1 mean        </span></span>
-<span><span class="co">#&gt;  6 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-20     1 mean        </span></span>
-<span><span class="co">#&gt;  7 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-19     1 mean        </span></span>
-<span><span class="co">#&gt;  8 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-18     1 mean        </span></span>
-<span><span class="co">#&gt;  9 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-17     1 mean        </span></span>
-<span><span class="co">#&gt; 10 LW04  2019-09-25  Daily Sea Surface Temperature 2019-09-16     1 mean        </span></span>
-<span><span class="co">#&gt;    value</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1  26.5</span></span>
-<span><span class="co">#&gt;  2  26.5</span></span>
-<span><span class="co">#&gt;  3  26.5</span></span>
-<span><span class="co">#&gt;  4  26.7</span></span>
-<span><span class="co">#&gt;  5  27.0</span></span>
-<span><span class="co">#&gt;  6  26.9</span></span>
-<span><span class="co">#&gt;  7  26.8</span></span>
-<span><span class="co">#&gt;  8  26.7</span></span>
-<span><span class="co">#&gt;  9  26.7</span></span>
-<span><span class="co">#&gt; 10  26.8</span></span>
+<span><span class="co">#&gt;    site  sample_date</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;date&gt;     </span></span>
+<span><span class="co">#&gt;  1 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  2 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  3 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  4 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  5 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  6 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  7 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  8 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  9 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt; 10 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;    covariate                                                      date      </span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;                                                          &lt;date&gt;    </span></span>
+<span><span class="co">#&gt;  1 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-25</span></span>
+<span><span class="co">#&gt;  2 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-24</span></span>
+<span><span class="co">#&gt;  3 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-23</span></span>
+<span><span class="co">#&gt;  4 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-22</span></span>
+<span><span class="co">#&gt;  5 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-21</span></span>
+<span><span class="co">#&gt;  6 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-20</span></span>
+<span><span class="co">#&gt;  7 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-19</span></span>
+<span><span class="co">#&gt;  8 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-18</span></span>
+<span><span class="co">#&gt;  9 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-17</span></span>
+<span><span class="co">#&gt; 10 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-16</span></span>
+<span><span class="co">#&gt;     band spatial_stat value</span></span>
+<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;        &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1     1 mean          26.5</span></span>
+<span><span class="co">#&gt;  2     1 mean          26.4</span></span>
+<span><span class="co">#&gt;  3     1 mean          26.5</span></span>
+<span><span class="co">#&gt;  4     1 mean          26.7</span></span>
+<span><span class="co">#&gt;  5     1 mean          27.0</span></span>
+<span><span class="co">#&gt;  6     1 mean          26.9</span></span>
+<span><span class="co">#&gt;  7     1 mean          26.8</span></span>
+<span><span class="co">#&gt;  8     1 mean          26.7</span></span>
+<span><span class="co">#&gt;  9     1 mean          26.7</span></span>
+<span><span class="co">#&gt; 10     1 mean          26.8</span></span>
 <span><span class="co">#&gt; # ℹ 290 more rows</span></span></code></pre></div>
 <p>Since we would like the <em>maximum</em> SST for each site over those 30 days, we then use <code>aggregate_zonal_statistics()</code>, specifying that the <em>temporal</em> summary statistic should be max:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
@@ -290,30 +315,42 @@
 <span>  <span class="fu">select</span><span class="op">(</span><span class="va">site</span>, <span class="va">sample_date</span>, <span class="va">summary_zonal_statistics</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
 <span>  <span class="fu">unnest</span><span class="op">(</span><span class="va">summary_zonal_statistics</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 10 × 10</span></span>
-<span><span class="co">#&gt;    site  sample_date covariate                     start_date end_date   n_dates</span></span>
-<span><span class="co">#&gt;    &lt;chr&gt; &lt;date&gt;      &lt;chr&gt;                         &lt;date&gt;     &lt;date&gt;       &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1 LW04  2019-09-25  Daily Sea Surface Temperature 2019-08-27 2019-09-25      30</span></span>
-<span><span class="co">#&gt;  2 BA09  2019-09-26  Daily Sea Surface Temperature 2019-08-28 2019-09-26      30</span></span>
-<span><span class="co">#&gt;  3 BA16  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30</span></span>
-<span><span class="co">#&gt;  4 BA15  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30</span></span>
-<span><span class="co">#&gt;  5 BA11  2019-09-27  Daily Sea Surface Temperature 2019-08-29 2019-09-27      30</span></span>
-<span><span class="co">#&gt;  6 YA02  2019-09-30  Daily Sea Surface Temperature 2019-09-01 2019-09-30      30</span></span>
-<span><span class="co">#&gt;  7 YQ02  2019-10-03  Daily Sea Surface Temperature 2019-09-04 2019-10-03      30</span></span>
-<span><span class="co">#&gt;  8 IP3.5 2019-10-04  Daily Sea Surface Temperature 2019-09-05 2019-10-04      30</span></span>
-<span><span class="co">#&gt;  9 GS03  2019-10-08  Daily Sea Surface Temperature 2019-09-09 2019-10-08      30</span></span>
-<span><span class="co">#&gt; 10 GS05  2019-10-08  Daily Sea Surface Temperature 2019-09-09 2019-10-08      30</span></span>
-<span><span class="co">#&gt;     band spatial_stat temporal_stat value</span></span>
-<span><span class="co">#&gt;    &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;         &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt;  1     1 mean         max            27.2</span></span>
-<span><span class="co">#&gt;  2     1 mean         max            27.0</span></span>
-<span><span class="co">#&gt;  3     1 mean         max            27.0</span></span>
-<span><span class="co">#&gt;  4     1 mean         max            27.0</span></span>
-<span><span class="co">#&gt;  5     1 mean         max            27  </span></span>
-<span><span class="co">#&gt;  6     1 mean         max            27.0</span></span>
-<span><span class="co">#&gt;  7     1 mean         max            27.4</span></span>
-<span><span class="co">#&gt;  8     1 mean         max            27.7</span></span>
-<span><span class="co">#&gt;  9     1 mean         max            27.5</span></span>
-<span><span class="co">#&gt; 10     1 mean         max            27.4</span></span></code></pre></div>
+<span><span class="co">#&gt;    site  sample_date</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt; &lt;date&gt;     </span></span>
+<span><span class="co">#&gt;  1 LW04  2019-09-25 </span></span>
+<span><span class="co">#&gt;  2 BA09  2019-09-26 </span></span>
+<span><span class="co">#&gt;  3 BA16  2019-09-27 </span></span>
+<span><span class="co">#&gt;  4 BA15  2019-09-27 </span></span>
+<span><span class="co">#&gt;  5 BA11  2019-09-27 </span></span>
+<span><span class="co">#&gt;  6 YA02  2019-09-30 </span></span>
+<span><span class="co">#&gt;  7 YQ02  2019-10-03 </span></span>
+<span><span class="co">#&gt;  8 IP3.5 2019-10-04 </span></span>
+<span><span class="co">#&gt;  9 GS03  2019-10-08 </span></span>
+<span><span class="co">#&gt; 10 GS05  2019-10-08 </span></span>
+<span><span class="co">#&gt;    covariate                                                      start_date</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;                                                          &lt;date&gt;    </span></span>
+<span><span class="co">#&gt;  1 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-27</span></span>
+<span><span class="co">#&gt;  2 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-28</span></span>
+<span><span class="co">#&gt;  3 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-29</span></span>
+<span><span class="co">#&gt;  4 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-29</span></span>
+<span><span class="co">#&gt;  5 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-08-29</span></span>
+<span><span class="co">#&gt;  6 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-01</span></span>
+<span><span class="co">#&gt;  7 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-04</span></span>
+<span><span class="co">#&gt;  8 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-05</span></span>
+<span><span class="co">#&gt;  9 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-09</span></span>
+<span><span class="co">#&gt; 10 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2019-09-09</span></span>
+<span><span class="co">#&gt;    end_date   n_dates  band spatial_stat temporal_stat value</span></span>
+<span><span class="co">#&gt;    &lt;date&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;        &lt;chr&gt;         &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt;  1 2019-09-25      30     1 mean         max            27.2</span></span>
+<span><span class="co">#&gt;  2 2019-09-26      30     1 mean         max            27.0</span></span>
+<span><span class="co">#&gt;  3 2019-09-27      30     1 mean         max            27.0</span></span>
+<span><span class="co">#&gt;  4 2019-09-27      30     1 mean         max            27.0</span></span>
+<span><span class="co">#&gt;  5 2019-09-27      30     1 mean         max            27  </span></span>
+<span><span class="co">#&gt;  6 2019-09-30      30     1 mean         max            27.0</span></span>
+<span><span class="co">#&gt;  7 2019-10-03      30     1 mean         max            27.4</span></span>
+<span><span class="co">#&gt;  8 2019-10-04      30     1 mean         max            27.7</span></span>
+<span><span class="co">#&gt;  9 2019-10-08      30     1 mean         max            27.5</span></span>
+<span><span class="co">#&gt; 10 2019-10-08      30     1 mean         max            27.4</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="vector-data">Vector data<a class="anchor" aria-label="anchor" href="#vector-data"></a>

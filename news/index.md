@@ -1,5 +1,9 @@
 # Changelog
 
+## mermaidrcovariates 1.0.1
+
+- Account for new covariates, duplicated covariate IDs
+
 ## mermaidrcovariates 1.0.0
 
 - Added
