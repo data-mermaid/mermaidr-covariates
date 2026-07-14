@@ -7,7 +7,7 @@
 #' @export
 #'
 #' @examples
-#' # covariate_helper("Daily Sea Surface Temperature")
+#' # covariate_helper("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)")
 #' # covariate_helper("GPW MEOW Realms")
 covariate_helper <- function(covariate) {
   covariate <- get_covariate_id(covariate)

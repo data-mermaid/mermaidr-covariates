@@ -3,16 +3,15 @@ test_that("summarise_zonal_statistics returns zonal_statistics and summary_zonal
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_project_data(
-    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
-    "fishbelt",
-    "sampleevents",
-    limit = 1
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NosyKarabo_06", -12.996556, 48.562083, "2020-12-10"
   )
+
 
   zs <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 20,
     radius = 10,
     spatial_stats = "mean"
@@ -26,7 +25,7 @@ test_that("summarise_zonal_statistics returns zonal_statistics and summary_zonal
   expect_equal(
     zs_summary[["summary_zonal_statistics"]][[1]] %>% dplyr::mutate(value = round(value, 2)),
     structure(list(
-      covariate = "Daily Sea Surface Temperature", start_date = structure(18587, class = "Date"),
+      covariate = "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)", start_date = structure(18587, class = "Date"),
       end_date = structure(18606, class = "Date"), n_dates = 20,
       band = 1, spatial_stat = "mean", temporal_stat = "mean",
       value = 28.67
@@ -95,20 +94,17 @@ not the start/end date based on the date_col and n_days", {
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_project_data(
-    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
-    "fishbelt",
-    "sampleevents",
-    limit = 1
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NosyKarabo_06", -12.996556, 48.562083, "2020-12-10"
   )
 
   se <- se %>%
     dplyr::mutate(date = as.Date("1985-01-05")) # 1985-01-01 is the first date of data
 
   covariates <- se %>%
-    dplyr::select(project, site, latitude, longitude, sample_date, date) %>%
     get_zonal_statistics(
-      "Daily Sea Surface Temperature",
+      "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
       n_days = 10,
       radius = 10,
       spatial_stats = "mean",

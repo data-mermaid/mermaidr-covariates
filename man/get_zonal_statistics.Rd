@@ -24,6 +24,8 @@ get_zonal_statistics(
 \item{spatial_stats}{Spatial statistics -- used to summarise all data around
 the site location, according to the \code{radius} set. If \code{radius} is 0, then \code{spatial_stats} is not relevant; it is just the value itself.}
 
+\item{radius}{Radius around site location, in metres. Defaults to 100.}
+
 \item{n_days}{Number of days to get statistics for. Includes the sample date
 itself, and days prior to it -- e.g., 365 days would include the sample date
 and the 364 days prior. Only relevant for covariates that are daily; otherwise ignored.}
@@ -37,5 +39,5 @@ and the 364 days prior. Only relevant for covariates that are daily; otherwise i
 \item{.progress}{Whether to show progress bar and time remaining. Defaults to TRUE.}
 }
 \description{
-Get zonal statistics for covariate data that is in a raster format.. Using \code{spatial_stats} to spatially summarise covariates data, for each relevant date prior to the sample event date. For example, for a daily covariate like Daily Sea Surface Temperature, the function returns SST for *each* of the \code{n_days} prior to the sample event date. If the covariate is periodic, e.g. occurring every 5 years, it returns the most recent value. If the covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns that data.
+Get zonal statistics for covariate data that is in a raster format.. Using \code{spatial_stats} to spatially summarise covariates data, for each relevant date prior to the sample event date. For example, for a daily covariate like "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)", the function returns SST for *each* of the \code{n_days} prior to the sample event date. If the covariate is periodic, e.g. occurring every 5 years, it returns the most recent value. If the covariate only occurs once (e.g. 50 Reefs+ prioritization), it returns that data.
 }

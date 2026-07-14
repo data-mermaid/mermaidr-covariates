@@ -3,16 +3,14 @@ test_that("get_zonal_statistics allows using covariate name or ID", {
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_project_data(
-    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
-    "fishbelt",
-    "sampleevents",
-    limit = 1
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NosyKarabo_06", -12.996556, 48.562083, "2020-12-10"
   )
 
   zs_name <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 1,
     radius = 10,
     spatial_stats = "mean"
@@ -20,7 +18,7 @@ test_that("get_zonal_statistics allows using covariate name or ID", {
 
   zs_id <- get_zonal_statistics(
     se,
-    "50b810fb-5f17-4cdb-b34b-c377837e2a29",
+    "daily_sst",
     n_days = 1,
     radius = 10,
     spatial_stats = "mean"
@@ -34,18 +32,16 @@ test_that("NA returned for all columns when there is no data within date range",
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_project_data(
-    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
-    "fishbelt",
-    "sampleevents",
-    limit = 1
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NosyKarabo_06", -12.996556, 48.562083, "2020-12-10"
   )
 
   se <- se %>%
     dplyr::mutate(sample_date = as.Date("1980-01-01"))
 
   covariates <- get_zonal_statistics(se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 1,
     radius = 10,
     spatial_stats = "mean"
@@ -65,16 +61,15 @@ test_that("get_zonal_statistics works with sample_date renamed", {
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_project_data(
-    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
-    "fishbelt",
-    "sampleevents",
-    limit = 1
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NosyKarabo_06", -12.996556, 48.562083, "2020-12-10"
   )
+
 
   orig_covariates <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 20,
     radius = 10,
     spatial_stats = "mean"
@@ -85,7 +80,7 @@ test_that("get_zonal_statistics works with sample_date renamed", {
 
   rename_date_covariates <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 20,
     radius = 10,
     spatial_stats = "mean",
@@ -100,16 +95,15 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_project_data(
-    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
-    "fishbelt",
-    "sampleevents",
-    limit = 1
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NosyKarabo_06", -12.996556, 48.562083, "2020-12-10"
   )
+
 
   orig_covariates <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 20,
     radius = 10,
     spatial_stats = "mean"
@@ -120,7 +114,7 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
 
   rename_date_covariates <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 20,
     radius = 10,
     spatial_stats = "mean",
@@ -137,16 +131,15 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
   skip_on_ci()
   skip_on_cran()
 
-  se <- mermaidr::mermaid_get_project_data(
-    "4d23d2a1-774f-4ccf-b567-69f95e4ff572",
-    "fishbelt",
-    "sampleevents",
-    limit = 1
+  se <- dplyr::tribble(
+    ~site, ~latitude, ~longitude, ~sample_date,
+    "NosyKarabo_06", -12.996556, 48.562083, "2020-12-10"
   )
+
 
   orig_covariates <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 20,
     radius = 10,
     spatial_stats = "mean"
@@ -157,7 +150,7 @@ test_that("get_zonal_statistics works with different date_col, retains both cols
 
   new_date_covariates <- get_zonal_statistics(
     se,
-    "Daily Sea Surface Temperature",
+    "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
     n_days = 20,
     radius = 10,
     spatial_stats = "mean",
@@ -180,15 +173,18 @@ test_that("new test scenarios...", {
   skip_on_ci()
   skip_on_cran()
 
-  cog_covariates <- c(
-    "50 Reefs+ prioritization",
-    "ACA Benthic Habitat",
-    "ACA Reef Extent",
-    "Daily Sea Surface Temperature",
-    "GPW Global Sediment Exposure",
-    "GPW Global Sediment Load",
-    "GPW Land Use and Land Cover"
-  )
+  covariates <- list_covariates()
+
+  covariates_type <- covariates %>%
+    dplyr::select(id) %>%
+    dplyr::distinct() %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(type = get_collection_type(id)) %>%
+    dplyr::ungroup()
+
+  cog_covariates <- covariates_type %>%
+    dplyr::filter(stringr::str_detect(type, "raster")) %>%
+    dplyr::pull(id)
 
   se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
@@ -295,7 +291,9 @@ test_that("new test scenarios...", {
   # covariates that are relevant to date:
   purrr::walk(
     c(
-      "Daily Sea Surface Temperature",
+      "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)",
+      "Daily Global 5km Satellite Coral Bleaching Alert Area",
+      "Daily Global 5km Satellite Coral Bleaching Degree Heating Week",
       "GPW Global Sediment Exposure",
       "GPW Global Sediment Load",
       "GPW Land Use and Land Cover"
@@ -496,7 +494,7 @@ test_that("For 'daily' covariates, get_zonal_statistics() gets data for n_days (
   skip_on_ci()
   skip_on_cran()
 
-  covariate <- "Daily Sea Surface Temperature"
+  covariate <- "Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)"
   n_days <- 5
 
   se <- dplyr::tribble(
@@ -521,6 +519,10 @@ test_that("For 'daily' covariates, get_zonal_statistics() gets data for n_days (
 })
 
 test_that("get_zonal_statistics gives the same results when SEs have overlapping intervals as it would when the SEs are on their own, without overlapping", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
   se <- dplyr::tribble(
     ~site, ~sample_date, ~latitude, ~longitude,
     "test", "2024-10-03", 29.364309, 34.961792,
@@ -531,13 +533,13 @@ test_that("get_zonal_statistics gives the same results when SEs have overlapping
   )
 
   zs_together <- se %>%
-    get_zonal_statistics("Daily Sea Surface Temperature", n_days = 30, radius = 100, spatial_stats = "mean") %>%
+    get_zonal_statistics("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)", n_days = 30, radius = 100, spatial_stats = "mean") %>%
     dplyr::arrange(sample_date)
 
   zs_separate <- se %>%
     split(.$sample_date) %>%
     purrr::map_dfr(\(x) x %>%
-      get_zonal_statistics("Daily Sea Surface Temperature", n_days = 30, radius = 100, spatial_stats = "mean")) %>%
+      get_zonal_statistics("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)", n_days = 30, radius = 100, spatial_stats = "mean")) %>%
     dplyr::arrange(sample_date)
 
   expect_identical(

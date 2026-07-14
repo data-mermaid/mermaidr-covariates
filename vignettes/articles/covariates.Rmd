@@ -36,27 +36,30 @@ gfcr_summary_sampleevents <- summary_sampleevents %>%
 gfcr_summary_sampleevents
 ```
 
+
+
+
 ```
-## # A tibble: 142 × 385
-##    project_id project tags  country site_id site  latitude longitude reef_type reef_zone
-##    <chr>      <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>     <chr>    
-##  1 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  2 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  3 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  4 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  5 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  6 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  7 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  8 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  9 1370aaba-… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-## 10 1370aaba-… Gulf o… Glob… Jordan  04e931… Nort…     29.5      35.0 fringing  fore reef
+## # A tibble: 142 × 383
+##    project_id       project tags  country site_id site  latitude longitude reef_type reef_zone
+##    <chr>            <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>     <chr>    
+##  1 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  2 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  3 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  4 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  5 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  6 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  7 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  8 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  9 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+## 10 1370aaba-fe43-4… Gulf o… Glob… Jordan  04e931… Nort…     29.5      35.0 fringing  fore reef
 ## # ℹ 132 more rows
-## # ℹ 375 more variables: reef_exposure <chr>, management_id <chr>, management <chr>,
+## # ℹ 373 more variables: reef_exposure <chr>, management_id <chr>, management <chr>,
 ## #   management_est_year <int>, management_size <dbl>, management_parties <chr>,
 ## #   management_compliance <chr>, management_rules <chr>, sample_date <date>,
-## #   data_policy_beltfish <chr>, data_policy_benthiclit <chr>,
-## #   data_policy_benthicpit <chr>, data_policy_benthicpqt <chr>,
-## #   data_policy_habitatcomplexity <chr>, data_policy_bleachingqc <chr>, …
+## #   data_policy_beltfish <chr>, data_policy_benthiclit <chr>, data_policy_benthicpit <chr>,
+## #   data_policy_benthicpqt <chr>, data_policy_habitatcomplexity <chr>,
+## #   data_policy_bleachingqc <chr>, project_notes <chr>, site_notes <chr>, …
 ```
 
 ## Summary of hard coral cover for projects
@@ -75,15 +78,15 @@ gfcr_summary_sampleevents %>%
 
 ```
 ## # A tibble: 7 × 5
-##   project                                   tags  country n_sites average_hard_coral_c…¹
-##   <chr>                                     <chr> <chr>     <int>                  <dbl>
-## 1 Gulf of Aqaba Resilient Reefs Programme   Glob… Jordan       29                  21.4 
-## 2 Investing in Coral Reefs and the Blue Ec… Unit… Fiji         53                  30.9 
-## 3 Maldives RREEF (GFCR)                     Glob… Maldiv…      11                  43.4 
-## 4 SLCRI Bar Reef Seascape                   Inte… Sri La…      11                   9.68
-## 5 SLCRI Kayankerni Seascape                 Inte… Sri La…      11                  44.4 
-## 6 SLCRI Pigeon Island Seascape              Inte… Sri La…       7                  55.9 
-## 7 Terumbu Karang Sehat Indonesia Program -… Cons… Indone…      20                  36.9 
+##   project                                         tags  country n_sites average_hard_coral_c…¹
+##   <chr>                                           <chr> <chr>     <int>                  <dbl>
+## 1 Gulf of Aqaba Resilient Reefs Programme         Glob… Jordan       29                  21.4 
+## 2 Investing in Coral Reefs and the Blue Economy … Unit… Fiji         53                  30.9 
+## 3 Maldives RREEF (GFCR)                           Glob… Maldiv…      11                  43.4 
+## 4 SLCRI Bar Reef Seascape                         Inte… Sri La…      11                   9.68
+## 5 SLCRI Kayankerni Seascape                       Inte… Sri La…      11                  44.4 
+## 6 SLCRI Pigeon Island Seascape                    Inte… Sri La…       7                  55.9 
+## 7 Terumbu Karang Sehat Indonesia Program - Indon… Cons… Indone…      20                  36.9 
 ## # ℹ abbreviated name: ¹​average_hard_coral_cover
 ```
 
@@ -101,27 +104,22 @@ list_covariates()
 ```
 
 ```
-## # A tibble: 17 × 11
-##    title          description start_date end_date   license `sci:doi` keywords providers
-##    <chr>          <chr>       <date>     <date>     <chr>   <chr>     <chr>    <list>   
-##  1 50 Reefs+ pri… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… <tibble> 
-##  2 ACA Benthic H… The Alan C… 2018-01-01 2021-01-01 propri… <NA>      ACA, Al… <tibble> 
-##  3 ACA Reef Exte… ACA reef e… 2026-01-01 2026-01-01 CC0 1.… <NA>      reef, r… <tibble> 
-##  4 Country Bound… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
-##  5 Daily Sea Sur… Sea surfac… 1985-01-01 2026-01-13 CC0-1.0 <NA>      climate… <tibble> 
-##  6 Human populat… Coastal po… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coastal… <tibble> 
-##  7 Marine Ecoreg… A biogeogr… 2011-11-18 2011-11-18 CC-BY-… 10.1641/… biodive… <tibble> 
-##  8 Market gravit… From econo… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
-##  9 Number of por… Port locat… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
-## 10 Tourism index  Intensive … 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
-## 11 GPW Country B… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
-## 12 GPW Dispersal… Dispersal … 2026-01-01 2026-01-01 CC0 1.… <NA>      dispers… <tibble> 
-## 13 GPW Global Se… Global Sed… 2000-01-01 2020-01-01 propri… <NA>      exposur… <tibble> 
-## 14 GPW Global Se… Global sed… 2000-01-01 2020-01-01 CC0 1.… <NA>      gpw, se… <tibble> 
-## 15 GPW Land Use … Land Use a… 2000-01-01 2020-01-01 CC0-1.0 <NA>      land co… <tibble> 
-## 16 GPW MEOW Real… Marine Eco… 2026-01-01 2026-01-01 cc-by-… <NA>      biodive… <tibble> 
-## 17 GPW Watersheds Watersheds… 2026-01-01 2026-01-01 CC0 1.… <NA>      gpw, hy… <tibble> 
-## # ℹ 3 more variables: `sci:citation` <chr>, bbox <list>, id <chr>
+## # A tibble: 22 × 14
+##    title description start_date end_date   license `sci:doi` keywords providers `sci:citation`
+##    <chr> <chr>       <date>     <date>     <chr>   <chr>     <chr>    <list>    <chr>         
+##  1 50 R… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… <tibble>  "Zawada, K., …
+##  2 ACA … The Alan C… 2018-01-01 2021-01-01 propri… <NA>      ACA, Al… <tibble>   <NA>         
+##  3 ACA … ACA reef e… 2026-01-01 2026-01-01 CC0 1.… <NA>      reef, r… <tibble>   <NA>         
+##  4 Coun… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble>  "Flanders Mar…
+##  5 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble>  "Skirving, W.…
+##  6 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble>  "Skirving, W.…
+##  7 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble>  "Skirving, W.…
+##  8 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble>  "Skirving, W.…
+##  9 Dail… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble>  "Skirving, W.…
+## 10 Dail… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble>  "Skirving, W.…
+## # ℹ 12 more rows
+## # ℹ 5 more variables: bbox <list>, renders <named list>, version <chr>,
+## #   item_assets <named list>, id <chr>
 ```
 
 ## Get maximum SST for previous year
@@ -136,18 +134,18 @@ gfcr_summary_sampleevents %>%
 
 ```
 ## # A tibble: 142 × 5
-##    project                                 site           latitude longitude sample_date
-##    <chr>                                   <chr>             <dbl>     <dbl> <date>     
-##  1 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2024-12-06 
-##  2 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2024-12-01 
-##  3 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2025-10-28 
-##  4 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2024-12-09 
-##  5 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2025-07-30 
-##  6 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2025-10-29 
-##  7 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2025-09-01 
-##  8 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2024-12-08 
-##  9 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine …     29.4      35.0 2024-12-24 
-## 10 Gulf of Aqaba Resilient Reefs Programme Northern Deep…     29.5      35.0 2025-10-27 
+##    project                                 site                 latitude longitude sample_date
+##    <chr>                                   <chr>                   <dbl>     <dbl> <date>     
+##  1 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-24 
+##  2 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-10-28 
+##  3 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-09 
+##  4 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-08 
+##  5 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-07-30 
+##  6 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-09-01 
+##  7 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-06 
+##  8 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-10-29 
+##  9 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-01 
+## 10 Gulf of Aqaba Resilient Reefs Programme Northern Deep Corals     29.5      35.0 2025-10-26 
 ## # ℹ 132 more rows
 ```
 
@@ -158,7 +156,7 @@ For example, to get the daily SST for each of the 30 days prior to (and includin
 
 ``` r
 daily_sst <- gfcr_summary_sampleevents %>%
-  get_zonal_statistics("Daily Sea Surface Temperature", n_days = 30, radius = 100, spatial_stats = "mean")
+  get_zonal_statistics("Daily Global 5km Satellite Sea Surface Temperature (CoralTemp)", n_days = 30, radius = 100, spatial_stats = "mean")
 ```
 
 
@@ -205,32 +203,44 @@ daily_sst %>%
 ```
 
 ```
-## # A tibble: 3,738 × 8
-##    site                sample_date hard_coral_cover covariate                    
-##    <chr>               <date>                 <dbl> <chr>                        
-##  1 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  2 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  3 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  4 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  5 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  6 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  7 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  8 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##  9 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-## 10 Sand Island Leeward 2023-05-24              38.5 Daily Sea Surface Temperature
-##    date        band spatial_stat value
-##    <date>     <dbl> <chr>        <dbl>
-##  1 2023-05-24     1 mean          30.6
-##  2 2023-05-23     1 mean          30.5
-##  3 2023-05-22     1 mean          30.5
-##  4 2023-05-21     1 mean          30.5
-##  5 2023-05-20     1 mean          30.5
-##  6 2023-05-19     1 mean          30.4
-##  7 2023-05-18     1 mean          30.1
-##  8 2023-05-17     1 mean          30.2
-##  9 2023-05-16     1 mean          30.0
-## 10 2023-05-15     1 mean          30.0
-## # ℹ 3,728 more rows
+## # A tibble: 4,260 × 8
+##    site                sample_date hard_coral_cover
+##    <chr>               <date>                 <dbl>
+##  1 Sand Island Leeward 2023-05-24              38.5
+##  2 Sand Island Leeward 2023-05-24              38.5
+##  3 Sand Island Leeward 2023-05-24              38.5
+##  4 Sand Island Leeward 2023-05-24              38.5
+##  5 Sand Island Leeward 2023-05-24              38.5
+##  6 Sand Island Leeward 2023-05-24              38.5
+##  7 Sand Island Leeward 2023-05-24              38.5
+##  8 Sand Island Leeward 2023-05-24              38.5
+##  9 Sand Island Leeward 2023-05-24              38.5
+## 10 Sand Island Leeward 2023-05-24              38.5
+##    covariate                                                      date        band
+##    <chr>                                                          <date>     <dbl>
+##  1 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-24     1
+##  2 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-23     1
+##  3 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-22     1
+##  4 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-21     1
+##  5 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-20     1
+##  6 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-19     1
+##  7 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-18     1
+##  8 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-17     1
+##  9 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-16     1
+## 10 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-15     1
+##    spatial_stat value
+##    <chr>        <dbl>
+##  1 mean          30.6
+##  2 mean          30.5
+##  3 mean          30.5
+##  4 mean          30.5
+##  5 mean          30.5
+##  6 mean          30.4
+##  7 mean          30.1
+##  8 mean          30.2
+##  9 mean          30.0
+## 10 mean          30.0
+## # ℹ 4,250 more rows
 ```
 
 ## Summarise zonal statistics
@@ -299,30 +309,30 @@ max_sst
 ##  8 Kalkudah                      2023-05-29              46  
 ##  9 Pirate cove North to Headland 2023-06-14              73.5
 ## 10 Pigeon island Landward - 01   2023-06-16              73.6
-##    covariate                     start_date end_date   n_dates  band spatial_stat
-##    <chr>                         <date>     <date>       <dbl> <dbl> <chr>       
-##  1 Daily Sea Surface Temperature 2023-04-25 2023-05-24      30     1 mean        
-##  2 Daily Sea Surface Temperature 2023-04-25 2023-05-24      30     1 mean        
-##  3 Daily Sea Surface Temperature 2023-04-26 2023-05-25      30     1 mean        
-##  4 Daily Sea Surface Temperature 2023-04-26 2023-05-25      30     1 mean        
-##  5 Daily Sea Surface Temperature 2023-04-26 2023-05-25      30     1 mean        
-##  6 Daily Sea Surface Temperature 2023-04-29 2023-05-28      30     1 mean        
-##  7 Daily Sea Surface Temperature 2023-04-29 2023-05-28      30     1 mean        
-##  8 Daily Sea Surface Temperature 2023-04-30 2023-05-29      30     1 mean        
-##  9 Daily Sea Surface Temperature 2023-05-16 2023-06-14      30     1 mean        
-## 10 Daily Sea Surface Temperature 2023-05-18 2023-06-16      30     1 mean        
-##    temporal_stat value
-##    <chr>         <dbl>
-##  1 max            30.6
-##  2 max            30.6
-##  3 max            30.6
-##  4 max            30.6
-##  5 max            30.6
-##  6 max            30.7
-##  7 max            30.7
-##  8 max            30.7
-##  9 max            30.2
-## 10 max            30.3
+##    covariate                                                      start_date end_date  
+##    <chr>                                                          <date>     <date>    
+##  1 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-25 2023-05-24
+##  2 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-25 2023-05-24
+##  3 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-26 2023-05-25
+##  4 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-26 2023-05-25
+##  5 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-26 2023-05-25
+##  6 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-29 2023-05-28
+##  7 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-29 2023-05-28
+##  8 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-04-30 2023-05-29
+##  9 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-16 2023-06-14
+## 10 Daily Global 5km Satellite Sea Surface Temperature (CoralTemp) 2023-05-18 2023-06-16
+##    n_dates  band spatial_stat temporal_stat value
+##      <dbl> <dbl> <chr>        <chr>         <dbl>
+##  1      30     1 mean         max            30.6
+##  2      30     1 mean         max            30.6
+##  3      30     1 mean         max            30.6
+##  4      30     1 mean         max            30.6
+##  5      30     1 mean         max            30.6
+##  6      30     1 mean         max            30.7
+##  7      30     1 mean         max            30.7
+##  8      30     1 mean         max            30.7
+##  9      30     1 mean         max            30.2
+## 10      30     1 mean         max            30.3
 ## # ℹ 132 more rows
 ```
 
@@ -350,4 +360,4 @@ ggplot(
   theme_minimal()
 ```
 
-![](figure/plot-1.png)
+![plot of chunk plot](figure/plot-1.png)

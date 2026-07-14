@@ -104,7 +104,7 @@ lookup_covariate_id_by_name <- function(name) {
     return(NA)
   }
 
-  covariate[["id"]]
+  unique(covariate[["id"]])
 }
 
 get_covariate_id <- function(x) {
@@ -117,6 +117,7 @@ get_covariate_id <- function(x) {
 
   # Otherwise, assume it is a name and look up the ID
   covariate_id <- lookup_covariate_id_by_name(x)
+  covariate_id <- unique(covariate_id)
 
   # If no ID, error
   if (is.na(covariate_id)) {
