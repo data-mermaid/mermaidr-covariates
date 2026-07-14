@@ -39,6 +39,28 @@ gfcr_summary_sampleevents
 
 
 
+```
+## # A tibble: 142 × 383
+##    project_id       project tags  country site_id site  latitude longitude reef_type reef_zone
+##    <chr>            <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>     <chr>    
+##  1 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  2 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  3 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  4 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  5 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  6 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  7 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  8 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+##  9 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
+## 10 1370aaba-fe43-4… Gulf o… Glob… Jordan  04e931… Nort…     29.5      35.0 fringing  fore reef
+## # ℹ 132 more rows
+## # ℹ 373 more variables: reef_exposure <chr>, management_id <chr>, management <chr>,
+## #   management_est_year <int>, management_size <dbl>, management_parties <chr>,
+## #   management_compliance <chr>, management_rules <chr>, sample_date <date>,
+## #   data_policy_beltfish <chr>, data_policy_benthiclit <chr>, data_policy_benthicpit <chr>,
+## #   data_policy_benthicpqt <chr>, data_policy_habitatcomplexity <chr>,
+## #   data_policy_bleachingqc <chr>, project_notes <chr>, site_notes <chr>, …
+```
 
 ## Summary of hard coral cover for projects
 
@@ -338,4 +360,4 @@ ggplot(
   theme_minimal()
 ```
 
-![](figure/plot-1.png)
+![plot of chunk plot](figure/plot-1.png)

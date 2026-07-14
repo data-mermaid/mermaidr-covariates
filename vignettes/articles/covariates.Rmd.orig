@@ -42,6 +42,8 @@ saveRDS(gfcr_summary_sampleevents, here::here("scratch", "gfcr_summary_sampleeve
 
 ```{r read-sample-data, echo = FALSE}
 gfcr_summary_sampleevents <- readRDS(here::here("scratch", "gfcr_summary_sampleevents.rds"))
+
+gfcr_summary_sampleevents
 ```
 
 ## Summary of hard coral cover for projects
