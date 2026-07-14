@@ -41,25 +41,25 @@ gfcr_summary_sampleevents
 
 ```
 ## # A tibble: 142 × 383
-##    project_id       project tags  country site_id site  latitude longitude reef_type reef_zone
-##    <chr>            <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>     <chr>    
-##  1 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  2 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  3 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  4 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  5 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  6 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  7 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  8 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-##  9 1370aaba-fe43-4… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing  fore reef
-## 10 1370aaba-fe43-4… Gulf o… Glob… Jordan  04e931… Nort…     29.5      35.0 fringing  fore reef
+##    project_id          project tags  country site_id site  latitude longitude reef_type
+##    <chr>               <chr>   <chr> <chr>   <chr>   <chr>    <dbl>     <dbl> <chr>    
+##  1 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  2 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  3 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  4 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  5 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  6 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  7 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  8 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+##  9 1370aaba-fe43-438e… Gulf o… Glob… Jordan  399b38… Aqab…     29.4      35.0 fringing 
+## 10 1370aaba-fe43-438e… Gulf o… Glob… Jordan  04e931… Nort…     29.5      35.0 fringing 
 ## # ℹ 132 more rows
-## # ℹ 373 more variables: reef_exposure <chr>, management_id <chr>, management <chr>,
-## #   management_est_year <int>, management_size <dbl>, management_parties <chr>,
-## #   management_compliance <chr>, management_rules <chr>, sample_date <date>,
-## #   data_policy_beltfish <chr>, data_policy_benthiclit <chr>, data_policy_benthicpit <chr>,
-## #   data_policy_benthicpqt <chr>, data_policy_habitatcomplexity <chr>,
-## #   data_policy_bleachingqc <chr>, project_notes <chr>, site_notes <chr>, …
+## # ℹ 374 more variables: reef_zone <chr>, reef_exposure <chr>, management_id <chr>,
+## #   management <chr>, management_est_year <int>, management_size <dbl>,
+## #   management_parties <chr>, management_compliance <chr>, management_rules <chr>,
+## #   sample_date <date>, data_policy_beltfish <chr>, data_policy_benthiclit <chr>,
+## #   data_policy_benthicpit <chr>, data_policy_benthicpqt <chr>,
+## #   data_policy_habitatcomplexity <chr>, data_policy_bleachingqc <chr>, …
 ```
 
 ## Summary of hard coral cover for projects
@@ -78,15 +78,15 @@ gfcr_summary_sampleevents %>%
 
 ```
 ## # A tibble: 7 × 5
-##   project                                         tags  country n_sites average_hard_coral_c…¹
-##   <chr>                                           <chr> <chr>     <int>                  <dbl>
-## 1 Gulf of Aqaba Resilient Reefs Programme         Glob… Jordan       29                  21.4 
-## 2 Investing in Coral Reefs and the Blue Economy … Unit… Fiji         53                  30.9 
-## 3 Maldives RREEF (GFCR)                           Glob… Maldiv…      11                  43.4 
-## 4 SLCRI Bar Reef Seascape                         Inte… Sri La…      11                   9.68
-## 5 SLCRI Kayankerni Seascape                       Inte… Sri La…      11                  44.4 
-## 6 SLCRI Pigeon Island Seascape                    Inte… Sri La…       7                  55.9 
-## 7 Terumbu Karang Sehat Indonesia Program - Indon… Cons… Indone…      20                  36.9 
+##   project                                  tags  country n_sites average_hard_coral_c…¹
+##   <chr>                                    <chr> <chr>     <int>                  <dbl>
+## 1 Gulf of Aqaba Resilient Reefs Programme  Glob… Jordan       29                  21.4 
+## 2 Investing in Coral Reefs and the Blue E… Unit… Fiji         53                  30.9 
+## 3 Maldives RREEF (GFCR)                    Glob… Maldiv…      11                  43.4 
+## 4 SLCRI Bar Reef Seascape                  Inte… Sri La…      11                   9.68
+## 5 SLCRI Kayankerni Seascape                Inte… Sri La…      11                  44.4 
+## 6 SLCRI Pigeon Island Seascape             Inte… Sri La…       7                  55.9 
+## 7 Terumbu Karang Sehat Indonesia Program … Cons… Indone…      20                  36.9 
 ## # ℹ abbreviated name: ¹​average_hard_coral_cover
 ```
 
@@ -104,22 +104,29 @@ list_covariates()
 ```
 
 ```
-## # A tibble: 22 × 14
-##    title description start_date end_date   license `sci:doi` keywords providers `sci:citation`
-##    <chr> <chr>       <date>     <date>     <chr>   <chr>     <chr>    <list>    <chr>         
-##  1 50 R… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… <tibble>  "Zawada, K., …
-##  2 ACA … The Alan C… 2018-01-01 2021-01-01 propri… <NA>      ACA, Al… <tibble>   <NA>         
-##  3 ACA … ACA reef e… 2026-01-01 2026-01-01 CC0 1.… <NA>      reef, r… <tibble>   <NA>         
-##  4 Coun… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble>  "Flanders Mar…
-##  5 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble>  "Skirving, W.…
-##  6 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble>  "Skirving, W.…
-##  7 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble>  "Skirving, W.…
-##  8 Dail… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble>  "Skirving, W.…
-##  9 Dail… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble>  "Skirving, W.…
-## 10 Dail… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble>  "Skirving, W.…
-## # ℹ 12 more rows
-## # ℹ 5 more variables: bbox <list>, renders <named list>, version <chr>,
-## #   item_assets <named list>, id <chr>
+## # A tibble: 19 × 11
+##    title         description start_date end_date   license `sci:doi` keywords providers
+##    <chr>         <chr>       <date>     <date>     <chr>   <chr>     <chr>    <list>   
+##  1 50 Reefs+ pr… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… <tibble> 
+##  2 ACA Benthic … The Alan C… 2018-01-01 2021-01-01 propri… <NA>      ACA, Al… <tibble> 
+##  3 ACA Reef Ext… ACA reef e… 2026-01-01 2026-01-01 CC0 1.… <NA>      reef, r… <tibble> 
+##  4 Country Boun… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
+##  5 Daily Global… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble> 
+##  6 Daily Global… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble> 
+##  7 Daily Global… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble> 
+##  8 Human popula… Coastal po… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coastal… <tibble> 
+##  9 Marine Ecore… A biogeogr… 2011-11-18 2011-11-18 CC-BY-… 10.1641/… biodive… <tibble> 
+## 10 Market gravi… From econo… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+## 11 Number of po… Port locat… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+## 12 Tourism index Intensive … 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+## 13 GPW Country … This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
+## 14 GPW Dispersa… Dispersal … 2026-01-01 2026-01-01 CC0 1.… <NA>      dispers… <tibble> 
+## 15 GPW Global S… Global Sed… 2000-01-01 2020-01-01 propri… <NA>      exposur… <tibble> 
+## 16 GPW Global S… Global sed… 2000-01-01 2020-01-01 CC0 1.… <NA>      gpw, se… <tibble> 
+## 17 GPW Land Use… Land Use a… 2000-01-01 2020-01-01 CC0-1.0 <NA>      land co… <tibble> 
+## 18 GPW MEOW Rea… Marine Eco… 2026-01-01 2026-01-01 cc-by-… <NA>      biodive… <tibble> 
+## 19 GPW Watershe… Watersheds… 2026-01-01 2026-01-01 CC0 1.… <NA>      gpw, hy… <tibble> 
+## # ℹ 3 more variables: `sci:citation` <chr>, bbox <list>, id <chr>
 ```
 
 ## Get maximum SST for previous year
@@ -134,18 +141,18 @@ gfcr_summary_sampleevents %>%
 
 ```
 ## # A tibble: 142 × 5
-##    project                                 site                 latitude longitude sample_date
-##    <chr>                                   <chr>                   <dbl>     <dbl> <date>     
-##  1 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-24 
-##  2 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-10-28 
-##  3 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-09 
-##  4 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-08 
-##  5 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-07-30 
-##  6 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-09-01 
-##  7 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-06 
-##  8 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2025-10-29 
-##  9 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine Reserve     29.4      35.0 2024-12-01 
-## 10 Gulf of Aqaba Resilient Reefs Programme Northern Deep Corals     29.5      35.0 2025-10-26 
+##    project                                 site          latitude longitude sample_date
+##    <chr>                                   <chr>            <dbl>     <dbl> <date>     
+##  1 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2024-12-24 
+##  2 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2025-10-28 
+##  3 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2024-12-09 
+##  4 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2024-12-08 
+##  5 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2025-07-30 
+##  6 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2025-09-01 
+##  7 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2024-12-06 
+##  8 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2025-10-29 
+##  9 Gulf of Aqaba Resilient Reefs Programme Aqaba Marine…     29.4      35.0 2024-12-01 
+## 10 Gulf of Aqaba Resilient Reefs Programme Northern Dee…     29.5      35.0 2025-10-26 
 ## # ℹ 132 more rows
 ```
 

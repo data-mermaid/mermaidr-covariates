@@ -21,11 +21,19 @@ list_covariates <- function(as_data_frame = TRUE) {
   res <- purrr::map(
     res,
     \(x) {
-      x$type <- NULL
-      x$links <- NULL
-      x$stac_version <- NULL
-      x$stac_extensions <- NULL
-      x$summaries <- NULL
+      # ONLY want to keep these cols: title, description, start_date, end_date, sci:doi, keywords, providers, sci:citation, id
+      # So everything else, set to NULL
+      cols_keep <- c("title", "description", "start_date", "end_date", "sci:doi", "keywords", "providers", "license", "sci:citation", "id")
+      cols_remove <- names(x)[!names(x) %in% cols_keep]
+
+      x$bbox <- x$extent$spatial$bbox
+      temporal_interval <- x$extent$temporal$interval[[1]]
+
+      if (!is.null(temporal_interval)) {
+        temporal_interval <- as.Date(temporal_interval)
+        x$start_date <- temporal_interval[1]
+        x$end_date <- temporal_interval[2]
+      }
 
       if (length(x$keywords) == 0) {
         x$keywords <- NA_character_
@@ -37,16 +45,9 @@ list_covariates <- function(as_data_frame = TRUE) {
         purrr::map_dfr(dplyr::as_tibble) %>%
         list()
 
-      x$bbox <- x$extent$spatial$bbox
-      temporal_interval <- x$extent$temporal$interval[[1]]
-
-      if (!is.null(temporal_interval)) {
-        temporal_interval <- as.Date(temporal_interval)
-        x$start_date <- temporal_interval[1]
-        x$end_date <- temporal_interval[2]
+      for (col in cols_remove) {
+        x[[col]] <- NULL
       }
-
-      x$extent <- NULL
 
       x
     }
@@ -113,7 +114,6 @@ reshape_covariates_df <- function(covariates) {
   covariates %>%
     purrr::map_dfr(\(x) {
       x %>%
-        # purrr::compact() %>% # In case of any empty entries
         dplyr::as_tibble()
     }) %>%
     dplyr::select(title, description, start_date, end_date, dplyr::everything()) %>%
