@@ -1,5 +1,41 @@
 # Changelog
 
+## mermaidrcovariates 1.0.0
+
+- Added
+  [`attach_covariate_data()`](https://data-mermaid.github.io/mermaidr-covariates/reference/attach_covariate_data.md)
+  for accessing vector covariates
+- Added
+  [`covariate_helper()`](https://data-mermaid.github.io/mermaidr-covariates/reference/covariate_helper.md)
+  for understanding which of
+  [`attach_covariate_data()`](https://data-mermaid.github.io/mermaidr-covariates/reference/attach_covariate_data.md)
+  or
+  [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
+  to use
+- Added
+  [`list_datasets_for_covariate()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_datasets_for_covariate.md)
+  for listing datasets and bands/columns within a covariate
+- Improved parallelization
+
+Large rewrite of zonal statistics API:
+
+- Deprecated `get_summary_zonal_statistics()` in favour of using
+  [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
+  and
+  then[`summarise_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summarise_zonal_statistics.md)
+- Renamed `covariates` column in
+  [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
+  to `zonal_statistics`
+- Renamed `covariates` column from
+  [`summarise_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summarise_zonal_statistics.md)
+  to `summary_zonal_statistics` – original `zonal_statistics()` column
+  is retained
+- Removed columns `start_date`, `end_date`, and `n_dates` from
+  [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
+  output – only appear in output from
+  [`summarise_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/summarise_zonal_statistics.md)
+- Added support for multiple bands, specifying dataset
+
 ## mermaidrcovariates 0.1.2
 
 - Add

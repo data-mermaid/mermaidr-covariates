@@ -36,6 +36,22 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="1.0.0" id="mermaidrcovariates-100">mermaidrcovariates 1.0.0<a class="anchor" aria-label="anchor" href="#mermaidrcovariates-100"></a></h2>
+<ul><li>Added <code><a href="../reference/attach_covariate_data.html">attach_covariate_data()</a></code> for accessing vector covariates</li>
+<li>Added <code><a href="../reference/covariate_helper.html">covariate_helper()</a></code> for understanding which of <code><a href="../reference/attach_covariate_data.html">attach_covariate_data()</a></code> or <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> to use</li>
+<li>Added <code><a href="../reference/list_datasets_for_covariate.html">list_datasets_for_covariate()</a></code> for listing datasets and bands/columns within a covariate</li>
+<li>Improved parallelization</li>
+</ul><p>Large rewrite of zonal statistics API:</p>
+<ul><li>Deprecated <code>get_summary_zonal_statistics()</code> in favour of using <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> and then<code><a href="../reference/summarise_zonal_statistics.html">summarise_zonal_statistics()</a></code>
+</li>
+<li>Renamed <code>covariates</code> column in <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> to <code>zonal_statistics</code>
+</li>
+<li>Renamed <code>covariates</code> column from <code><a href="../reference/summarise_zonal_statistics.html">summarise_zonal_statistics()</a></code> to <code>summary_zonal_statistics</code> – original <code>zonal_statistics()</code> column is retained</li>
+<li>Removed columns <code>start_date</code>, <code>end_date</code>, and <code>n_dates</code> from <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> output – only appear in output from <code><a href="../reference/summarise_zonal_statistics.html">summarise_zonal_statistics()</a></code>
+</li>
+<li>Added support for multiple bands, specifying dataset</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.2" id="mermaidrcovariates-012">mermaidrcovariates 0.1.2<a class="anchor" aria-label="anchor" href="#mermaidrcovariates-012"></a></h2>
 <ul><li>Add <code><a href="../reference/search_covariates.html">search_covariates()</a></code> to search by title or description</li>
 <li>Add <code>date_col</code> to <code><a href="../reference/get_zonal_statistics.html">get_zonal_statistics()</a></code> and <code>get_summary_zonal_statistics()</code>, which allows for using a column other than <code>"sample_date"</code>.</li>
@@ -74,7 +90,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>
