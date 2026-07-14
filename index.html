@@ -95,7 +95,7 @@
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">covariates</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/list_covariates.html">list_covariates</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">covariates</span></span>
-<span><span class="co">#&gt; # A tibble: 22 × 14</span></span>
+<span><span class="co">#&gt; # A tibble: 19 × 11</span></span>
 <span><span class="co">#&gt;    title  description start_date end_date   license `sci:doi` keywords providers</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;  &lt;chr&gt;       &lt;date&gt;     &lt;date&gt;     &lt;chr&gt;   &lt;chr&gt;     &lt;chr&gt;    &lt;list&gt;   </span></span>
 <span><span class="co">#&gt;  1 50 Re… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… &lt;tibble&gt; </span></span>
@@ -103,14 +103,21 @@
 <span><span class="co">#&gt;  3 ACA R… ACA reef e… 2026-01-01 2026-01-01 CC0 1.… &lt;NA&gt;      reef, r… &lt;tibble&gt; </span></span>
 <span><span class="co">#&gt;  4 Count… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… &lt;tibble&gt; </span></span>
 <span><span class="co">#&gt;  5 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  6 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  7 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  8 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt;  9 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; 10 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… &lt;tibble&gt; </span></span>
-<span><span class="co">#&gt; # ℹ 12 more rows</span></span>
-<span><span class="co">#&gt; # ℹ 6 more variables: `sci:citation` &lt;chr&gt;, bbox &lt;list&gt;, renders &lt;named list&gt;,</span></span>
-<span><span class="co">#&gt; #   version &lt;chr&gt;, item_assets &lt;named list&gt;, id &lt;chr&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt;  6 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt;  7 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt;  8 Human… Coastal po… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coastal… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt;  9 Marin… A biogeogr… 2011-11-18 2011-11-18 CC-BY-… 10.1641/… biodive… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 10 Marke… From econo… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 11 Numbe… Port locat… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 12 Touri… Intensive … 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 13 GPW C… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 14 GPW D… Dispersal … 2026-01-01 2026-01-01 CC0 1.… &lt;NA&gt;      dispers… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 15 GPW G… Global Sed… 2000-01-01 2020-01-01 propri… &lt;NA&gt;      exposur… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 16 GPW G… Global sed… 2000-01-01 2020-01-01 CC0 1.… &lt;NA&gt;      gpw, se… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 17 GPW L… Land Use a… 2000-01-01 2020-01-01 CC0-1.0 &lt;NA&gt;      land co… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 18 GPW M… Marine Eco… 2026-01-01 2026-01-01 cc-by-… &lt;NA&gt;      biodive… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; 19 GPW W… Watersheds… 2026-01-01 2026-01-01 CC0 1.… &lt;NA&gt;      gpw, hy… &lt;tibble&gt; </span></span>
+<span><span class="co">#&gt; # ℹ 3 more variables: `sci:citation` &lt;chr&gt;, bbox &lt;list&gt;, id &lt;chr&gt;</span></span></code></pre></div>
 <p>Covariates may contain raster data, vector data, or both. There are different functions for accessing raster or vector data.</p>
 <p>The table below summarises which function to use for the different covariates available on Prescient:</p>
 <table class="table">

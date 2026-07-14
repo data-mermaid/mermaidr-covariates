@@ -64,7 +64,7 @@ function:
 
 covariates <- list_covariates()
 covariates
-#> # A tibble: 22 × 14
+#> # A tibble: 19 × 11
 #>    title  description start_date end_date   license `sci:doi` keywords providers
 #>    <chr>  <chr>       <date>     <date>     <chr>   <chr>     <chr>    <list>   
 #>  1 50 Re… This datas… 2026-02-22 2026-02-22 CC-BY-… 10.5281/… conserv… <tibble> 
@@ -72,14 +72,21 @@ covariates
 #>  3 ACA R… ACA reef e… 2026-01-01 2026-01-01 CC0 1.… <NA>      reef, r… <tibble> 
 #>  4 Count… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
 #>  5 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble> 
-#>  6 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… BAA, Bl… <tibble> 
-#>  7 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble> 
-#>  8 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble> 
-#>  9 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble> 
-#> 10 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble> 
-#> # ℹ 12 more rows
-#> # ℹ 6 more variables: `sci:citation` <chr>, bbox <list>, renders <named list>,
-#> #   version <chr>, item_assets <named list>, id <chr>
+#>  6 Daily… NOAA Coral… 1985-03-25 2026-07-12 other   10.3390/… coral b… <tibble> 
+#>  7 Daily… NOAA Coral… 1985-01-01 2026-07-12 other   10.3390/… Coral R… <tibble> 
+#>  8 Human… Coastal po… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coastal… <tibble> 
+#>  9 Marin… A biogeogr… 2011-11-18 2011-11-18 CC-BY-… 10.1641/… biodive… <tibble> 
+#> 10 Marke… From econo… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+#> 11 Numbe… Port locat… 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+#> 12 Touri… Intensive … 2021-12-28 2021-12-28 MIT Li… 10.1111/… coral r… <tibble> 
+#> 13 GPW C… This datas… 2024-10-04 2024-10-04 other   10.14284… adminis… <tibble> 
+#> 14 GPW D… Dispersal … 2026-01-01 2026-01-01 CC0 1.… <NA>      dispers… <tibble> 
+#> 15 GPW G… Global Sed… 2000-01-01 2020-01-01 propri… <NA>      exposur… <tibble> 
+#> 16 GPW G… Global sed… 2000-01-01 2020-01-01 CC0 1.… <NA>      gpw, se… <tibble> 
+#> 17 GPW L… Land Use a… 2000-01-01 2020-01-01 CC0-1.0 <NA>      land co… <tibble> 
+#> 18 GPW M… Marine Eco… 2026-01-01 2026-01-01 cc-by-… <NA>      biodive… <tibble> 
+#> 19 GPW W… Watersheds… 2026-01-01 2026-01-01 CC0 1.… <NA>      gpw, hy… <tibble> 
+#> # ℹ 3 more variables: `sci:citation` <chr>, bbox <list>, id <chr>
 ```
 
 Covariates may contain raster data, vector data, or both. There are
