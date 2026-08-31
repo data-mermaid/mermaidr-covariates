@@ -92,23 +92,6 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
   # If there is more than one col (band or column) in the specified asset, they need to specify
   # Remove -- this is not needed for now, attaching all of the data
   bands_cols <- get_asset_bands_or_columns(asset)
-  #
-  # if (nrow(bands_cols) > 1 & is.null(col)) {
-  #   if (asset_types[[dataset]] == "parquet") {
-  #     cols <- bands_cols[["name"]] %>% paste0(collapse = '", "')
-  #     cols <- glue::glue('"{cols}"')
-  #
-  #     usethis::ui_stop(
-  #       "Dataset \"{dataset}\" contains more than one column of data. Please specify which to use in `col`.
-  #     Options: {cols}."
-  #     )
-  #   } else {
-  #     tibble_string <- paste(capture.output(print(bands_cols)), collapse = "\n")
-  #     usethis::ui_stop(
-  #       "Dataset \"{dataset}\" contains more than one band of data. Please specify which to use in `col`. You may specify by band number or by name.\nOptions: \n{tibble_string}"
-  #     )
-  #   }
-  # }
 
   # Check that band/col are valid
   if (asset_type == "cog") {
@@ -141,12 +124,24 @@ check_inputs_covariate_data <- function(items, covariate, dataset = NULL, col = 
       )
     }
   } else if (asset_type == "parquet" & !is.null(col)) {
-    valid_col <- col %in% bands_cols[["name"]]
+    valid_cols <- purrr::map_lgl(col, \(x) {
+      x %in% bands_cols[["name"]]
+    })
 
-    if (!valid_col) {
-      usethis::ui_stop(
-        "Column \"{col}\" is not valid. \nOptions: \n{comma_sep_quoted(bands_cols[['name']])}"
+    if (any(!valid_cols)) {
+      names(valid_cols) <- col
+      invalid_cols <- valid_cols %>%
+        purrr::keep(\(x) !x) %>%
+        names()
+      multiple_invalid <- length(invalid_cols) > 1
+
+      msg <- glue::glue("Column{s} {cols} {is_are} not valid. \nOptions: \n{comma_sep_quoted(bands_cols[['name']])}",
+        s = ifelse(multiple_invalid, "s", ""),
+        is_are = ifelse(multiple_invalid, "are", "is"),
+        cols = comma_sep_quoted(invalid_cols)
       )
+
+      usethis::ui_stop(msg)
     }
   }
 
