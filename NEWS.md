@@ -1,3 +1,7 @@
+# mermaidr 1.0.2
+
+* Fix bug that was preventing specifying multiple `columns` in `attach_covariate_data()`
+
 # mermaidrcovariates 1.0.1
 
 * Account for new covariates, duplicated covariate IDs
