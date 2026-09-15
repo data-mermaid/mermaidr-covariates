@@ -40,7 +40,7 @@ get_zonal_statistics <- function(se, covariate,
   # Add an ID for iterating over (splitting by lat/long/sample date,
   # accounting for overlapping sample dates to reduce duplicating API calls)
   se <- se %>%
-    add_id_for_iteration(date_col, n_days)
+    add_id_for_iteration(date_col, n_days, covariate_info[["covariate_interval"]])
 
   # Rounding SEs lat/long to 5 digits -- otherwise, causes ID issues when not really important
   se <- se %>%
@@ -456,7 +456,7 @@ keep_relevant_zonal_stats <- function(se, covariate_interval, n_days, date_col) 
 
   if (covariate_interval %in% c("once", "periodic")) {
     return(se %>%
-      dplyr::select(-...date_temp))
+      dplyr::select(-dplyr::any_of("...date_temp")))
   }
 
   covariates_cols <- se %>%

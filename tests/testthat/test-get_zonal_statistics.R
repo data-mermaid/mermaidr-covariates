@@ -547,3 +547,19 @@ test_that("get_zonal_statistics gives the same results when SEs have overlapping
     zs_separate
   )
 })
+
+test_that("get_zonal_statistics works without sample_date when covariate_interval is 'once'", {
+  skip_if_offline()
+  skip_on_ci()
+  skip_on_cran()
+
+  site <- tibble::tribble(
+    ~name, ~latitude, ~longitude,
+    "1201", -2.02301994, 134.4132
+  )
+
+  expect_named(
+    get_zonal_statistics(site, "aca_benthic", spatial_stats = "mean", radius = 1000),
+    c(names(site), "zonal_statistics")
+  )
+})
