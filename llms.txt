@@ -381,6 +381,8 @@ se_country
   : Attach covariate data
 - [`covariate_helper()`](https://data-mermaid.github.io/mermaidr-covariates/reference/covariate_helper.md)
   : Covariate helper
+- [`get_covariate_type()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_covariate_type.md)
+  : Get covariate type
 - [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
   : Get zonal statistics
 - [`list_covariates()`](https://data-mermaid.github.io/mermaidr-covariates/reference/list_covariates.md)

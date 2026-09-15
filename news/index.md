@@ -1,5 +1,18 @@
 # Changelog
 
+## mermaidrcovariates 1.0.3
+
+- Add exported function
+  [`get_covariate_type()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_covariate_type.md)
+- Fix bug where
+  [`get_zonal_statistics()`](https://data-mermaid.github.io/mermaidr-covariates/reference/get_zonal_statistics.md)
+  errored when sample_date was missing for covariates that are un-dated
+
+## mermaidrcovariates 1.0.2
+
+- Fix bug that was preventing specifying multiple `columns` in
+  [`attach_covariate_data()`](https://data-mermaid.github.io/mermaidr-covariates/reference/attach_covariate_data.md)
+
 ## mermaidrcovariates 1.0.1
 
 - Account for new covariates, duplicated covariate IDs
