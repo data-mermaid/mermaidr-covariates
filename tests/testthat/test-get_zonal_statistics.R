@@ -553,7 +553,7 @@ test_that("get_zonal_statistics works without sample_date when covariate_interva
   skip_on_ci()
   skip_on_cran()
 
-  site <- tibble::tribble(
+  site <- dplyr::tribble(
     ~name, ~latitude, ~longitude,
     "1201", -2.02301994, 134.4132
   )
