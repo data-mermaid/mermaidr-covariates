@@ -125,32 +125,6 @@ get_all_asset_types <- function(item) {
     purrr::map_chr(get_asset_type)
 }
 
-get_collection_type <- function(collection) {
-  # Look at the first item
-  item <- rstac::stac(stac_url) %>%
-    rstac::collections(collection) %>%
-    rstac::items(limit = 1) %>%
-    rstac::get_request()
-
-  item <- item[["features"]][[1]]
-
-  # Look for COG assets and parquet assets
-  cog_assets <- get_cog_assets(item)
-  parquet_assets <- get_parquet_assets(item)
-
-  is_raster <- !identical(cog_assets, NA_character_)
-  is_vector <- !identical(parquet_assets, NA_character_)
-
-  if (is_raster & is_vector) {
-    "raster + vector"
-  } else if (is_raster) {
-    "raster"
-  } else if (is_vector) {
-    "vector"
-  } else {
-    "unknown"
-  }
-}
 get_asset_bands_or_columns <- function(asset) {
   # If parquet, get columns
   # If COG, get bands

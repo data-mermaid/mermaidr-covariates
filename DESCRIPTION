@@ -1,7 +1,7 @@
 Package: mermaidrcovariates
 Type: Package
 Title: Access covariates for MERMAID data
-Version: 1.0.2
+Version: 1.0.3
 Authors@R:
     c(person(given = "Sharla",
            family = "Gelfand",

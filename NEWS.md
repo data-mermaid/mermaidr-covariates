@@ -1,4 +1,8 @@
-# mermaidr 1.0.2
+# mermaidrcovariates 1.0.3
+
+* Add exported function `get_covariate_type()`
+
+# mermaidrcovariates 1.0.2
 
 * Fix bug that was preventing specifying multiple `columns` in `attach_covariate_data()`
 

@@ -179,7 +179,7 @@ test_that("new test scenarios...", {
     dplyr::select(id) %>%
     dplyr::distinct() %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(type = get_collection_type(id)) %>%
+    dplyr::mutate(type = get_covariate_type(id)) %>%
     dplyr::ungroup()
 
   cog_covariates <- covariates_type %>%

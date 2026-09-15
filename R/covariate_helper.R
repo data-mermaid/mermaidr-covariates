@@ -13,7 +13,7 @@ covariate_helper <- function(covariate) {
   covariate <- get_covariate_id(covariate)
   covariate_name <- get_covariate_name_from_id(covariate)
 
-  type <- get_collection_type(covariate)
+  type <- get_covariate_type(covariate)
 
   format_msg <- ifelse(length(type) == 1,
     glue::glue("Covariate contains *{type}* data."),
@@ -28,7 +28,7 @@ covariate_helper <- function(covariate) {
 
   # Go through each "type" the data has (even if just one), and report on datasets/bands
   original_type <- type
-  if (type == "raster + vector") {
+  if (type == "raster and vector") {
     type <- c("raster", "vector")
   }
 
@@ -115,6 +115,6 @@ get_fxn_from_type <- function(type) {
   switch(type,
     "raster" = "get_zonal_statistics()",
     "vector" = "attach_covariates()",
-    "raster + vector" = "get_zonal_statistics() OR attach_covariates(), depending on the dataset"
+    "raster and vector" = "get_zonal_statistics() OR attach_covariates(), depending on the dataset"
   )
 }
