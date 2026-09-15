@@ -76,7 +76,7 @@ list_covariates <- function(as_data_frame = TRUE) {
 # Overwrite rstac's existing print method for collections, to be more relevant for us
 
 #' @export
-print.covariate <- function(x) {
+print.covariate <- function(x, ...) {
   cat("# Covariate:", x$title, fill = TRUE)
 
   dates <- ifelse(is.na(x$end_date),
