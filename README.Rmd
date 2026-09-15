@@ -82,7 +82,7 @@ covariates_type <- covariates %>%
   select(Covariate = title, id) %>%
   distinct() %>%
   rowwise() %>%
-  mutate(Type = mermaidrcovariates:::get_collection_type(id)) %>%
+  mutate(Type = get_covariate_type(id)) %>%
   ungroup()
 
 covariates_type %>%

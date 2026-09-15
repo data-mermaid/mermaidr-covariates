@@ -1,4 +1,9 @@
-# mermaidr 1.0.2
+# mermaidrcovariates 1.0.3
+
+* Add exported function `get_covariate_type()`
+* Fix bug where `get_zonal_statistics()` errored when sample_date was missing for covariates that are un-dated
+
+# mermaidrcovariates 1.0.2
 
 * Fix bug that was preventing specifying multiple `columns` in `attach_covariate_data()`
 

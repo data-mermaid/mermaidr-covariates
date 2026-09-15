@@ -5,8 +5,8 @@ test_that("attach_covariate_data only returns `columns` cols if not NULL, all co
 
   se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
-     "AA", -17.97855,   179.2251, "2008-11-25"
-    )
+    "AA", -17.97855, 179.2251, "2008-11-25"
+  )
 
   col_named <- attach_covariate_data(se, "meow_boundaries", columns = "REALM")
 
@@ -28,10 +28,13 @@ test_that("attach_covariate_data accepts multiple `columns`", {
 
   se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
-     "AA", -17.97855,   179.2251, "2008-11-25"
-    )
+    "AA", -17.97855, 179.2251, "2008-11-25"
+  )
 
-  col_named <- attach_covariate_data(se, "meow_boundaries", columns = c("REALM", "ECOREGION"))
+  expect_named(
+    attach_covariate_data(se, "meow_boundaries", columns = c("REALM", "ECOREGION")),
+    c("site", "latitude", "longitude", "sample_date", "REALM", "ECOREGION")
+  )
 })
 
 test_that("attach_covariate_data errors when columns are invalid -- works for one invalid, one (among multiple) invalid, multiple invalid", {
@@ -41,8 +44,8 @@ test_that("attach_covariate_data errors when columns are invalid -- works for on
 
   se <- dplyr::tribble(
     ~site, ~latitude, ~longitude, ~sample_date,
-     "AA", -17.97855,   179.2251, "2008-11-25"
-    )
+    "AA", -17.97855, 179.2251, "2008-11-25"
+  )
 
   expect_error(attach_covariate_data(se, "meow_boundaries", columns = "REAL"), "is not valid")
 

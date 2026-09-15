@@ -17,7 +17,16 @@ get_covariate_name_from_id <- function(id) {
     purrr::pluck("title")
 }
 
-add_id_for_iteration <- function(df, date_col, n_days) {
+add_id_for_iteration <- function(df, date_col, n_days, covariate_interval) {
+
+  if (covariate_interval == "once") {
+    # If the covariate interval is 'once', then date is completely irrelevant
+    df <- df %>%
+      dplyr::mutate(...id = glue::glue("{latitude}_{longitude}"))
+
+    return(df)
+  }
+
   df <- df %>%
     dplyr::mutate(
       ...date_temp = !!rlang::sym(date_col),
